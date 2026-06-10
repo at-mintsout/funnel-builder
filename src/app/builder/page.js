@@ -1,12 +1,16 @@
 "use client";
-import { useState, useEffect } from "react"; // 1. useEffect ko import kiya
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 export default function BuilderPage() {
+  const router = useRouter();
   const [activeStep, setActiveStep] = useState("landing");
   const [loading, setLoading] = useState(false);
-  const [fetchLoading, setFetchLoading] = useState(true); // Data fetch karne ke liye loader
+  const [fetchLoading, setFetchLoading] = useState(true);
+  const [userId, setUserId] = useState(null);
+  const [savedFunnelId, setSavedFunnelId] = useState(null);
 
   // All States
   const [headline, setHeadline] = useState("Apna Mahaan Offer Yahan Likhein!");
@@ -17,47 +21,56 @@ export default function BuilderPage() {
   const [price, setPrice] = useState("999");
   const [thanksMessage, setThanksMessage] = useState("Aapka Bohot Bohot Shukriya!");
   const [nextStepInstruction, setNextStepInstruction] = useState("Humne access link aapke email par bhej diya hai.");
+  
+  // Local preview ke liye email state
+  const [previewEmail, setPreviewEmail] = useState("");
 
-  // 2. DATABASE SE DATA WAPAS LANE WALA FUNCTION
-  const fetchSavedFunnel = async () => {
-    try {
-      // Hum database ke 'funnels' table se sabse latest save kiya hua funnel utha rahe hain
-      const { data, error } = await supabase
-        .from("funnels")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single();
-
-      if (error && error.code !== "PGRST116") {
-        // PGRST116 ka matlab hai table khali hai (no rows found), use error nahi manenge
-        throw error;
+  // Check login & Fetch Data
+  useEffect(() => {
+    const checkUserAndFetch = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push("/login");
+        return;
       }
+      setUserId(user.id);
 
-      if (data) {
-        // Agar database mein data mila, toh saari states ko update kar do
-        setHeadline(data.headline);
-        setSubheadline(data.subheadline);
-        setButtonText(data.button_text);
-        setButtonColor(data.button_color);
-        setProductName(data.product_name);
-        setPrice(data.price);
-        setThanksMessage(data.thanks_message);
-        setNextStepInstruction(data.next_step_instruction);
+      try {
+        const { data, error } = await supabase
+          .from("funnels")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .single();
+
+        if (data) {
+          setHeadline(data.headline);
+          setSubheadline(data.subheadline);
+          setButtonText(data.button_text);
+          setButtonColor(data.button_color);
+          setProductName(data.product_name);
+          setPrice(data.price);
+          setThanksMessage(data.thanks_message);
+          setNextStepInstruction(data.next_step_instruction);
+          setSavedFunnelId(data.id);
+        }
+      } catch (error) {
+        console.error("Fetch failed:", error);
+      } finally {
+        setFetchLoading(false);
       }
-    } catch (error) {
-      console.error("Data fetch karne mein dikkat hui:", error);
-    } finally {
-      setFetchLoading(false);
-    }
+    };
+
+    checkUserAndFetch();
+  }, [router]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
   };
 
-  // 3. Page khulte hi automatic fetch function ko chalao
-  useEffect(() => {
-    fetchSavedFunnel();
-  }, []);
-
-  // 4. DATA SAVE KARNE WALA FUNCTION
+  // Save Data
   const saveFunnelToDatabase = async () => {
     setLoading(true);
     try {
@@ -74,11 +87,17 @@ export default function BuilderPage() {
             price,
             thanks_message: thanksMessage,
             next_step_instruction: nextStepInstruction,
+            user_id: userId,
           },
-        ]);
+        ])
+        .select();
 
       if (error) throw error;
-      alert("🎉 Data Cloud Par Save Ho Gaya! Ab page refresh karke check karo bhai!");
+
+      if (data && data[0]) {
+        setSavedFunnelId(data[0].id);
+        alert("🎉 Aapka Personal Data Cloud Par Save Ho Gaya!");
+      }
     } catch (error) {
       console.error(error);
       alert("Error: Data save nahi ho paya!");
@@ -87,11 +106,16 @@ export default function BuilderPage() {
     }
   };
 
-  // Agar page abhi database se data load kar raha hai toh loading screen dikhao
+  // Builder preview ke andar temporary email handle karne ke liye (leads me save nahi karega, sirf navigation check karne ke liye)
+  const handlePreviewSubmit = (e) => {
+    e.preventDefault();
+    setActiveStep("checkout"); // Seedhe agle step par bhej do!
+  };
+
   if (fetchLoading) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white text-sm font-mono">
-        🔄 Cloud Se Aapka Funnel Load Ho Raha Hai...
+        🔄 Security Check & Loading Your Funnel...
       </div>
     );
   }
@@ -104,12 +128,12 @@ export default function BuilderPage() {
         <div>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-black tracking-wider text-indigo-400">FUNNEL CRAFT</h2>
-            <Link href="/" className="text-xs text-slate-400 hover:text-white bg-slate-900 px-2 py-1 rounded border border-slate-800">
-              Dashboard
-            </Link>
+            <button onClick={handleLogout} className="text-xs text-rose-400 hover:text-rose-300 bg-slate-900 px-2 py-1 rounded border border-slate-800">
+              Logout
+            </button>
           </div>
 
-          {/* FUNNEL STEPS NAVIGATION */}
+          {/* NAVIGATION */}
           <div className="mb-8 bg-slate-900 p-1 rounded-xl border border-slate-800 flex flex-col gap-1">
             <button onClick={() => setActiveStep("landing")} className={`w-full text-left px-3 py-2 text-xs font-bold rounded-lg transition ${activeStep === "landing" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white"}`}>📄 1. Landing Page</button>
             <button onClick={() => setActiveStep("checkout")} className={`w-full text-left px-3 py-2 text-xs font-bold rounded-lg transition ${activeStep === "checkout" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white"}`}>💳 2. Checkout Page</button>
@@ -173,16 +197,29 @@ export default function BuilderPage() {
           </div>
         </div>
 
-        <button 
-          onClick={saveFunnelToDatabase} 
-          disabled={loading}
-          className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-800 py-3 rounded-xl font-bold text-sm shadow-lg mt-6 transition"
-        >
-          {loading ? "Saving to Cloud..." : "💾 Save Full Funnel"}
-        </button>
+        {/* LINK BOX & SAVE BUTTON AREA */}
+        <div className="space-y-3 mt-6">
+          {savedFunnelId && (
+            <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl text-center">
+              <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-1">🔗 Your Live Funnel Link</p>
+              <a 
+                href={`/preview/${savedFunnelId}`} 
+                target="_blank" 
+                className="text-[11px] text-emerald-400 hover:underline block break-all font-mono"
+              >
+                /preview/{savedFunnelId}
+              </a>
+            </div>
+          )}
+
+          <button onClick={saveFunnelToDatabase} disabled={loading} className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-800 py-3 rounded-xl font-bold text-sm shadow-lg transition">
+            {loading ? "Saving..." : "💾 Save Full Funnel"}
+          </button>
+        </div>
+
       </div>
 
-      {/* RIGHT SIDE: LIVE PREVIEW SCREEN */}
+      {/* RIGHT SIDE: LIVE PREVIEW */}
       <div className="flex-1 bg-slate-900 p-8 flex items-center justify-center relative overflow-y-auto pt-20">
         <div className="absolute top-4 left-8 right-8 bg-slate-950/40 border border-slate-800 p-2 rounded-t-lg flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-rose-500"></div>
@@ -196,10 +233,21 @@ export default function BuilderPage() {
             <span className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-widest">EXCLUSIVE OFFER</span>
             <h1 className="text-3xl font-black mt-6 mb-4 text-white leading-tight">{headline}</h1>
             <p className="text-slate-400 text-sm mb-8 max-w-md mx-auto">{subheadline}</p>
-            <div className="max-w-xs mx-auto space-y-2 mb-6">
-              <input type="email" placeholder="Apna Email Address" className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs focus:outline-none" disabled />
-            </div>
-            <button className={`max-w-xs w-full text-white font-bold py-2.5 px-4 rounded-lg text-xs shadow-lg ${buttonColor}`}>{buttonText}</button>
+            
+            {/* 🎯 Ab form aur button dono active hain testing ke liye */}
+            <form onSubmit={handlePreviewSubmit} className="max-w-xs mx-auto space-y-3 mb-6">
+              <input 
+                type="email" 
+                placeholder="Apna Email Address" 
+                value={previewEmail}
+                onChange={(e) => setPreviewEmail(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs focus:outline-none text-center" 
+                required
+              />
+              <button type="submit" className={`w-full text-white font-bold py-2.5 px-4 rounded-lg text-xs shadow-lg ${buttonColor}`}>
+                {buttonText}
+              </button>
+            </form>
           </div>
         )}
 
@@ -213,7 +261,10 @@ export default function BuilderPage() {
               </div>
               <p className="text-lg font-black text-indigo-400">₹{price}</p>
             </div>
-            <button className="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg text-xs shadow-lg">Complete Payment (₹{price})</button>
+            {/* 🎯 Checkout button par click karne se thank you step khulega */}
+            <button onClick={() => setActiveStep("thanks")} className="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg text-xs shadow-lg">
+              Complete Payment (₹{price})
+            </button>
           </div>
         )}
 
