@@ -15,22 +15,18 @@ export default function BuilderPage() {
   const [leadsList, setLeadsList] = useState([]);
   const [selectedSegment, setSelectedSegment] = useState("All");
 
-  // Funnel States
+  // Funnel Content States
   const [headline, setHeadline] = useState("Apna Mahaan Offer Yahan Likhein!");
   const [subheadline, setSubheadline] = useState("Ek aisi line jo customer ko majboor kar de product khareedne par.");
   const [buttonText, setButtonText] = useState("Join Now ➔");
   const [buttonColor, setButtonColor] = useState("bg-indigo-600");
   const [productName, setProductName] = useState("Premium SaaS Masterclass");
   const [price, setPrice] = useState("999");
-  
-  // 🎯 Nayi state payment URL ke liye
   const [paymentUrl, setPaymentUrl] = useState("https://rzp.io/l/example");
-
   const [thanksMessage, setThanksMessage] = useState("Aapka Bohot Bohot Shukriya!");
   const [nextStepInstruction, setNextStepInstruction] = useState("Humne access link aapke email par bhej diya hai.");
-  const [previewEmail, setPreviewEmail] = useState("");
 
-  // Fetch Funnel & CRM Leads
+  // Fetch Funnel & CRM Leads from Database
   const fetchData = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -55,11 +51,12 @@ export default function BuilderPage() {
         setButtonColor(funnelData.button_color);
         setProductName(funnelData.product_name);
         setPrice(funnelData.price);
-        setPaymentUrl(funnelData.payment_url || ""); // Load Payment URL
+        setPaymentUrl(funnelData.payment_url || "");
         setThanksMessage(funnelData.thanks_message);
         setNextStepInstruction(funnelData.next_step_instruction);
         setSavedFunnelId(funnelData.id);
 
+        // Fetch Leads
         const { data: leadsData } = await supabase
           .from("leads")
           .select("*")
@@ -79,7 +76,7 @@ export default function BuilderPage() {
     fetchData();
   }, [router]);
 
-  // CRM Status Update
+  // CRM Live Status Dropdown Update
   const handleStatusChange = async (leadId, newStatus) => {
     try {
       const { error } = await supabase
@@ -96,7 +93,7 @@ export default function BuilderPage() {
     }
   };
 
-  // Upsert Funnel
+  // Upsert Funnel Data
   const saveFunnelToDatabase = async () => {
     setLoading(true);
     try {
@@ -108,7 +105,7 @@ export default function BuilderPage() {
         button_color: buttonColor,
         product_name: productName,
         price,
-        payment_url: paymentUrl, // 🎯 Database mein URL bhej rahe hain
+        payment_url: paymentUrl,
         thanks_message: thanksMessage,
         next_step_instruction: nextStepInstruction,
         user_id: userId,
@@ -138,17 +135,24 @@ export default function BuilderPage() {
     router.push("/login");
   };
 
+  // Filter Leads by Selected Tab Segment
   const filteredLeads = leadsList.filter((lead) => {
     if (selectedSegment === "All") return true;
     return lead.status === selectedSegment;
   });
 
-  if (fetchLoading) return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white text-sm font-mono">🔄 Loading Gateway Dashboard...</div>;
+  if (fetchLoading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white text-sm font-mono">
+        🔄 Loading Gateway Dashboard...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-900 text-white font-sans flex flex-col md:flex-row">
       
-      {/* LEFT PANEL */}
+      {/* 🛠️ LEFT PANEL - SIDEBAR CONTROLS */}
       <div className="w-full md:w-80 bg-slate-950 border-r border-slate-800 p-6 flex flex-col justify-between overflow-y-auto">
         <div>
           <div className="flex items-center justify-between mb-6">
@@ -156,6 +160,7 @@ export default function BuilderPage() {
             <button onClick={handleLogout} className="text-xs text-rose-400 hover:text-rose-300 bg-slate-900 px-2 py-1 rounded border border-slate-800">Logout</button>
           </div>
 
+          {/* NAV STEP SELECTION TABS */}
           <div className="mb-6 bg-slate-900 p-1 rounded-xl border border-slate-800 flex flex-col gap-1">
             <button onClick={() => setActiveStep("landing")} className={`w-full text-left px-3 py-2 text-xs font-bold rounded-lg transition ${activeStep === "landing" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white"}`}>📄 1. Landing Page</button>
             <button onClick={() => setActiveStep("checkout")} className={`w-full text-left px-3 py-2 text-xs font-bold rounded-lg transition ${activeStep === "checkout" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white"}`}>💳 2. Checkout Page</button>
@@ -165,7 +170,7 @@ export default function BuilderPage() {
 
           <hr className="border-slate-800 mb-6" />
 
-          {/* EDITING INPUTS */}
+          {/* DYNAMIC INPUT CONTROL FIELDS */}
           {activeStep !== "crm" && (
             <div className="space-y-5">
               {activeStep === "landing" && (
@@ -177,6 +182,10 @@ export default function BuilderPage() {
                   <div>
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Sub-Headline</label>
                     <textarea value={subheadline} onChange={(e) => setSubheadline(e.target.value)} rows={3} className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:border-indigo-500" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Button Text</label>
+                    <input type="text" value={buttonText} onChange={(e) => setButtonText(e.target.value)} className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:border-indigo-500" />
                   </div>
                 </>
               )}
@@ -190,11 +199,22 @@ export default function BuilderPage() {
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Price (INR)</label>
                     <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:border-indigo-500" />
                   </div>
-                  {/* 🎯 INTEGRATION FIELD FOR ALL PAYMENT GATEWAYS */}
                   <div>
                     <label className="block text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-2">🔌 Payment Gateway / UPI Link</label>
                     <input type="url" placeholder="Razorpay, Stripe, or UPI Link..." value={paymentUrl} onChange={(e) => setPaymentUrl(e.target.value)} className="w-full bg-slate-900 border border-amber-500/30 text-amber-300 rounded-lg p-2 text-xs focus:outline-none focus:border-amber-500" />
-                    <p className="text-[9px] text-slate-500 mt-1">Paste your Razorpay Payment Page, Stripe Checkout, or Paytm link here.</p>
+                    <p className="text-[9px] text-slate-500 mt-1">Paste your Razorpay Payment Page, Stripe Checkout, or UPI link here.</p>
+                  </div>
+                </>
+              )}
+              {activeStep === "thanks" && (
+                <>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Thank You Title</label>
+                    <input type="text" value={thanksMessage} onChange={(e) => setThanksMessage(e.target.value)} className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:border-indigo-500" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Next Step Instruction</label>
+                    <textarea value={nextStepInstruction} onChange={(e) => setNextStepInstruction(e.target.value)} rows={3} className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-sm focus:outline-none focus:border-indigo-500" />
                   </div>
                 </>
               )}
@@ -202,6 +222,7 @@ export default function BuilderPage() {
           )}
         </div>
 
+        {/* BOTTOM SAVE LINKS BOX */}
         <div className="space-y-3 mt-6">
           {savedFunnelId && (
             <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl text-center">
@@ -215,36 +236,112 @@ export default function BuilderPage() {
         </div>
       </div>
 
-      {/* RIGHT SIDE */}
-      <div className="flex-1 bg-slate-900 p-8 flex items-center justify-center relative overflow-y-auto">
+      {/* 🖥️ RIGHT SIDE PANEL - LIVE CORE RENDERING VIEW */}
+      <div className="flex-1 bg-slate-900 p-8 flex items-center justify-center relative overflow-y-auto pt-20">
+        
+        {/* 💼 1. IF ACTIVE TAB IS CRM */}
         {activeStep === "crm" ? (
-          // CRM UI
-          <div className="w-full max-w-4xl bg-slate-950 border border-slate-800 p-8 rounded-3xl shadow-2xl space-y-6">
-            <h2 className="text-xl font-black text-amber-400">💼 Pipeline CRM Engine</h2>
-            {/* Table remains same as previous */}
+          <div className="w-full max-w-4xl bg-slate-950 border border-slate-800 p-8 rounded-3xl shadow-2xl space-y-6 text-left">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-800 pb-4 gap-4">
+              <div>
+                <h2 className="text-xl font-black text-amber-400">💼 Pipeline CRM Engine</h2>
+                <p className="text-xs text-slate-500 mt-1">Manage, segment, and close your incoming customers.</p>
+              </div>
+              
+              {/* Pipeline Segmentation Controls */}
+              <div className="flex items-center gap-2 bg-slate-900 p-1 border border-slate-800 rounded-xl text-xs">
+                {["All", "New", "Interested", "Closed", "Lost"].map((seg) => (
+                  <button 
+                    key={seg} 
+                    onClick={() => setSelectedSegment(seg)} 
+                    className={`px-3 py-1.5 rounded-lg font-bold transition ${selectedSegment === seg ? "bg-amber-500 text-slate-950" : "text-slate-400 hover:text-white"}`}
+                  >
+                    {seg}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {filteredLeads.length === 0 ? (
+              <div className="text-center py-12 space-y-2">
+                <p className="text-slate-500 text-sm">Abhi tak is segment mein koi leads nahi hain.</p>
+                <p className="text-[11px] text-slate-600">Apne live public link par jaakar ek fresh entry submit karke dekhein!</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto border border-slate-800 rounded-xl bg-slate-900/40">
+                <table className="w-full text-left border-collapse min-w-[600px]">
+                  <thead>
+                    <tr className="bg-slate-900 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-800">
+                      <th className="p-4">Customer Info</th>
+                      <th className="p-4">WhatsApp / Phone</th>
+                      <th className="p-4">Pipeline Status</th>
+                      <th className="p-4 text-right">Date Captured</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/60 text-xs text-slate-300">
+                    {filteredLeads.map((lead) => (
+                      <tr key={lead.id} className="hover:bg-slate-900/30 transition">
+                        <td className="p-4">
+                          <p className="font-bold text-white text-sm">{lead.name || "No Name"}</p>
+                          <p className="text-xs text-slate-400 mt-0.5">{lead.email}</p>
+                        </td>
+                        <td className="p-4 font-mono text-slate-300">{lead.phone || "No Phone"}</td>
+                        <td className="p-4">
+                          <select 
+                            value={lead.status || "New"} 
+                            onChange={(e) => handleStatusChange(lead.id, e.target.value)}
+                            className={`bg-slate-950 border text-xs px-2 py-1.5 rounded-lg focus:outline-none font-bold ${
+                              lead.status === "Closed" ? "border-emerald-500 text-emerald-400" :
+                              lead.status === "Interested" ? "border-indigo-500 text-indigo-400" :
+                              lead.status === "Lost" ? "border-rose-500 text-rose-400" : "border-slate-700 text-amber-400"
+                            }`}
+                          >
+                            <option value="New">🟢 New Lead</option>
+                            <option value="Interested">⚡ Interested</option>
+                            <option value="Closed">🏆 Closed (Won)</option>
+                            <option value="Lost">❌ Lost</option>
+                          </select>
+                        </td>
+                        <td className="p-4 text-right text-slate-500 font-mono">
+                          {lead.created_at ? new Date(lead.created_at).toLocaleDateString("en-IN") : "Just Now"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         ) : (
+          /* 📄 2. IF ACTIVE TABS ARE VISUAL PREVIEWS */
           <div className="w-full max-w-xl bg-slate-950 border border-slate-800 p-10 rounded-2xl shadow-2xl text-center">
             {activeStep === "checkout" ? (
               <div className="text-left space-y-4">
-                <h2 className="text-xl font-bold border-b border-slate-800 pb-3">💳 Secure Checkout Preview</h2>
-                <div className="bg-slate-900 p-4 rounded-xl flex justify-between items-center">
+                <h2 className="text-xl font-bold border-b border-slate-800 pb-3 text-white">💳 Secure Checkout Preview</h2>
+                <div className="bg-slate-900 p-4 rounded-xl flex justify-between items-center border border-slate-800">
                   <div>
-                    <p className="text-sm font-bold">{productName}</p>
+                    <p className="text-sm font-bold text-white">{productName}</p>
                     <p className="text-[10px] text-slate-500">Gateway Route Enabled</p>
                   </div>
                   <p className="text-lg font-black text-indigo-400">₹{price}</p>
                 </div>
-                <button className="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg text-xs">
-                  Pay Now via Gateway ➔
+                <button className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-3 rounded-lg text-xs tracking-wider transition">
+                  Pay Now via Secure Route ➔
                 </button>
               </div>
+            ) : activeStep === "thanks" ? (
+              <div className="space-y-4">
+                <div className="w-12 h-12 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto text-xl">✓</div>
+                <h1 className="text-2xl font-black text-white">{thanksMessage}</h1>
+                <p className="text-slate-400 text-xs">{nextStepInstruction}</p>
+              </div>
             ) : (
-              <>
-                <h1 className="text-2xl font-black mb-4">{headline}</h1>
-                <p className="text-slate-400 text-xs mb-6">{subheadline}</p>
-                <button className={`w-full py-2.5 rounded-lg text-xs font-bold ${buttonColor}`}>{buttonText}</button>
-              </>
+              // Landing Page Preview (Default Box)
+              <div className="space-y-4">
+                <h1 className="text-2xl font-black text-white">{headline}</h1>
+                <p className="text-slate-400 text-xs">{subheadline}</p>
+                <button className={`w-full py-2.5 rounded-lg text-xs font-bold tracking-wide text-white ${buttonColor}`}>{buttonText}</button>
+              </div>
             )}
           </div>
         )}
