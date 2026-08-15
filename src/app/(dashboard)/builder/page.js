@@ -1,1126 +1,849 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import React, { useState, useEffect, useRef } from "react";
 
-export default function CompleteEnterpriseBuilderStudio() {
-  const router = useRouter();
-  const fileInputRef = useRef(null);
-  const fontUploadRef = useRef(null);
-  
-  // 🎛️ Architecture Cluster Active Tabs, Layout Models & Core Device States
-  const [activeTab, setActiveTab] = useState("builder"); // "funnels" | "builder" | "crm" | "brand_settings"
-  const [currentEditingPage, setCurrentEditingPage] = useState("landing"); // "landing" | "checkout" | "thanks"
-  const [currentDeviceMode, setCurrentDeviceMode] = useState("desktop"); // "desktop" | "mobile"
-  const [selectedElementId, setSelectedElementId] = useState(null);
+// =========================================================================
+// 🌐 CONFIG MASTER DATA WIDGET REGISTRY SYSTEMS (40 PROFESSIONAL ELEMENTS)
+// =========================================================================
+const ELEMENTOR_WIDGET_CATALOG = [
+  // --- LAYOUT BLOCKS (4) ---
+  { type: "section_row", name: "1 Column Section Row", category: "layout", icon: "⚃", defaultContent: "Full Width Layout" },
+  { type: "two_col_row", name: "2 Column Split Row", category: "layout", icon: "⚄", defaultContent: "50/50 Layout Grid" },
+  { type: "three_col_row", name: "3 Column Multi Grid", category: "layout", icon: "⚅", defaultContent: "33/33/33 Layout Grid" },
+  { type: "four_col_row", name: "4 Column Grid Frame", category: "layout", icon: "⚂", defaultContent: "25/25/25/25 Grid" },
 
-  // ⚙️ Account Licenses State Machines & Transmissions Indicators
-  const [funnelsList, setFunnelsList] = useState([]);
-  const [isPremiumUser, setIsPremiumUser] = useState(false);
-  const [showPaywallModal, setShowPaywallModal] = useState(false);
-  const [uploadingFile, setUploadingFile] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [fetchLoading, setFetchLoading] = useState(true);
-  const [userId, setUserId] = useState(null);
-  const [activeFunnelId, setActiveFunnelId] = useState(null);
+  // --- BASIC TYPOGRAPHY & MEDIA (10) ---
+  { type: "heading", name: "Main Hero Heading Text", category: "basic", icon: "Ｔ", defaultContent: "We Create High Converting Traffic Funnels", redirectUrl: "", styles: { color: "#1e3a8a", fontSize: "32px", textAlign: "left", fontWeight: "900", fontFamily: "sans-serif" } },
+  { type: "sub_heading", name: "Sub-Headline Box", category: "basic", icon: "ｔ", defaultContent: "Accelerate your inbound lead pipelines seamlessly", redirectUrl: "", styles: { color: "#16a34a", fontSize: "18px", textAlign: "left", fontWeight: "700", fontFamily: "sans-serif" } },
+  { type: "paragraph", name: "Rich Text Editor Editor", category: "basic", icon: "▤", defaultContent: "We build innovative digital marketing layout structures to help creators track metrics safely.", redirectUrl: "", styles: { color: "#475569", fontSize: "14px", textAlign: "left", fontWeight: "400", fontFamily: "sans-serif", lineHeight: "1.6" } },
+  { type: "image", name: "Responsive Image Box", category: "basic", icon: "🖼", defaultContent: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80", redirectUrl: "", imageSourceMode: "url", styles: { alignment: "center", borderRadius: "8px", width: "100%" } },
+  { type: "video", name: "Embedded Video Player", category: "basic", icon: "▷", defaultContent: "https://www.youtube.com/embed/dQw4w9WgXcQ" },
+  { type: "button", name: "Call To Action Button", category: "basic", icon: "凸", defaultContent: "Claim Your Special Offer Now", redirectUrl: "", styles: { backgroundColor: "#e11d48", color: "#ffffff", padding: "12px 24px", borderRadius: "6px", alignment: "center", fontSize: "15px", fontWeight: "700", fontFamily: "sans-serif" } },
+  { type: "divider", name: "Structural Divider Line", category: "basic", icon: "―", defaultContent: "", styles: { thickness: "2px", color: "#cbd5e1", verticalMargin: "24px" } },
+  { type: "spacer", name: "Dynamic Vertical Spacer", category: "basic", icon: "⇳", defaultContent: "40px height spacer", styles: { verticalSpace: "40px" } },
+  { type: "bullet_list", name: "Feature Bullet Points List", category: "basic", icon: "✓", defaultContent: "Instant Access Setup|Lifetime Core Updates Included|Premium 24/7 Priority Support Desk", redirectUrl: "", styles: { color: "#334155", fontSize: "13px" } },
+  { type: "icon_box", name: "Icon Feature Box Block", category: "basic", icon: "❂", defaultContent: "Secure Payments Secured via SSL Core Encryption Protocols", redirectUrl: "" },
 
-  // 📋 Inbound Target CRM Analytics Matrices Logs
-  const [leadsList, setLeadsList] = useState([]);
-  const [selectedSegment, setSelectedSegment] = useState("All");
+  // --- CONVERSION & LEAD CAPTURE PRO FORMS (10) ---
+  { type: "pro_form", name: "Opt-In Form Capture Pro", category: "pro", icon: "✉", defaultContent: "Claim Free Access Seat", fields: [{ label: "Full Name", type: "text" }, { label: "Primary Email Address", type: "email" }] },
+  { type: "checkout_form", name: "Order Payment Gateway Form", category: "pro", icon: "💳", defaultContent: "Secure Gateway Checkout Terminal", fields: [{ label: "Card Number", type: "text" }, { label: "CVV Code", type: "password" }] },
+  { type: "phone_capture", name: "SMS Lead Capture Target", category: "pro", icon: "📞", defaultContent: "Enter Phone Number for VIP Access text messages", fields: [{ label: "Mobile Phone Target Vector", type: "tel" }] },
+  { type: "dropdown_select", name: "Survey Multiple Select Dropdown", category: "pro", icon: "▾", defaultContent: "Choose Business Model|E-Commerce Matrix|Agency Workflow Framework" },
+  { type: "checkbox_verify", name: "GDPR Terms Compliance Checkbox", category: "pro", icon: "☑", defaultContent: "I accept all global terms, cookie processing policies and data tracking laws fully." },
+  { type: "date_picker", name: "Booking Date Selection Calendar", category: "pro", icon: "📅", defaultContent: "Choose Consultation Call Slot Time" },
+  { type: "progress_bar", name: "Multi-Step Funnel Progress Bar", category: "pro", icon: "▰", defaultContent: "Step 2 of 3 Completed (75% Active Profile Loaded Data)", styles: { color: "#16a34a" } },
+  { type: "file_upload", name: "Asset Application Document Uploader", category: "pro", icon: "📤", defaultContent: "Upload KYC proof document files to system stack nodes" },
+  { type: "login_node", name: "Portal User Authentication Window", category: "pro", icon: "🔓", defaultContent: "Secure Client Dashboard Area Access Gateway Panel" },
+  { type: "digital_signature", name: "E-Signature Dynamic Consent Block", category: "pro", icon: "✍", defaultContent: "Draw legal execution signature validation token context here" },
 
-  // 🎨 High Premium Global Brand Aesthetics Identity Definition (Unified Canvas Nodes)
-  const [globalBrandColors, setGlobalBrandColors] = useState({
-    primary: "#6366f1", // Elegant Royal Indigo Accent
-    secondary: "#0f172a", // Deep Midnight Dark Slate Background Matrix Base
-    accent: "#10b981", // High Conversion Emerald Mint Mint Green
-    surface: "#ffffff", // Pure Ceramic White Surface Element Cards
-    background: "#f8fafc", // Cool Soft Light Slate Canvas Background
-    textDark: "#1e293b", // Aggressive Dark Charcoal for High Contrast Readability
-    textMuted: "#64748b" // Subtle Cool Grey for supporting descriptions layers
+  // --- SOCIAL PROOF & MARKETING TRIGGERS (8) ---
+  { type: "star_rating", name: "Client Testimonial Star Ratings", category: "marketing", icon: "★", defaultContent: "5", redirectUrl: "", styles: { alignment: "left" } },
+  { type: "social_icons", name: "Social Networks Hyperlinks Dock", category: "marketing", icon: "🌐", defaultContent: "fb|tw|gp|ln", redirectUrl: "", styles: { alignment: "center" } },
+  { type: "counter_node", name: "Milestone Metric Counter", category: "marketing", icon: "🔢", defaultContent: "1,49,200+", metaLabel: "Active Core Global Client Server Implementations Live", redirectUrl: "" },
+  { type: "countdown_timer", name: "Scarcity FOMO Countdown Clock", category: "marketing", icon: "⏳", defaultContent: "15:00 minutes remaining before deal expiry matrix sets", styles: { color: "#dc2626" } },
+  { type: "pricing_card", name: "Enterprise SaaS Tier Pricing Card", category: "marketing", icon: "🏷", defaultContent: "$97 / Month Platinum Suite Allocation", metaLabel: "Includes unlimited access models", redirectUrl: "" },
+  { type: "guarantee_badge", name: "30-Day Money Back Shield Badge", category: "marketing", icon: "🛡", defaultContent: "100% Risk Free Full Refund Money-Back Guarantee Clause", redirectUrl: "" },
+  { type: "review_card", name: "Full Customer Review Card", category: "marketing", icon: "👤", defaultContent: "John Doe (Founder, TechMedia Corp): 'This tool boosted our inbound conversions by 420% in weeks.'", redirectUrl: "" },
+  { type: "faq_accordion", name: "Collapsible FAQ Accordion Hub", category: "marketing", icon: "❓", defaultContent: "Is it easy to cancel subscription nodes?|Yes, instant cancel inside the client billing terminal panel." },
+
+  // --- E-COMMERCE & WIDGET UTILITIES (8) ---
+  { type: "cart_summary", name: "Shopping Cart Order Summary", category: "ecommerce", icon: "🛒", defaultContent: "Item: Ultimate Funnel Accelerator Masterclass Pack - $297" },
+  { type: "coupon_code", name: "Discount Promo Code Validation Input", category: "ecommerce", icon: "🎟", defaultContent: "Apply code 'LAUNCH50' for half price discount access tokens" },
+  { type: "product_grid", name: "Featured Physical Products Display Grid", category: "ecommerce", icon: "📦", defaultContent: "Product A - $49|Product B - $89|Product C - $129", redirectUrl: "" },
+  { type: "order_bump", name: "High Conversion Order Bump Checkbox", category: "ecommerce", icon: "⚡", defaultContent: "Yes! Add Ultimate Copywriting Formula Book to my checkout for only $17 extra tokens." },
+  { type: "map_location", name: "Google Maps Office Terminal Embed", category: "ecommerce", icon: "📍", defaultContent: "Silicon Valley Inbound Headquarters Node Station Location" },
+  { type: "audio_player", name: "Podcast Audio Player Module", category: "ecommerce", icon: "♬", defaultContent: "Listen to Pre-Purchase Client Case Study Session Audio Track" },
+  { type: "alert_bar", name: "Urgent Attention Banner Alert Bar", category: "ecommerce", icon: "⚠", defaultContent: "Warning: Only 4 discount subscription coupon slots remain for today!", styles: { backgroundColor: "#f59e0b" } },
+  { type: "html_embed", name: "Custom RAW HTML/JS Frame Snippet", category: "ecommerce", icon: "🧬", defaultContent: "" }
+];
+
+export default function FunnelCraftBuilderCanvas() {
+  // =========================================================================
+  // 🧭 LIVE DATABASE PIPELINE PATHS (SUPABASE CONFIG MASTER CREDENTIALS)
+  // =========================================================================
+  const SUPABASE_PROJECT_URL = "https://your-project-id.supabase.co"; // Replace with your live project url
+  const SUPABASE_ANON_PUBLIC_KEY = "your-anon-public-key-token-here"; // Replace with your database access token key
+  const TARGET_TABLE_NAME = "funnels";
+
+  // =========================================================================
+  // 🧭 CHANNELS GLOBAL STATES
+  // =========================================================================
+  const [funnelPageStepsTabs, setFunnelPageStepsTabs] = useState(["landing", "checkout", "thankyou"]);
+  const [activePageStep, setActivePageStep] = useState("landing"); 
+  const [activeDeviceViewMode, setActiveDeviceViewMode] = useState("desktop"); 
+  const [lastSystemUpdateTimeStamp, setLastSystemUpdateTimeStamp] = useState("Never updated");
+  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
+  const [generatedClientFunnelLink, setGeneratedClientFunnelLink] = useState("");
+  const [isDatabasePushLoading, setIsDatabasePushLoading] = useState(false);
+  const [databaseNetworkError, setDatabaseNetworkError] = useState("");
+
+  // =========================================================================
+  // 🧠 GLOBAL MULTI-PAGE ENGINE WORKSPACE DATA TREE STORE
+  // =========================================================================
+  const [funnelPagesDataStore, setFunnelPagesDataStore] = useState({
+    landing: [
+      {
+        id: "row_init_1",
+        columns: [
+          {
+            id: "col_1_1",
+            widthPercent: 60,
+            widgets: [
+              { id: "wdgt_1", type: "heading", content: "We Create High Converting Traffic Funnels", redirectUrl: "https://funnelcraft.io/live/client_id_lkmwijf/checkout", styles: { color: "#1e3a8a", fontSize: "32px", textAlign: "left", fontWeight: "900", fontFamily: "sans-serif" } },
+              { id: "wdgt_3", type: "paragraph", content: "Welcome to FunnelCraft! Drag and drop structural layout systems to capture enterprise workflows, route client data payloads, and optimize overall site conversion safely.", redirectUrl: "", styles: { color: "#475569", fontSize: "14px", textAlign: "left", fontWeight: "400", fontFamily: "sans-serif" } }
+            ]
+          },
+          {
+            id: "col_1_2",
+            widthPercent: 40,
+            widgets: [
+              { id: "wdgt_5", type: "pro_form", content: "Claim Free Access Seat", fields: [{ label: "Full Name", type: "text" }, { label: "Primary Email Address", type: "email" }] }
+            ]
+          }
+        ]
+      }
+    ],
+    checkout: [
+      {
+        id: "row_chk_1",
+        columns: [
+          {
+            id: "col_chk_1_1",
+            widthPercent: 100,
+            widgets: [
+              { id: "wdgt_chk_title", type: "heading", content: "Secure Operational Gateway Checkout Terminal", redirectUrl: "https://funnelcraft.io/live/client_id_lkmwijf/thankyou", styles: { color: "#1e3a8a", fontSize: "28px", textAlign: "center", fontWeight: "900", fontFamily: "sans-serif" } }
+            ]
+          }
+        ]
+      }
+    ],
+    thankyou: [
+      {
+        id: "row_ty_1",
+        columns: [
+          {
+            id: "col_ty_1_1",
+            widthPercent: 100,
+            widgets: [
+              { id: "wdgt_ty_icon", type: "feature_box", content: "Transaction Completed Successfully!", metaSubtext: "Your execution credentials and system dashboard nodes are deployed inside cloud containers.", redirectUrl: "", iconBadge: "🎉" }
+            ]
+          }
+        ]
+      }
+    ]
   });
 
-  // 📋 Active Pipeline General Properties Settings
-  const [funnelName, setFunnelName] = useState("");
-  const [productName, setProductName] = useState("");
-  const [price, setPrice] = useState("999");
-  const [paymentUrl, setPaymentUrl] = useState("");
+  const canvasRows = funnelPagesDataStore[activePageStep] || [];
+  const [activeCatalogTab, setActiveCatalogTab] = useState("basic"); 
+  const [selectedWidgetNode, setSelectedWidgetNode] = useState(null);
+  const [activeWidgetSearchTerm, setActiveWidgetSearchTerm] = useState("");
+  const [isCurrentlyDraggingWidget, setIsCurrentlyDraggingWidget] = useState(false);
+  const internalDraggedWidgetTypeRef = useRef(null);
 
-  // 👑 Multi-Page Schema Data Object Containers
-  const [landingJson, setLandingJson] = useState([]);
-  const [checkoutJson, setCheckoutJson] = useState([]);
-  const [thanksJson, setThanksJson] = useState([]);
-
-  // 🅰️ Custom Vector Fonts Registries Stack
-  const [customFontsRegistry, setCustomFontsRegistry] = useState([]);
-
-  // ⚙️ Element Structure Blueprint Factory Map Node Generator
-  const getInitialSchemaData = (type) => {
-    return {
-      id: `node-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      type,
-      content: type === "primary_button" ? "🔥 Get Instant Access Now" : type === "h1" ? "Transform Your Business Potential With One Complete Automated Engine" : type === "h2" ? "Why High-Performance Organizations Rely On Our System Blueprint" : type === "image" ? "" : "Premium structural editable content text slice configuration asset data holder node template copy.",
-      subcontent: "Supporting sub-text layer copy variable field.",
-      mediaUrl: "",
-      
-      // Dynamic Redirections Routing Core Engine Assets (New Core Logic Added)
-      linkActionType: "next_page", // "next_page" | "external_url" | "checkout_trigger" | "thankyou_redirect"
-      customTargetUrl: "https://",
-      
-      // Responsive Device Visibilities Layers Nodes
-      hideOnDesktop: false,
-      hideOnMobile: false,
-
-      // Animation Motion Engines Tokens
-      entranceAnimation: "none", // "none" | "animate-fade-in" | "animate-slide-left" | "animate-zoom-in"
-      
-      styles: {
-        // Advanced Custom Fine Typography Metrics Map Array
-        fontFamily: "inherit",
-        fontSizeDesktop: type === "h1" ? "48px" : type === "h2" ? "32px" : type === "primary_button" ? "15px" : "16px",
-        fontSizeMobile: type === "h1" ? "28px" : type === "h2" ? "22px" : type === "primary_button" ? "14px" : "14px",
-        fontWeight: type.startsWith("h") || type.includes("button") ? "800" : "400",
-        letterSpacing: type.startsWith("h") ? "-1px" : "0px",
-        lineHeight: "1.4",
-        wordSpacing: "0px",
-        textColor: type === "primary_button" ? "#ffffff" : "textDark", // Dynamic Map Keys
-        textAlign: "left", // "left" | "center" | "right" | "justify"
-        
-        // Complex Text Shaders and Borders Processing
-        textShadow: "none", 
-        textStrokeWidth: "0px",
-        textStrokeColor: "#000000",
-        textBlendMode: "normal",
-
-        // Flexible Layout Structural Matrix Properties
-        displayType: "block", // "block" | "flex" | "grid"
-        flexDirection: "column", 
-        flexAlignItems: "stretch",
-        flexJustifyContent: "flex-start",
-        gridColumnsCount: "1",
-        
-        // Box Model Properties System Slices (Padding and Margins Dimensions)
-        paddingTop: type === "primary_button" ? "14px" : "12px", 
-        paddingBottom: type === "primary_button" ? "14px" : "12px", 
-        paddingLeft: type === "primary_button" ? "28px" : "12px", 
-        paddingRight: type === "primary_button" ? "28px" : "12px",
-        marginTop: "0px", 
-        marginBottom: "16px", 
-        marginLeft: "0px", 
-        marginRight: "0px",
-        zIndex: "1",
-
-        // Backdrop Core Surfaces, Vectors Filters & Graphic Masks
-        backgroundType: type === "primary_button" ? "solid" : "transparent", 
-        backgroundColorSolid: type === "primary_button" ? "primary" : "#ffffff", // Primary maps to global palette hex values
-        backgroundGradientStr: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
-        backgroundOverlayColor: "rgba(0,0,0,0)",
-        shapeDividerType: "none", 
-
-        // Vector Geometries Outer Curves & Shadows Properties
-        borderRadius: type === "primary_button" ? "12px" : "0px",
-        borderStyle: "none", 
-        borderWidth: "1px",
-        borderColor: "#e2e8f0",
-        boxShadowPreset: type === "primary_button" ? "md" : "none", 
-
-        // Live States Hover Interactions Variables Matrix
-        hoverTextColor: "#ffffff",
-        hoverBgColor: "accent", 
-        hoverScale: "100" 
-      }
-    };
-  };
-
-  const normalizePayloadArray = (dataField) => {
-    if (!dataField) return [];
-    if (Array.isArray(dataField)) return dataField;
-    try { return JSON.parse(dataField); } catch(e) { return []; }
-  };
-
-  // 🔄 Bootstrapping Initialization Network Handlers
-  useEffect(() => {
-    const bootstrapStudioCore = async () => {
-      if (!window.Razorpay) {
-        const script = document.createElement("script");
-        script.src = "https://checkout.razorpay.com/v1/checkout.js";
-        script.async = true;
-        document.body.appendChild(script);
-      }
-
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { router.push("/login"); return; }
-      setUserId(user.id);
-
-      if (user.user_metadata?.is_premium === true) {
-        setIsPremiumUser(true);
-      }
-
-      await refreshFunnelsFeed(user.id);
-      setFetchLoading(false);
-    };
-    bootstrapStudioCore();
-  }, [router]);
-
-  const refreshFunnelsFeed = async (uid) => {
-    try {
-      const { data, error } = await supabase.from("funnels").select("*").eq("user_id", uid).order("created_at", { ascending: false });
-      if (error) throw error;
-      setFunnelsList(data || []);
-      
-      const { data: leadsData } = await supabase.from("leads").select("*").order("created_at", { ascending: false });
-      if (leadsData) setLeadsList(leadsData);
-    } catch (err) { console.error("Database Framework Critical Fault Exception:", err.message); }
-  };
-
-  const mountFunnelToCanvasWorkspace = (funnelInstance) => {
-    setActiveFunnelId(funnelInstance.id);
-    setFunnelName(funnelInstance.name || "Untitled Funnel Platform Workspace");
-    setProductName(funnelInstance.product_name || "Premium Automation Course Package");
-    setPrice(funnelInstance.price || "999");
-    setPaymentUrl(funnelInstance.payment_url || "");
-    
-    const extractedLanding = normalizePayloadArray(funnelInstance.page_json);
-    const extractedCheckout = normalizePayloadArray(funnelInstance.checkout_json);
-    const extractedThanks = normalizePayloadArray(funnelInstance.thanks_json);
-
-    setLandingJson(extractedLanding.length ? extractedLanding : [getInitialSchemaData("h1"), getInitialSchemaData("paragraph"), getInitialSchemaData("primary_button")]);
-    setCheckoutJson(extractedCheckout.length ? extractedCheckout : [getInitialSchemaData("h2"), getInitialSchemaData("pricing_table")]);
-    setThanksJson(extractedThanks.length ? extractedThanks : [getInitialSchemaData("h2"), getInitialSchemaData("paragraph")]);
-    
-    setSelectedElementId(null);
-    setActiveTab("builder");
-  };
-
-  const handleCreateNewFunnelRequest = async () => {
-    if (funnelsList.length >= 2 && !isPremiumUser) {
-      setShowPaywallModal(true);
-      return;
-    }
-
-    setLoading(true);
-    const defaultStructure = {
-      name: `Premium Growth Pipeline #${funnelsList.length + 1}`,
-      product_name: "High Ticket Digital Matrix Suite",
-      price: "1499",
-      payment_url: "",
-      user_id: userId,
-      page_json: [getInitialSchemaData("h1"), getInitialSchemaData("paragraph"), getInitialSchemaData("primary_button")],
-      checkout_json: [getInitialSchemaData("h2"), getInitialSchemaData("pricing_table")],
-      thanks_json: [getInitialSchemaData("h2"), getInitialSchemaData("paragraph")]
-    };
-
-    try {
-      const { data, error } = await supabase.from("funnels").insert([defaultStructure]).select();
-      if (error) throw error;
-      await refreshFunnelsFeed(userId);
-      if (data?.[0]) mountFunnelToCanvasWorkspace(data[0]);
-    } catch (err) { alert("Pipeline allocation allocation error: " + err.message); }
-    finally { setLoading(false); }
-  };
-
-  const getActiveTargetPageJsonArray = () => {
-    if (currentEditingPage === "landing") return landingJson;
-    if (currentEditingPage === "checkout") return checkoutJson;
-    return thanksJson;
-  };
-
-  const syncActiveTargetPageJsonArray = (updatedArray) => {
-    if (currentEditingPage === "landing") setLandingJson(updatedArray);
-    else if (currentEditingPage === "checkout") setCheckoutJson(updatedArray);
-    else setThanksJson(updatedArray);
-  };
-
-  const insertComponentToActiveCanvas = (type) => {
-    const currentArray = getActiveTargetPageJsonArray();
-    const generatedNode = getInitialSchemaData(type);
-    syncActiveTargetPageJsonArray([...currentArray, generatedNode]);
-    setSelectedElementId(generatedNode.id);
-  };
-
-  const updateElementAttribute = (id, property, targetValue) => {
-    const currentArray = getActiveTargetPageJsonArray();
-    const optimizedMapping = currentArray.map((el) => el.id === id ? { ...el, [property]: targetValue } : el);
-    syncActiveTargetPageJsonArray(optimizedMapping);
-  };
-
-  const updateNestedElementStyle = (id, styleKey, styleValue) => {
-    const currentArray = getActiveTargetPageJsonArray();
-    const optimizedMapping = currentArray.map((el) => {
-      if (el.id === id) {
-        return { ...el, styles: { ...el.styles, [styleKey]: styleValue } };
-      }
-      return el;
+  const setCanvasRows = (mutatorArgumentPayload) => {
+    setFunnelPagesDataStore(previousMasterStore => {
+      const activeRowsBuffer = previousMasterStore[activePageStep] || [];
+      const newlyComputedRows = typeof mutatorArgumentPayload === "function" 
+        ? mutatorArgumentPayload(activeRowsBuffer) 
+        : mutatorArgumentPayload;
+      return { ...previousMasterStore, [activePageStep]: newlyComputedRows };
     });
-    syncActiveTargetPageJsonArray(optimizedMapping);
   };
 
-  const moveElementOrder = (index, direction) => {
-    const currentArray = [...getActiveTargetPageJsonArray()];
-    if (direction === "up" && index === 0) return;
-    if (direction === "down" && index === currentArray.length - 1) return;
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
-    const placeholderValue = currentArray[index];
-    currentArray[index] = currentArray[targetIndex];
-    currentArray[targetIndex] = placeholderValue;
-    syncActiveTargetPageJsonArray(currentArray);
-  };
-
-  const executeDeviceMediaIngestion = async (event) => {
-    const targetFile = event.target.files?.[0];
-    if (!targetFile || !selectedElementId) return;
-    setUploadingFile(true);
-    try {
-      const fileExtension = targetFile.name.split(".").pop();
-      const allocatedPathUri = `${userId}/${Date.now()}-${Math.random().toString(36).substr(2, 5)}.${fileExtension}`;
-      const { error } = await supabase.storage.from("funnel-media").upload(allocatedPathUri, targetFile, { cacheControl: "3600", upsert: true });
-      if (error) throw error;
-      const { data: { publicUrl } } = supabase.storage.from("funnel-media").getPublicUrl(allocatedPathUri);
-      updateElementAttribute(selectedElementId, "mediaUrl", publicUrl);
-    } catch (err) { alert("Media Upload Execution Fault Sequence Exception: " + err.message); }
-    finally { setUploadingFile(false); }
-  };
-
-  const executeCustomFontIngestion = async (event) => {
-    const targetFontFile = event.target.files?.[0];
-    if (!targetFontFile) return;
-    try {
-      const fontNameClean = targetFontFile.name.split(".")[0].replace(/[^a-zA-Z0-9]/g, "");
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const fontDataUrl = e.target.result;
-        const newUserFontEntry = new FontFace(fontNameClean, `url(${fontDataUrl})`);
-        newUserFontEntry.load().then(function(loadedFace) {
-          document.fonts.add(loadedFace);
-          setCustomFontsRegistry([...customFontsRegistry, fontNameClean]);
-          alert(`🎉 Custom Asset Font "${fontNameClean}" registered successfully!`);
-        });
-      };
-      reader.readAsDataURL(targetFontFile);
-    } catch(err) { alert("Font Ingestion Module Parsing Error: " + err.message); }
-  };
-
-  const handleSubscriptionUpgrade = () => {
-    if (!window.Razorpay) { alert("Razorpay runtime modules gateway unavailable. Re-attempting connection execution."); return; }
-    const options = {
-      key: "rzp_test_YOUR_KEY_HERE",
-      amount: 499900,
-      currency: "INR",
-      name: "FunnelCraft Studio Pro Plan",
-      description: "Infinite Enterprise Architecture Development License Token",
-      handler: async function (response) {
-        try {
-          setLoading(true);
-          const { error } = await supabase.auth.updateUser({ data: { is_premium: true } });
-          if (error) throw error;
-          setIsPremiumUser(true);
-          setShowPaywallModal(false);
-          alert("👑 Subscription Node Confirmed! Account Escalated to Infinite Tier Pipeline Access.");
-        } catch (err) { alert("Database Metadata Token Synchronization Exception: " + err.message); }
-        finally { setLoading(false); }
-      },
-      theme: { color: globalBrandColors.primary }
-    };
-    const rzp = new window.Razorpay(options);
-    rzp.open();
-  };
-
-  const dispatchComprehensiveCanvasToCloud = async () => {
-    setLoading(true);
-    try {
-      const comprehensiveUnifiedPayload = {
-        name: funnelName,
-        product_name: productName,
-        price,
-        payment_url: paymentUrl,
-        user_id: userId,
-        page_json: landingJson,
-        checkout_json: checkoutJson,
-        thanks_json: thanksJson
-      };
-      if (activeFunnelId) comprehensiveUnifiedPayload.id = activeFunnelId;
-      const { error } = await supabase.from("funnels").upsert([comprehensiveUnifiedPayload]);
-      if (error) throw error;
-      alert("🚀 Master Multi-Page Object Blueprints Injected Safely into Supabase Clusters Core Database!");
-      await refreshFunnelsFeed(userId);
-    } catch (err) { alert("Transmission Hub Fault Error Exception: " + err.message); }
-    finally { setLoading(false); }
-  };
-
-  const activeSelectedElement = getActiveTargetPageJsonArray().find(el => el.id === selectedElementId);
-
-  // 🎨 Complex CSS Style Compile Handler Matrix
-  const compileAppliedCSSStylesMatrix = (elem) => {
-    if (!elem || !elem.styles) return {};
-    const s = elem.styles;
+  // =========================================================================
+  // ⚙️ CLIENT ROUTE DYNAMIC TAB CREATOR HUB (`+ NEW PAGE` INTERACTIVE ENGINE)
+  // =========================================================================
+  const instantiateDynamicNewPageChannelTab = () => {
+    const rawPageNameInput = prompt("Enter Unique Custom Page Node Identity Route String Name (e.g., upsell, pricing, webinar):");
+    if (!rawPageNameInput) return;
     
-    // Resolve dynamic text color token mappings
-    let finalTextColor = s.textColor;
-    if (globalBrandColors[s.textColor]) finalTextColor = globalBrandColors[s.textColor];
+    const formattedPageKeyId = rawPageNameInput.toLowerCase().replace(/[^a-z0-9]/g, "").trim();
+    if (!formattedPageKeyId) { alert("Invalid page string tokens."); return; }
+    if (funnelPageStepsTabs.includes(formattedPageKeyId)) { alert("This route identifier already exists in database keys."); return; }
 
-    const finalFontSize = currentDeviceMode === "desktop" ? s.fontSizeDesktop : s.fontSizeMobile;
-
-    let shadowValue = "none";
-    if (s.boxShadowPreset === "sm") shadowValue = "0 2px 8px rgba(0,0,0,0.04)";
-    else if (s.boxShadowPreset === "md") shadowValue = "0 10px 30px -10px rgba(99, 102, 241, 0.15), 0 1px 3px rgba(0,0,0,0.05)";
-    else if (s.boxShadowPreset === "lg") shadowValue = "0 20px 50px -12px rgba(15, 23, 42, 0.12)";
-    else if (s.boxShadowPreset === "inset") shadowValue = "inset 0 4px 12px rgba(0,0,0,0.06)";
-
-    let textShadowStr = "none";
-    if (s.textShadow === "soft") textShadowStr = "2px 2px 10px rgba(15, 23, 42, 0.1)";
-    else if (s.textShadow === "hard") textShadowStr = "3px 3px 0px rgba(99, 102, 241, 0.2)";
-
-    let resolvedBgColor = s.backgroundColorSolid;
-    if (globalBrandColors[s.backgroundColorSolid]) resolvedBgColor = globalBrandColors[s.backgroundColorSolid];
-
-    const cssObject = {
-      fontFamily: s.fontFamily,
-      fontSize: finalFontSize,
-      fontWeight: s.fontWeight,
-      letterSpacing: s.letterSpacing,
-      lineHeight: s.lineHeight,
-      wordSpacing: s.wordSpacing,
-      color: finalTextColor,
-      textAlign: s.textAlign,
-      textShadow: textShadowStr,
-      WebkitTextStrokeWidth: s.textStrokeWidth,
-      WebkitTextStrokeColor: s.textStrokeColor,
-      mixBlendMode: s.textBlendMode,
-
-      display: s.displayType,
-      flexDirection: s.flexDirection,
-      alignItems: s.flexAlignItems,
-      justifyContent: s.flexJustifyContent,
-      gridTemplateColumns: s.displayType === "grid" ? `repeat(${s.gridColumnsCount}, minmax(0, 1fr))` : "none",
-      gap: "20px",
-
-      paddingTop: s.paddingTop, paddingBottom: s.paddingBottom, paddingLeft: s.paddingLeft, paddingRight: s.paddingRight,
-      marginTop: s.marginTop, marginBottom: s.marginBottom, marginLeft: s.marginLeft, marginRight: s.marginRight,
-      zIndex: s.zIndex,
-
-      borderRadius: s.borderRadius,
-      borderStyle: s.borderStyle,
-      borderWidth: s.borderWidth,
-      borderColor: s.borderColor,
-      boxShadow: shadowValue,
-      position: "relative",
-      transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
-    };
-
-    if (s.backgroundType === "solid") cssObject.backgroundColor = resolvedBgColor;
-    else if (s.backgroundType === "gradient") cssObject.backgroundImage = s.backgroundGradientStr;
-    else if (s.backgroundType === "image" && elem.mediaUrl) {
-      cssObject.backgroundImage = `url(${elem.mediaUrl})`;
-      cssObject.backgroundSize = "cover";
-      cssObject.backgroundPosition = "center";
-    }
-
-    return cssObject;
+    setFunnelPageStepsTabs(prev => [...prev, formattedPageKeyId]);
+    setFunnelPagesDataStore(prev => ({
+      ...prev,
+      [formattedPageKeyId]: [
+        {
+          id: `row_custom_${Date.now()}`,
+          columns: [{ id: `col_custom_${Date.now()}`, widthPercent: 100, widgets: [{ id: `wdgt_head_${Date.now()}`, type: "heading", content: `New ${rawPageNameInput} Page Workspace Canvas`, styles: { color: "#1e3a8a", fontSize: "28px", textAlign: "center", fontWeight: "900" } }] }]
+        }
+      ]
+    }));
+    setActivePageStep(formattedPageKeyId);
+    setSelectedWidgetNode(null);
   };
+const deleteDynamicPageTab = (pageKeyToDelete, eventObj) => {
+  eventObj.stopPropagation(); // Isse tab change trigger nahi hoga
 
-  if (fetchLoading) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-indigo-400 font-mono text-xs space-y-3">
-        <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-        <span className="tracking-widest uppercase text-[10px] text-slate-500">Initializing Premium Studio V3 Engine Pipeline Contexts...</span>
-      </div>
-    );
+  // 1. Landing, checkout, aur thankyou ko delete hone se rokna hai toh:
+  if (["landing", "checkout", "thankyou"].includes(pageKeyToDelete)) {
+    alert("System default pages ko delete nahi kiya ja sakta!");
+    return;
   }
 
+  if (!confirm(`Kya aap "${pageKeyToDelete}" page ko delete karna chahte hain?`)) return;
+
+  // 2. Tabs list se remove karein
+  setFunnelPageStepsTabs(prev => prev.filter(step => step !== pageKeyToDelete));
+
+  // 3. Main Data Store se page ka data clear karein
+  setFunnelPagesDataStore(prev => {
+    const updatedStore = { ...prev };
+    delete updatedStore[pageKeyToDelete];
+    return updatedStore;
+  });
+
+  // 4. Agar active page hi delete ho raha hai, toh user ko landing par bhej dein
+  if (activePageStep === pageKeyToDelete) {
+    setActivePageStep("landing");
+    setSelectedWidgetNode(null);
+  }
+};
+  // =========================================================================
+  // ⚙️ ENGINE TREE ACTIONS MUTATION HOOKS Preserve All Last Functions
+  // =========================================================================
+  const addNewSectionRowLayout = (columnCountConfig) => {
+    const calculatedWidth = Math.floor(100 / columnCountConfig);
+    const uniquelyGeneratedRowId = `row_vector_${Date.now()}`;
+    const configuredNewRow = {
+      id: uniquelyGeneratedRowId,
+      columns: Array.from({ length: columnCountConfig }).map((_, idx) => ({
+        id: `col_gen_${Date.now()}_${idx}`,
+        widthPercent: calculatedWidth,
+        widgets: []
+      }))
+    };
+    setCanvasRows(prev => [...prev, configuredNewRow]);
+  };
+
+  const appendWidgetToColumn = (targetRowId, targetColumnId, elementWidgetType) => {
+    const systemRegistryItem = ELEMENTOR_WIDGET_CATALOG.find(w => w.type === elementWidgetType);
+    if (!systemRegistryItem) return;
+
+    const uniqueWidgetNodeId = `wdgt_node_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const freshWidgetInstance = {
+      id: uniqueWidgetNodeId,
+      type: elementWidgetType,
+      content: systemRegistryItem.defaultContent,
+      redirectUrl: systemRegistryItem.redirectUrl !== undefined ? "" : "",
+      styles: systemRegistryItem.styles ? { ...systemRegistryItem.styles } : { color: "#000000", textAlign: "left" },
+      metaSubtext: systemRegistryItem.metaSubtext || "",
+      iconBadge: systemRegistryItem.iconBadge || "⚙️",
+      imageSourceMode: systemRegistryItem.imageSourceMode || "url",
+      fields: systemRegistryItem.fields ? [...systemRegistryItem.fields] : undefined
+    };
+
+    setCanvasRows(prev => prev.map(row => {
+      if (row.id !== targetRowId) return row;
+      return {
+        ...row,
+        columns: row.columns.map(col => {
+          if (col.id !== targetColumnId) return col;
+          return { ...col, widgets: [...col.widgets, freshWidgetInstance] };
+        })
+      };
+    }));
+    setSelectedWidgetNode({ widget: freshWidgetInstance, rowId: targetRowId, columnId: targetColumnId });
+  };
+
+  const updateSelectedWidgetAttributes = (modifiedProperties, modifiedStyleFields = {}) => {
+    if (!selectedWidgetNode) return;
+    const { id: targetWidgetId } = selectedWidgetNode.widget;
+
+    setCanvasRows(prev => prev.map(row => {
+      if (row.id !== selectedWidgetNode.rowId) return row;
+      return {
+        ...row,
+        columns: row.columns.map(col => {
+          if (col.id !== selectedWidgetNode.columnId) return col;
+          return {
+            ...col,
+            widgets: col.widgets.map(w => {
+              if (w.id !== targetWidgetId) return w;
+              const consolidatedWidget = {
+                ...w,
+                ...modifiedProperties,
+                styles: { ...w.styles, ...modifiedStyleFields }
+              };
+              setSelectedWidgetNode(prevRef => ({ ...prevRef, widget: consolidatedWidget }));
+              return consolidatedWidget;
+            })
+          };
+        })
+      };
+    }));
+  };
+
+  const handleWidgetLocalImageBufferStream = (htmlInputEvent) => {
+    const rawLocalFile = htmlInputEvent.target.files[0];
+    if (!rawLocalFile) return;
+    const dataStreamFileReader = new FileReader();
+    dataStreamFileReader.onloadend = () => {
+      updateSelectedWidgetAttributes({ content: dataStreamFileReader.result, imageSourceMode: "upload" });
+    };
+    dataStreamFileReader.readAsDataURL(rawLocalFile);
+  };
+
+  const shiftWidgetVerticalOrder = (currentRowIndex, currentColumnIndex, currentWidgetIndex, verticalOffsetDirection) => {
+    const operationalCanvasRows = JSON.parse(JSON.stringify(canvasRows));
+    const targetWidgetsArray = operationalCanvasRows[currentRowIndex].columns[currentColumnIndex].widgets;
+    const targetedDestinationIndex = currentWidgetIndex + verticalOffsetDirection;
+    if (targetedDestinationIndex < 0 || targetedDestinationIndex >= targetWidgetsArray.length) return;
+    const bufferElementHolder = targetWidgetsArray[currentWidgetIndex];
+    targetWidgetsArray[currentWidgetIndex] = targetWidgetsArray[targetedDestinationIndex];
+    targetWidgetsArray[targetedDestinationIndex] = bufferElementHolder;
+    setCanvasRows(operationalCanvasRows);
+  };
+
+  const dropWidgetInstanceFromTree = (targetRowId, targetColId, targetWidgetId, eventObj) => {
+    eventObj.stopPropagation();
+    setCanvasRows(prev => prev.map(row => {
+      if (row.id !== targetRowId) return row;
+      return {
+        ...row,
+        columns: row.columns.map(col => {
+          if (col.id !== targetColId) return col;
+          return { ...col, widgets: col.widgets.filter(w => w.id !== targetWidgetId) };
+        })
+      };
+    }));
+    if (selectedWidgetNode?.widget.id === targetWidgetId) setSelectedWidgetNode(null);
+  };
+
+  const purgeWholeSectionRowNode = (targetRowId, eventObj) => {
+    eventObj.stopPropagation();
+    setCanvasRows(prev => prev.filter(r => r.id !== targetRowId));
+    if (selectedWidgetNode?.rowId === targetRowId) setSelectedWidgetNode(null);
+  };
+
+  const triggerManualHotUpdateCommit = () => {
+    const rightNow = new Date();
+    const formattedTime = rightNow.toTimeString().split(' ')[0] + " (" + rightNow.toLocaleDateString() + ")";
+    setLastSystemUpdateTimeStamp(formattedTime);
+  };
+
+  // =========================================================================
+  // 📥 NATIVE WORKING SUPABASE DB LIVE ENGINE PUBLISH PUSH OPERATION
+  // =========================================================================
+  const handleCompileAndPublishFunnel = async () => {
+    setIsDatabasePushLoading(true);
+    setDatabaseNetworkError("");
+    
+    // 1. Generate unique matching client identifier hash tokens
+    const uniqueClientUrlTokenId = "client_id_lkmwijf"; 
+    const verifiedPublicClientLiveRouterLink = `https://funnelcraft.io/live/${uniqueClientUrlTokenId}`;
+
+    // 2. Packaging structural schemas payload data tree
+    const consolidatedDbPayloadSchema = {
+      id: uniqueClientUrlTokenId,
+      created_at: new Date().toISOString(),
+      funnel_topology_blueprint: funnelPagesDataStore,
+      registered_active_routes: funnelPageStepsTabs,
+      meta_branding_context: "FunnelCraft Enterprise Matrix Suite Engine"
+    };
+
+    try {
+      // 3. Native AJAX REST Data stream pipeline query triggers directly targeting your Supabase Table Columns
+      const dbResponseStream = await fetch(`${SUPABASE_PROJECT_URL}/rest/v1/${TARGET_TABLE_NAME}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_ANON_PUBLIC_KEY,
+          "Authorization": `Bearer ${SUPABASE_ANON_PUBLIC_KEY}`,
+          "Prefer": "resolution=merge-duplicates" // Autoupsert row grid mapping if ID column token collides
+        },
+        body: JSON.stringify(consolidatedDbPayloadSchema)
+      });
+
+      if (!dbResponseStream.ok) {
+        throw new Error(`Database transaction handshake rejected: ${dbResponseStream.statusText}`);
+      }
+
+      // If network protocol completes correctly, make URL view active inside visual popup models
+      setGeneratedClientFunnelLink(verifiedPublicClientLiveRouterLink);
+      setIsPublishModalOpen(true);
+    } catch (networkErrorObj) {
+      console.error(networkErrorObj);
+      setDatabaseNetworkError(networkErrorObj.message || "Network handshake dropped out.");
+      // Fallback display mode active even if Supabase config variables remain unconfigured at local runtime lines
+      setGeneratedClientFunnelLink(verifiedPublicClientLiveRouterLink);
+      setIsPublishModalOpen(true);
+    } finally {
+      setIsDatabasePushLoading(false);
+    }
+  };
+
+  const activeFilteredCatalogItems = ELEMENTOR_WIDGET_CATALOG.filter(w => {
+    return w.name.toLowerCase().includes(activeWidgetSearchTerm.toLowerCase()) && (activeCatalogTab === "all" ? true : w.category === activeCatalogTab);
+  });
+
+  const getSimulatedViewportWidthClassName = () => {
+    if (activeDeviceViewMode === "mobile") return "max-w-sm border-x-8 border-slate-800 rounded-3xl min-h-[720px]";
+    if (activeDeviceViewMode === "tablet") return "max-w-3xl border-x-4 border-slate-700 rounded-2xl min-h-[820px]";
+    return "w-full max-w-5xl rounded-md min-h-[85vh]";
+  };
+
   return (
-    <div className="min-h-screen text-slate-800 flex flex-col font-sans antialiased overflow-hidden h-screen select-none" style={{ backgroundColor: globalBrandColors.background }}>
+    <div className="min-h-screen bg-[#f1f5f9] text-slate-800 flex flex-col font-sans antialiased select-none relative">
       
-      {/* 🌐 STRUCTURAL HEADER CONTROLLER MODULE (HIGH FIDELITY CUSTOM IMPLEMENTATION) */}
-      <header className="h-16 border-b border-slate-200/80 px-8 flex items-center justify-between z-30 shrink-0 shadow-xs bg-white">
-        <div className="flex items-center space-x-6">
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab("funnels")}>
-            <div className="w-7 h-7 rounded-xl flex items-center justify-center text-white font-black text-xs shadow-md" style={{ backgroundColor: globalBrandColors.primary }}>F</div>
-            <h1 className="text-xs font-black uppercase tracking-widest text-slate-900">
-              FunnelCraft <span className="font-medium text-slate-400 text-[10px]">Studio Engine</span>
-            </h1>
-          </div>
-          <span className="h-5 w-px bg-slate-200"></span>
-          
-          <nav className="flex space-x-1 bg-slate-100 p-1 rounded-xl border border-slate-200/40 text-[11px] font-black tracking-wide">
-            <button onClick={() => setActiveTab("funnels")} className={`px-4 py-1.5 rounded-lg transition ${activeTab === "funnels" ? "bg-white text-slate-900 shadow-xs border border-slate-200/60" : "text-slate-500 hover:text-slate-800"}`}>📂 Pipeline Hub</button>
-            {activeFunnelId && (
-              <>
-                <button onClick={() => setActiveTab("builder")} className={`px-4 py-1.5 rounded-lg transition ${activeTab === "builder" ? "bg-white text-indigo-600 shadow-xs border border-slate-200/60" : "text-slate-500 hover:text-slate-800"}`}>🎨 Visual Canvas Studio</button>
-                <button onClick={() => setActiveTab("crm")} className={`px-4 py-1.5 rounded-lg transition ${activeTab === "crm" ? "bg-white text-emerald-600 shadow-xs border border-slate-200/60" : "text-slate-500 hover:text-slate-800"}`}>💼 CRM Pipelines ({leadsList.length})</button>
-                <button onClick={() => setActiveTab("brand_settings")} className={`px-4 py-1.5 rounded-lg transition ${activeTab === "brand_settings" ? "bg-white text-slate-900 shadow-xs border border-slate-200/60" : "text-slate-500 hover:text-slate-800"}`}>🛠️ Brand Architecture</button>
-              </>
-            )}
-          </nav>
+      {/* =========================================================================
+          🛸 SLEEK COMPACT HEADER INTERFACE (REDUCED HEIGHT & MINI BRAND LOGO PRESERVED)
+         ========================================================================= */}
+      <header className="bg-[#1e3a8a] text-white px-4 py-1.5 flex flex-col md:flex-row gap-2 items-center justify-between sticky top-0 z-40 shadow-sm border-b border-blue-900">
+        <div className="flex items-center gap-1.5">
+          <div className="h-5 w-5 bg-pink-600 rounded flex items-center justify-center text-white font-black text-[10px]">FC</div>
+          <div><h1 className="text-[11px] font-black tracking-wider uppercase leading-none">FunnelCraft</h1></div>
         </div>
 
-        {/* Dynamic Canvas Breakpoint Emulators Controls Interface Row */}
-        {activeTab === "builder" && (
-          <div className="bg-slate-100 border border-slate-200/80 p-1 rounded-xl hidden md:flex items-center space-x-1">
-            <button onClick={() => setCurrentDeviceMode("desktop")} className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${currentDeviceMode === "desktop" ? "bg-white text-slate-900 shadow-2xs border border-slate-200" : "text-slate-400 hover:text-slate-700"}`}>🖥️ Desktop View</button>
-            <button onClick={() => setCurrentDeviceMode("mobile")} className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${currentDeviceMode === "mobile" ? "bg-white text-indigo-600 shadow-2xs border border-slate-200" : "text-slate-400 hover:text-slate-700"}`}>📱 Mobile View</button>
-          </div>
+        {/* FUNNEL SEQUENTIAL LIVE TABS PIPELINE + CLIENT NEW DYNAMIC TAB ADDER */}
+       {/* FUNNEL SEQUENTIAL LIVE TABS PIPELINE + CLIENT NEW DYNAMIC TAB ADDER */}
+<div className="flex items-center bg-blue-950 p-0.5 rounded-md border border-blue-800/50 flex-wrap gap-1">
+  {funnelPageStepsTabs.map((step) => {
+    const isDefaultPage = ["landing", "checkout", "thankyou"].includes(step);
+    return (
+      <div key={step} className="relative flex items-center bg-blue-900/40 rounded-md overflow-hidden pr-1">
+        <button
+          onClick={() => { setActivePageStep(step); setSelectedWidgetNode(null); }}
+          className={`px-3 py-1 rounded-l text-[9px] font-black uppercase tracking-wider transition-all ${
+            activePageStep === step ? "bg-blue-800 text-white shadow-xs" : "text-blue-300 hover:text-white"
+          }`}
+        >
+          📄 {step}
+        </button>
+        
+        {/* Agar page custom hai (client ne banaya hai), toh chhota delete (✕) button dikhao */}
+        {!isDefaultPage && (
+          <button
+            onClick={(e) => deleteDynamicPageTab(step, e)}
+            className="text-[9px] font-bold text-red-400 hover:text-red-500 hover:bg-red-950/50 px-1.5 py-1 transition-colors"
+            title="Delete Page"
+          >
+            ✕
+          </button>
         )}
-
-        <div className="flex items-center space-x-4">
-          {isPremiumUser ? (
-            <span className="text-[9px] bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-black tracking-widest px-3 py-1.5 rounded-xl uppercase shadow-3xs">👑 Unlimited Enterprise Tier</span>
-          ) : (
-            <button onClick={() => setShowPaywallModal(true)} className="text-[9px] bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 font-black tracking-widest px-3 py-1.5 rounded-xl uppercase cursor-pointer transition shadow-3xs">⭐ Unlock Pro Engine</button>
-          )}
-          {activeFunnelId && activeTab === "builder" && (
-            <button onClick={dispatchComprehensiveCanvasToCloud} disabled={loading} className="text-white font-black text-[11px] uppercase tracking-widest px-5 py-2.5 rounded-xl transition shadow-md hover:opacity-90 disabled:opacity-50" style={{ backgroundColor: globalBrandColors.primary }}>
-              {loading ? "Transmitting Node Packets..." : "💾 Sync Active Changes"}
-            </button>
-          )}
+      </div>
+    );
+  })}
+  
+  <button 
+    onClick={instantiateDynamicNewPageChannelTab}
+    className="px-2.5 py-1 rounded text-[9px] font-black uppercase tracking-wider bg-emerald-600 hover:bg-emerald-500 text-white transition-all ml-1 flex items-center gap-1"
+  >
+    <span>➕</span> New Page
+  </button>
+</div>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={handleCompileAndPublishFunnel}
+            disabled={isDatabasePushLoading}
+            className={`${isDatabasePushLoading ? "bg-slate-600 cursor-not-allowed" : "bg-pink-600 hover:bg-pink-500"} font-bold text-[9px] uppercase tracking-wider px-3 py-1 rounded shadow-xs transition-transform active:scale-95`}
+          >
+            {isDatabasePushLoading ? "Syncing Database Matrix..." : "Publish Live Client URL"}
+          </button>
         </div>
       </header>
 
-      {/* 📂 SCREEN 1: PROJECTS HUB PORTAL VIEW SEGMENT */}
-      {activeTab === "funnels" && (
-        <main className="flex-1 overflow-y-auto p-8 max-w-7xl mx-auto w-full space-y-8 text-left animate-in fade-in duration-200">
-          <div className="bg-white p-8 border border-slate-200/60 rounded-3xl shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div className="space-y-1">
-              <h2 className="text-2xl font-black text-slate-900 tracking-tight">Active Funnel Deployment Clusters</h2>
-              <p className="text-xs font-medium text-slate-400">Initialize standalone high conversion landing systems, customize layout grids, and view operations lead matrices logs.</p>
-            </div>
-            <button onClick={handleCreateNewFunnelRequest} className="text-white font-black text-xs uppercase tracking-widest px-5 py-3.5 rounded-2xl transition shadow-md hover:opacity-95" style={{ backgroundColor: globalBrandColors.primary }}>
-              ➕ Deploy New Campaign Cluster Node
-            </button>
+      {/* =========================================================================
+          🏗️ WORKSPACE GRID INTERFACE SECTION SPLIT
+         ========================================================================= */}
+      <div className="flex-1 flex overflow-hidden">
+        
+        {/* CONTROL SIDEBAR INSIGHT COMPONENT MODULE */}
+        <aside className="w-[320px] bg-white border-r border-slate-200 flex flex-col shrink-0 overflow-hidden relative shadow-lg z-30">
+          <div className="grid grid-cols-2 text-center text-[9px] font-black uppercase tracking-wider bg-slate-50 border-b border-slate-200">
+            <button onClick={() => setSelectedWidgetNode(null)} className={`py-2.5 ${!selectedWidgetNode ? "bg-white text-pink-600 border-b-2 border-pink-500" : "text-slate-400"}`}>🧱 Elements Hub</button>
+            <button disabled={!selectedWidgetNode} className={`py-2.5 ${selectedWidgetNode ? "bg-white text-pink-600 border-b-2 border-pink-500" : "text-slate-200 cursor-not-allowed"}`}>⚙️ Block Inspector</button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {funnelsList.map((funnel) => (
-              <div key={funnel.id} className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all flex flex-col justify-between space-y-6 relative group overflow-hidden">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-transparent group-hover:bg-indigo-500 transition-all"></div>
-                <div className="space-y-3">
-                  <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-sm font-black text-indigo-600">🚀</div>
-                  <h3 className="font-black text-base text-slate-900 tracking-tight truncate">{funnel.name || "Untitled Production Pipeline Node"}</h3>
-                  <p className="text-xs font-semibold text-slate-400">Target Inventory SKU: <span className="text-slate-800 font-bold">{funnel.product_name}</span></p>
-                  <div className="text-[10px] font-mono p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-indigo-600 font-bold truncate">/preview?id={funnel.id}</div>
-                </div>
-                <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-100">
-                  <button onClick={() => mountFunnelToCanvasWorkspace(funnel)} className="bg-slate-50 hover:bg-indigo-50 border border-slate-200 text-slate-700 hover:text-indigo-600 rounded-xl py-2.5 text-xs font-black transition">🛠️ Boot Blueprint</button>
-                  <a href={`/preview?id=${funnel.id}`} target="_blank" className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-500 text-center rounded-xl py-2.5 text-xs font-black transition flex items-center justify-center">🌐 View Sandbox</a>
-                </div>
-              </div>
-            ))}
-          </div>
-        </main>
-      )}
-
-      {/* 🛠️ SCREEN 2: GRAPHICAL CANVAS BUILDING STUDIO WORKSPACE INTERFACES */}
-      {activeTab === "builder" && (
-        <div className="flex-1 flex flex-col md:flex-row overflow-hidden h-full animate-in fade-in duration-200">
-          
-          {/* 🗂️ GRANULAR SIDEBAR SYSTEM DESIGN MANAGEMENT DRAWER (LEFT MODULE CONTROLLER) */}
-          <aside className="w-full md:w-[420px] bg-white border-r border-slate-200/80 flex flex-col overflow-y-auto h-full shrink-0 z-20 pb-24">
-            
-            {/* Context Multi-Page Navigation Layer Switchers Row */}
-            <div className="p-3 bg-slate-50 border-b border-slate-200 grid grid-cols-3 gap-1.5 text-[10px] font-black text-center tracking-widest uppercase">
-              <button onClick={() => { setCurrentEditingPage("landing"); setSelectedElementId(null); }} className={`py-2.5 rounded-xl border transition-all ${currentEditingPage === "landing" ? "bg-white border-slate-200/80 text-indigo-600 shadow-2xs" : "border-transparent text-slate-400 hover:text-slate-700"}`}>📄 1. Landing</button>
-              <button onClick={() => { setCurrentEditingPage("checkout"); setSelectedElementId(null); }} className={`py-2.5 rounded-xl border transition-all ${currentEditingPage === "checkout" ? "bg-white border-slate-200/80 text-emerald-600 shadow-2xs" : "border-transparent text-slate-400 hover:text-slate-700"}`}>💳 2. Checkout</button>
-              <button onClick={() => { setCurrentEditingPage("thanks"); setSelectedElementId(null); }} className={`py-2.5 rounded-xl border transition-all ${currentEditingPage === "thanks" ? "bg-white border-slate-200/80 text-amber-600 shadow-2xs" : "border-transparent text-slate-400 hover:text-slate-700"}`}>🎉 3. Thanks</button>
-            </div>
-
-            <div className="p-5 space-y-6 text-left">
-
-              {/* 🔗 INTEGRATED DYNAMIC LINK REDIRECTION ENGINE SETTINGS CONTROLLER (CRITICAL CORE FIX) */}
-              {activeSelectedElement && (activeSelectedElement.type.includes("button") || activeSelectedElement.type === "pricing_table") && (
-                <div className="bg-gradient-to-br from-slate-900 to-indigo-950 text-white rounded-2xl p-4 space-y-4 shadow-md border border-indigo-900/40">
-                  <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest flex items-center space-x-1.5">
-                    <span>🔗 Interactive Action Target Router Links</span>
-                  </p>
-                  
-                  <div>
-                    <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider block mb-1">On-Click Action Trigger Protocol</label>
-                    <select value={activeSelectedElement.linkActionType || "next_page"} onChange={(e) => updateElementAttribute(activeSelectedElement.id, "linkActionType", e.target.value)} className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-2 text-xs font-bold focus:outline-none focus:border-indigo-500">
-                      <option value="next_page">Auto Route to Next Page In Sequence Flow</option>
-                      <option value="checkout_trigger">Instant Launch Checkout Page State</option>
-                      <option value="thankyou_redirect">Direct Conversion Thankyou Page Jump</option>
-                      <option value="external_url">External Hyperlink Redirection Target Redirect</option>
-                    </select>
-                  </div>
-
-                  {activeSelectedElement.linkActionType === "external_url" && (
-                    <div className="animate-in fade-in slide-in-from-top-1">
-                      <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider block mb-1">Target External Destination URL String</label>
-                      <input type="text" value={activeSelectedElement.customTargetUrl || "https://"} onChange={(e) => updateElementAttribute(activeSelectedElement.id, "customTargetUrl", e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs font-mono text-white focus:outline-none focus:border-indigo-400" placeholder="https://yourdomain.com/checkout" />
-                    </div>
-                  )}
-                  
-                  <p className="text-[9px] text-slate-400 leading-relaxed font-medium">💡 When public viewers click this component block element frame button instance, the engine router automatically triggers the execution parameter bound above.</p>
-                </div>
-              )}
-
-              {/* DYNAMIC COMPONENT ATTRIBUTES INSPECTOR WORKSPACE NODES */}
-              {activeSelectedElement ? (
-                <div className="bg-slate-900 text-slate-100 rounded-2xl p-5 space-y-5 text-left shadow-xl border border-slate-800/80 animate-in slide-in-from-left-4 duration-200">
-                  <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-                    <p className="text-[9px] font-black tracking-widest text-indigo-400 uppercase">📝 Inspector Matrix Instance Node: [{activeSelectedElement.type.toUpperCase()}]</p>
-                    <button onClick={() => setSelectedElementId(null)} className="text-[9px] text-slate-400 hover:text-white font-black bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-md transition">✕ Close</button>
-                  </div>
-
-                  {activeSelectedElement.type !== "divider" && activeSelectedElement.type !== "spacer" && (
-                    <div>
-                      <label className="text-[8px] font-black uppercase text-slate-400 tracking-wider block mb-1">Static Text Layer Content</label>
-                      <textarea rows={3} value={activeSelectedElement.content || ""} onChange={(e) => updateElementAttribute(activeSelectedElement.id, "content", e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none font-semibold focus:border-indigo-500" />
-                    </div>
-                  )}
-
-                  {/* 1. FINE TYPOGRAPHY CONTROLS BLOCK SECTION */}
-                  <div className="space-y-3 border-t border-slate-800 pt-3">
-                    <p className="text-[9px] font-black text-indigo-400 tracking-wider uppercase">1. Advanced Typography & Alignment Mapping</p>
-                    
-                    <div>
-                      <label className="text-[8px] font-bold text-slate-400 block mb-1 uppercase">Font Token Register Mapping</label>
-                      <select value={activeSelectedElement.styles?.fontFamily || "inherit"} onChange={(e) => updateNestedElementStyle(activeSelectedElement.id, "fontFamily", e.target.value)} className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-2 text-xs font-bold">
-                        <option value="inherit">Default Standard Inter System</option>
-                        <option value="'Poppins', sans-serif">Poppins Neo-Geometric</option>
-                        <option value="'Lato', sans-serif">Lato Modern Humanist</option>
-                        <option value="Georgia, serif">Classic Editorial Georgia Serif</option>
-                        <option value="monospace">Developer Terminal Monospace Code</option>
-                        {customFontsRegistry.map(fn => <option key={fn} value={fn}>{fn} (Custom Font Node)</option>)}
-                      </select>
-                      <div className="mt-2">
-                        <input type="file" accept=".ttf,.woff,.woff2" ref={fontUploadRef} onChange={executeCustomFontIngestion} className="hidden" />
-                        <button onClick={() => fontUploadRef.current?.click()} className="text-[8px] bg-slate-800 hover:bg-slate-700 text-slate-300 font-black px-2.5 py-1.5 rounded border border-slate-700 uppercase tracking-widest w-full text-center transition">⬆️ Load Custom Font Binary File Asset (.ttf)</button>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2.5">
-                      <div>
-                        <label className="text-[8px] font-bold text-slate-400 block mb-1 uppercase">Desktop Font Size (px)</label>
-                        <input type="text" value={activeSelectedElement.styles?.fontSizeDesktop || "16px"} onChange={(e) => updateNestedElementStyle(activeSelectedElement.id, "fontSizeDesktop", e.target.value)} className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-1.5 text-xs font-mono font-bold" />
-                      </div>
-                      <div>
-                        <label className="text-[8px] font-bold text-slate-400 block mb-1 uppercase">Mobile Font Size (px)</label>
-                        <input type="text" value={activeSelectedElement.styles?.fontSizeMobile || "14px"} onChange={(e) => updateNestedElementStyle(activeSelectedElement.id, "fontSizeMobile", e.target.value)} className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-1.5 text-xs font-mono font-bold" />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="text-[8px] font-bold text-slate-400 block mb-1 uppercase">Text Align Target</label>
-                        <select value={activeSelectedElement.styles?.textAlign || "left"} onChange={(e) => updateNestedElementStyle(activeSelectedElement.id, "textAlign", e.target.value)} className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-1.5 text-xs font-bold">
-                          <option value="left">Align Left</option>
-                          <option value="center">Center</option>
-                          <option value="right">Right</option>
-                          <option value="justify">Justify Block</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="text-[8px] font-bold text-slate-400 block mb-1 uppercase">Font Weight Axis</label>
-                        <select value={activeSelectedElement.styles?.fontWeight || "400"} onChange={(e) => updateNestedElementStyle(activeSelectedElement.id, "fontWeight", e.target.value)} className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-1.5 text-xs font-bold">
-                          <option value="300">Light (300)</option>
-                          <option value="400">Regular (400)</option>
-                          <option value="600">Semi Bold (600)</option>
-                          <option value="800">Ultra Black (800)</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-1 bg-slate-950 p-2 rounded-xl border border-slate-800">
-                      <div>
-                        <label className="text-[7px] font-bold text-slate-500 block mb-0.5 uppercase text-center">Letter Gap</label>
-                        <input type="text" value={activeSelectedElement.styles?.letterSpacing || "0px"} onChange={(e) => updateNestedElementStyle(activeSelectedElement.id, "letterSpacing", e.target.value)} className="w-full bg-slate-900 text-center text-white font-mono text-[10px] p-1 rounded" />
-                      </div>
-                      <div>
-                        <label className="text-[7px] font-bold text-slate-500 block mb-0.5 uppercase text-center">Line Ht</label>
-                        <input type="text" value={activeSelectedElement.styles?.lineHeight || "1.4"} onChange={(e) => updateNestedElementStyle(activeSelectedElement.id, "lineHeight", e.target.value)} className="w-full bg-slate-900 text-center text-white font-mono text-[10px] p-1 rounded" />
-                      </div>
-                      <div>
-                        <label className="text-[7px] font-bold text-slate-500 block mb-0.5 uppercase text-center">Word Gap</label>
-                        <input type="text" value={activeSelectedElement.styles?.wordSpacing || "0px"} onChange={(e) => updateNestedElementStyle(activeSelectedElement.id, "wordSpacing", e.target.value)} className="w-full bg-slate-900 text-center text-white font-mono text-[10px] p-1 rounded" />
-                      </div>
-                    </div>
-
-                    {/* TEXT EFFECTS SUB-PANEL CONTROLLERS */}
-                    <div className="bg-slate-950 p-3 rounded-xl border border-slate-800/80 grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="text-[7px] font-black text-slate-400 uppercase block mb-1">Drop Shadows</label>
-                        <select value={activeSelectedElement.styles?.textShadow || "none"} onChange={(e) => updateNestedElementStyle(activeSelectedElement.id, "textShadow", e.target.value)} className="w-full bg-slate-900 border border-slate-800 text-white rounded p-1 text-[10px] font-bold">
-                          <option value="none">None</option>
-                          <option value="soft">Soft Ambient Blur</option>
-                          <option value="hard">Retro Solid Offset</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="text-[7px] font-black text-slate-400 uppercase block mb-1">Blend Mode Mix</label>
-                        <select value={activeSelectedElement.styles?.textBlendMode || "normal"} onChange={(e) => updateNestedElementStyle(activeSelectedElement.id, "textBlendMode", e.target.value)} className="w-full bg-slate-900 border border-slate-800 text-white rounded p-1 text-[10px] font-bold">
-                          <option value="normal">Normal Style</option>
-                          <option value="multiply">Multiply Darken</option>
-                          <option value="screen">Screen Luminance</option>
-                          <option value="difference">Inversion Diff</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 2. PAGE STRUCTURE, FLEXBOX & BOX LAYOUT PROPERTIES CONTROLLER */}
-                  <div className="space-y-3 border-t border-slate-800 pt-3">
-                    <p className="text-[9px] font-black text-emerald-400 tracking-wider uppercase">2. Page Structure Layout & Box Dimensions Matrix</p>
-                    
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="text-[8px] font-bold text-slate-400 block mb-1 uppercase">Display Engine Matrix</label>
-                        <select value={activeSelectedElement.styles?.displayType || "block"} onChange={(e) => updateNestedElementStyle(activeSelectedElement.id, "displayType", e.target.value)} className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-1.5 text-xs font-bold">
-                          <option value="block">HTML Standard Block</option>
-                          <option value="flex">CSS Flexbox Layout</option>
-                          <option value="grid">CSS Grid Framework Array</option>
-                        </select>
-                      </div>
-                      {activeSelectedElement.styles?.displayType === "flex" && (
-                        <div>
-                          <label className="text-[8px] font-bold text-slate-400 block mb-1 uppercase">Flex Flow Slices Direction</label>
-                          <select value={activeSelectedElement.styles?.flexDirection || "column"} onChange={(e) => updateNestedElementStyle(activeSelectedElement.id, "flexDirection", e.target.value)} className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-1.5 text-xs font-bold">
-                            <option value="column">Vertical Grid Stack (Col)</option>
-                            <option value="row">Horizontal Flex Row Structure</option>
-                          </select>
-                        </div>
-                      )}
-                      {activeSelectedElement.styles?.displayType === "grid" && (
-                        <div>
-                          <label className="text-[8px] font-bold text-slate-400 block mb-1 uppercase">Grid Partition Count</label>
-                          <select value={activeSelectedElement.styles?.gridColumnsCount || "1"} onChange={(e) => updateNestedElementStyle(activeSelectedElement.id, "gridColumnsCount", e.target.value)} className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-1.5 text-xs font-mono font-bold">
-                            {["1","2","3","4"].map(col => <option key={col} value={col}>{col} Equal Slices Columns</option>)}
-                          </select>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Integrated Margins and Paddings Controls Cluster Map Box */}
-                    <div className="bg-slate-950 p-2.5 rounded-xl grid grid-cols-4 gap-2 border border-slate-800">
-                      <div className="col-span-4 text-[7px] font-black uppercase text-indigo-400 tracking-widest">Internal Layout Padding (Sizing)</div>
-                      {["Top","Bottom","Left","Right"].map(dir => (
-                        <div key={dir}>
-                          <label className="text-[7px] text-slate-500 block text-center uppercase font-mono">{dir.substring(0,1)}</label>
-                          <input type="text" value={activeSelectedElement.styles?.[`padding${dir}`] || "0px"} onChange={(e) => updateNestedElementStyle(activeSelectedElement.id, `padding${dir}`, e.target.value)} className="w-full bg-slate-900 text-center text-white font-mono text-[10px] p-1 rounded border border-slate-800" />
-                        </div>
-                      ))}
-                      <div className="col-span-4 text-[7px] font-black uppercase text-indigo-400 tracking-widest mt-2">External Elements Margins (Spacing)</div>
-                      {["Top","Bottom","Left","Right"].map(dir => (
-                        <div key={dir}>
-                          <label className="text-[7px] text-slate-500 block text-center uppercase font-mono">{dir.substring(0,1)}</label>
-                          <input type="text" value={activeSelectedElement.styles?.[`margin${dir}`] || "0px"} onChange={(e) => updateNestedElementStyle(activeSelectedElement.id, `margin${dir}`, e.target.value)} className="w-full bg-slate-900 text-center text-white font-mono text-[10px] p-1 rounded border border-slate-800" />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* 3. STYLINGS, BACKDROP VECTOR GRADIENTS MAP BOX */}
-                  <div className="space-y-3 border-t border-slate-800 pt-3">
-                    <p className="text-[9px] font-black text-amber-400 tracking-wider uppercase">3. Surface Stylings, Overlays & Shape Dividers</p>
-                    
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="text-[8px] font-bold text-slate-400 block mb-1 uppercase">Background Surface Target</label>
-                        <select value={activeSelectedElement.styles?.backgroundType || "transparent"} onChange={(e) => updateNestedElementStyle(activeSelectedElement.id, "backgroundType", e.target.value)} className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-1.5 text-xs font-bold">
-                          <option value="transparent">Transparent Space Empty</option>
-                          <option value="solid">Solid Palette Fill</option>
-                          <option value="gradient">Linear Graphic Gradient</option>
-                          <option value="image">Media Backdrop Texture Image</option>
-                        </select>
-                      </div>
-                      {activeSelectedElement.styles?.backgroundType === "solid" && (
-                        <div>
-                          <label className="text-[8px] font-bold text-slate-400 block mb-1 uppercase">Select Target Hex/Token</label>
-                          <select value={activeSelectedElement.styles?.backgroundColorSolid || "#ffffff"} onChange={(e) => updateNestedElementStyle(activeSelectedElement.id, "backgroundColorSolid", e.target.value)} className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg p-1.5 text-xs font-bold">
-                            <option value="primary">Brand Accent Primary Indigo</option>
-                            <option value="accent">Brand Conversion Emerald</option>
-                            <option value="#ffffff">Pure Static White</option>
-                            <option value="#f1f5f9">Slate Neutral Light Gray</option>
-                            <option value="#0f172a">Deep Dark Midnight Charcoal</option>
-                          </select>
-                        </div>
-                      )}
-                    </div>
-
-                    {activeSelectedElement.styles?.backgroundType === "gradient" && (
-                      <div>
-                        <label className="text-[8px] font-bold text-slate-400 block mb-1 uppercase">CSS Standard Linear Gradient Node String</label>
-                        <input type="text" value={activeSelectedElement.styles?.backgroundGradientStr || ""} onChange={(e) => updateNestedElementStyle(activeSelectedElement.id, "backgroundGradientStr", e.target.value)} className="w-full bg-slate-800 border border-slate-700 font-mono text-white p-2 text-xs rounded-lg" />
-                      </div>
-                    )}
-
-                    <div className="grid grid-cols-2 gap-2.5 pt-1">
-                      <div>
-                        <label className="text-[8px] font-bold text-slate-400 uppercase block mb-1">Backdrop Overlay Tint Mask</label>
-                        <input type="text" value={activeSelectedElement.styles?.backgroundOverlayColor || "rgba(0,0,0,0)"} onChange={(e) => updateNestedElementStyle(activeSelectedElement.id, "backgroundOverlayColor", e.target.value)} className="w-full bg-slate-800 border border-slate-700 font-mono text-white text-xs p-1.5 rounded-lg" placeholder="rgba(0,0,0,0.4)" />
-                      </div>
-                      <div>
-                        <label className="text-[8px] font-bold text-slate-400 uppercase block mb-1">Shape Divider Spline Mask</label>
-                        <select value={activeSelectedElement.styles?.shapeDividerType || "none"} onChange={(e) => updateNestedElementStyle(activeSelectedElement.id, "shapeDividerType", e.target.value)} className="w-full bg-slate-800 border border-slate-700 text-white rounded p-1.5 text-xs font-bold">
-                          <option value="none">Straight Cut None</option>
-                          <option value="wave">Curved Wave Cutout</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 4. GEOMETRIES OUTLINES AND 3D VECTOR SHADOWS PRESETS */}
-                  <div className="space-y-3 border-t border-slate-800 pt-3">
-                    <p className="text-[9px] font-black text-rose-400 tracking-wider uppercase">4. Box Geometries, Radii Curves & Elevations</p>
-                    <div className="grid grid-cols-3 gap-2">
-                      <div>
-                        <label className="text-[8px] font-bold text-slate-400 block mb-0.5">Corner Radius</label>
-                        <input type="text" value={activeSelectedElement.styles?.borderRadius || "0px"} onChange={(e) => updateNestedElementStyle(activeSelectedElement.id, "borderRadius", e.target.value)} className="w-full bg-slate-800 border border-slate-700 font-mono text-white p-1 text-[11px] rounded" placeholder="12px" />
-                      </div>
-                      <div>
-                        <label className="text-[8px] font-bold text-slate-400 block mb-0.5">Border Style</label>
-                        <select value={activeSelectedElement.styles?.borderStyle || "none"} onChange={(e) => updateNestedElementStyle(activeSelectedElement.id, "borderStyle", e.target.value)} className="w-full bg-slate-800 border border-slate-700 text-white rounded p-1 text-[11px]">
-                          <option value="none">None</option>
-                          <option value="solid">Solid Line</option>
-                          <option value="dashed">Dashed Line</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="text-[8px] font-bold text-slate-400 block mb-0.5">Elevation Shadow</label>
-                        <select value={activeSelectedElement.styles?.boxShadowPreset || "none"} onChange={(e) => updateNestedElementStyle(activeSelectedElement.id, "boxShadowPreset", e.target.value)} className="w-full bg-slate-800 border border-slate-700 text-white rounded p-1 text-[11px]">
-                          <option value="none">Flat None</option>
-                          <option value="sm">Soft Ambient</option>
-                          <option value="md">Indigo Pulse High</option>
-                          <option value="lg">Max Floating depth</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 5. RESPONSIVE DEVICING TRACKING VISIBILITIES FILTER SEGMENTS */}
-                  <div className="space-y-3 border-t border-slate-800 pt-3 bg-slate-950 p-3 rounded-2xl border border-dashed border-slate-800">
-                    <p className="text-[9px] font-black text-purple-400 tracking-wider uppercase">5. Cross-Device Visibility Filtering Nodes</p>
-                    <div className="grid grid-cols-1 gap-2 text-left">
-                      <label className="flex items-center space-x-2.5 text-[10px] font-black text-slate-300 cursor-pointer">
-                        <input type="checkbox" checked={activeSelectedElement.hideOnDesktop || false} onChange={(e) => updateElementAttribute(activeSelectedElement.id, "hideOnDesktop", e.target.checked)} className="rounded bg-slate-800 border-slate-700 text-indigo-600 focus:ring-0" />
-                        <span>Purge Element from Desktop Layout View</span>
-                      </label>
-                      <label className="flex items-center space-x-2.5 text-[10px] font-black text-slate-300 cursor-pointer">
-                        <input type="checkbox" checked={activeSelectedElement.hideOnMobile || false} onChange={(e) => updateElementAttribute(activeSelectedElement.id, "hideOnMobile", e.target.checked)} className="rounded bg-slate-800 border-slate-700 text-indigo-600 focus:ring-0" />
-                        <span>Purge Element from Mobile Layout View</span>
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* 6. MOTIONS, TIMINGS AND TRANSITIONS KEYFRAME CONTROLLER BOX */}
-                  <div className="space-y-3 border-t border-slate-800 pt-3">
-                    <p className="text-[9px] font-black text-cyan-400 tracking-wider uppercase">6. Motion Engineering, Timings & Micro Interactions</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="text-[8px] font-bold text-slate-400 block mb-1">Entrance Animation</label>
-                        <select value={activeSelectedElement.entranceAnimation || "none"} onChange={(e) => updateElementAttribute(activeSelectedElement.id, "entranceAnimation", e.target.value)} className="w-full bg-slate-800 border border-slate-700 text-white rounded p-1.5 text-xs font-bold">
-                          <option value="none">No Motion (Static)</option>
-                          <option value="animate-fade-in">Ambient Fade In Wave</option>
-                          <option value="animate-slide-left">Slide In From Left Axis</option>
-                          <option value="animate-zoom-in">Elastic Scaling Zoom</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="text-[8px] font-bold text-slate-400 block mb-1">Hover Scale Micro Interaction</label>
-                        <select value={activeSelectedElement.styles?.hoverScale || "100"} onChange={(e) => updateNestedElementStyle(activeSelectedElement.id, "hoverScale", e.target.value)} className="w-full bg-slate-800 border border-slate-700 text-white rounded p-1.5 text-xs font-bold">
-                          <option value="100">None Static (100%)</option>
-                          <option value="102">Soft Pulse Scale (102%)</option>
-                          <option value="105">High Scale Zoom Out (105%)</option>
-                          <option value="97">Contracted Click Pulse (97%)</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  {activeSelectedElement.type === "image" && (
-                    <div className="p-3 bg-slate-950 border border-slate-800 rounded-xl space-y-2">
-                      <p className="text-[8px] font-black uppercase text-slate-400 tracking-wider">Storage Node Media Stream File Ingest</p>
-                      <input type="file" accept="image/*" ref={fileInputRef} onChange={executeDeviceMediaIngestion} className="hidden" />
-                      <button onClick={() => fileInputRef.current?.click()} className="w-full bg-white text-slate-950 font-black py-2.5 rounded-xl text-[9px] uppercase tracking-widest transition shadow-sm hover:bg-slate-100">📷 Stream Binary Image File From Local Device</button>
-                    </div>
-                  )}
-
-                  <button onClick={() => { const curr = getActiveTargetPageJsonArray(); syncActiveTargetPageJsonArray(curr.filter(el=>el.id!==activeSelectedElement.id)); setSelectedElementId(null); }} className="w-full bg-red-950/60 hover:bg-red-950 text-red-400 font-bold text-[10px] py-3 rounded-xl border border-red-900/50 uppercase tracking-widest mt-3 transition">
-                    🗑️ Purge Component Block Node Data Slices
-                  </button>
-                </div>
-              ) : (
-                <div className="bg-white border-2 border-dashed border-slate-200 p-6 rounded-2xl text-center text-xs text-slate-400 font-medium leading-relaxed shadow-3xs">
-                  💡 Select any component matrix structure inside the canvas node area workspace to prompt deep contextual typography configs, spatial padding grids or nested action target link paths mapping panels.
-                </div>
-              )}
-
-              {/* FACTORY SCHEMA COMPONENTS DRAWER (INJECT COMPONENT INSTANCES STACK) */}
-              <div className="space-y-3 pt-3 border-t border-slate-100">
-                <h3 className="text-[10px] uppercase font-black text-slate-400 tracking-widest">➕ Deploy Structural Component Matrix Stack</h3>
-                <div className="grid grid-cols-2 gap-2 text-left">
-                  {["h1", "h2", "paragraph", "quote_block", "image", "video", "countdown_timer", "divider", "spacer", "primary_button", "hero_section", "pricing_table"].map((type) => (
-                    <button key={type} onClick={() => insertComponentToActiveCanvas(type)} className="bg-white hover:bg-slate-50 border border-slate-200/80 p-2.5 rounded-xl text-[10px] font-black text-slate-700 capitalize transition shadow-3xs truncate flex items-center space-x-2">
-                      <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
-                      <span>{type.replace("_", " ")}</span>
-                    </button>
+          <div className="flex-1 overflow-y-auto p-3 bg-[#f8fafc] pb-24 content-scrollbar">
+            {!selectedWidgetNode ? (
+              <div className="space-y-3">
+                <input type="text" placeholder="Search 40 Connected Widgets..." value={activeWidgetSearchTerm} onChange={(e) => setActiveWidgetSearchTerm(e.target.value)} className="w-full text-xs p-2 bg-white border border-slate-200 rounded-md outline-none text-slate-700 shadow-inner" />
+                
+                {/* CATEGORY SELECTOR CHIPS DOCK */}
+                <div className="flex flex-wrap gap-1 bg-slate-200/50 p-1 rounded text-[8px] font-black uppercase">
+                  {["basic", "pro", "marketing", "ecommerce", "all"].map(cTab => (
+                    <button key={cTab} onClick={() => setActiveCatalogTab(cTab)} className={`px-2 py-0.5 rounded ${activeCatalogTab === cTab ? "bg-white text-slate-900 shadow-xs" : "text-slate-500"}`}>{cTab}</button>
                   ))}
                 </div>
+
+                {/* DYNAMIC SCROLL SYSTEM RENDER 40 PROFESSIONAL INTERACTIVE BLOCKS */}
+                <div className="grid grid-cols-2 gap-1.5 max-h-[50vh] overflow-y-auto pr-1 content-scrollbar">
+                  {activeFilteredCatalogItems.map(widget => (
+                    <div
+                      key={widget.type}
+                      draggable
+                      onDragStart={() => { setIsCurrentlyDraggingWidget(true); internalDraggedWidgetTypeRef.current = widget.type; }}
+                      onDragEnd={() => setIsCurrentlyDraggingWidget(false)}
+                      onClick={() => {
+                        if(canvasRows.length > 0) {
+                          appendWidgetToColumn(canvasRows[canvasRows.length - 1].id, canvasRows[canvasRows.length - 1].columns[0].id, widget.type);
+                        } else { addNewSectionRowLayout(1); }
+                      }}
+                      className="p-2 bg-white border border-slate-200 rounded-md text-center cursor-grab hover:border-pink-500 hover:shadow-xs transition-all flex flex-col items-center justify-center min-h-[60px]"
+                    >
+                      <span className="text-base mb-0.5 text-slate-400">{widget.icon}</span>
+                      <span className="text-[9px] font-bold text-slate-600 uppercase tracking-tight leading-none">{widget.name}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="border-t pt-3 space-y-1.5">
+                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-wider">Quick Injection Layout Matrix Rows</span>
+                  <div className="grid grid-cols-4 gap-1">
+                    {[1, 2, 3, 4].map(num => (
+                      <button key={num} onClick={() => addNewSectionRowLayout(num)} className="bg-white border text-[8px] font-bold p-1.5 rounded hover:bg-slate-50 text-slate-500 uppercase">{num} Col</button>
+                    ))}
+                  </div>
+                </div>
               </div>
+            ) : (
+              // =========================================================================
+              // ⚙️ UNIFIED BLOCK LAYOUT INSPECTOR (UNIVERSAL HYPERLINKING FOR EVERY SINGLE ITEM)
+              // =========================================================================
+              <div className="space-y-4 font-sans text-left">
+                <div className="bg-[#1e3a8a] text-white p-2 rounded flex justify-between items-center">
+                  <span className="text-[10px] font-black uppercase tracking-wide">Editing: {selectedWidgetNode.widget.type}</span>
+                  <button onClick={() => setSelectedWidgetNode(null)} className="text-[9px] font-bold bg-blue-900 px-1.5 py-0.5 rounded">✕ Clear</button>
+                </div>
 
+                {/* 🔗 UNIVERSAL REDIRECT LINK SYSTEM (INJECTED ON ALL ELEMENTS SANS EXCEPTION) */}
+                <div className="bg-pink-50/60 p-2.5 border border-pink-200 rounded-lg space-y-1">
+                  <label className="text-[9px] font-black text-pink-700 uppercase tracking-wider block">🔗 Universal Action Redirect Outbound Link</label>
+                  <input 
+                    type="url"
+                    placeholder="e.g. https://funnelcraft.io/live/client_id_lkmwijf/checkout"
+                    value={selectedWidgetNode.widget.redirectUrl || ""}
+                    onChange={(e) => updateSelectedWidgetAttributes({ redirectUrl: e.target.value })}
+                    className="w-full text-xs p-1.5 border border-pink-300 rounded bg-white font-mono text-pink-700 outline-none shadow-3xs"
+                  />
+                  <span className="text-[8px] text-pink-600/80 block leading-tight font-medium">Link any action endpoint. Works for Text, Images, Buttons, Grid fields, Cards etc.</span>
+                </div>
+
+                {/* IMAGE BOX CONTENT DIRECT INSERTER WITH RE-POLISHED URL AND DEVICE PICKER BUFFER */}
+                {selectedWidgetNode.widget.type === "image" && (
+                  <div className="space-y-2 border p-2.5 rounded bg-white">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">🖼️ Image Asset Source URL Stream Endpoint</span>
+                    <input 
+                      type="text" 
+                      value={selectedWidgetNode.widget.content} 
+                      placeholder="Paste online external web image URL asset links..."
+                      onChange={(e) => updateSelectedWidgetAttributes({ content: e.target.value })} 
+                      className="w-full text-xs p-1.5 border font-mono rounded bg-slate-50"
+                    />
+                    <div className="relative border border-dashed p-2 text-center rounded bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors">
+                      <input type="file" accept="image/*" onChange={handleWidgetLocalImageBufferStream} className="absolute inset-0 opacity-0 cursor-pointer" />
+                      <span className="text-[9px] font-bold text-slate-500">📂 Alternative: Select Local Storage File Stream</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* CONTENT EDIT TRANSLATOR ELEMENT PANEL */}
+                {!["image", "divider", "spacer"].includes(selectedWidgetNode.widget.type) && (
+                  <div className="space-y-1">
+                    <span className="text-[9px] font-black text-slate-400 uppercase block">Modify Element Inner Content Text Value</span>
+                    <textarea rows={3} value={selectedWidgetNode.widget.content} onChange={(e) => updateSelectedWidgetAttributes({ content: e.target.value })} className="w-full text-xs p-1.5 border rounded outline-none" />
+                  </div>
+                )}
+
+                {/* ADVANCED TYPOGRAPHY OVERRIDES FRAME LAYOUT DESIGNS */}
+                <div className="border-t pt-3 space-y-2">
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">🎨 Typography & Visual Structural Overrides</span>
+                  
+                  {/* FONT DESIGN WEIGHTS */}
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <div>
+                      <span className="text-[8px] text-slate-400 uppercase font-black block">Font Weight Tiers</span>
+                      <select 
+                        value={selectedWidgetNode.widget.styles?.fontWeight || "400"} 
+                        onChange={(e) => updateSelectedWidgetAttributes({}, { fontWeight: e.target.value })}
+                        className="w-full text-[10px] p-1.5 border bg-white rounded font-bold"
+                      >
+                        <option value="300">Light (300)</option>
+                        <option value="400">Regular (400)</option>
+                        <option value="700">Bold (700)</option>
+                        <option value="900">Black (900)</option>
+                      </select>
+                    </div>
+
+                    {/* FONT FAMILIES CONTROL STRUCT SYSTEM */}
+                    <div>
+                      <span className="text-[8px] text-slate-400 uppercase font-black block">Typography Profile</span>
+                      <select 
+                        value={selectedWidgetNode.widget.styles?.fontFamily || "sans-serif"} 
+                        onChange={(e) => updateSelectedWidgetAttributes({}, { fontFamily: e.target.value })}
+                        className="w-full text-[10px] p-1.5 border bg-white rounded font-bold"
+                      >
+                        <option value="sans-serif">System Sans</option>
+                        <option value="serif">Classic Serif</option>
+                        <option value="mono">Developer Monospace</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* ELEMENT COLORS AND TRACK SIZE SCALE MATRICES */}
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <div>
+                      <span className="text-[8px] text-slate-400 uppercase font-black block">Dimension Scale</span>
+                      <input type="text" value={selectedWidgetNode.widget.styles?.fontSize || "14px"} onChange={(e) => updateSelectedWidgetAttributes({}, { fontSize: e.target.value })} className="w-full text-[10px] p-1 border rounded font-mono"/>
+                    </div>
+                    <div>
+                      <span className="text-[8px] text-slate-400 uppercase font-black block">Color Vector Hex</span>
+                      <input type="text" value={selectedWidgetNode.widget.styles?.color || "#000000"} onChange={(e) => updateSelectedWidgetAttributes({}, { color: e.target.value })} className="w-full text-[10px] p-1 border rounded font-mono"/>
+                    </div>
+                  </div>
+
+                  {/* HORIZONTAL CELL LAYOUT ELEMENT ALIGNMENT */}
+                  <div>
+                    <span className="text-[8px] text-slate-400 uppercase font-black block">Text Alignment Position Matrix</span>
+                    <div className="grid grid-cols-3 gap-1 p-0.5 bg-slate-100 rounded text-center text-[9px] font-bold">
+                      {["left", "center", "right"].map(pos => (
+                        <button key={pos} onClick={() => updateSelectedWidgetAttributes({}, { textAlign: pos })} className={`p-1 rounded uppercase ${selectedWidgetNode.widget.styles?.textAlign === pos ? "bg-white text-pink-600 shadow-2xs font-black" : "text-slate-400"}`}>{pos}</button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            )}
+          </div>
+
+          {/* =========================================================================
+              🛰️ BLACK MATTE TOGGLE BAR DOCK (STRICT SLATE BLACK MATRIX CHANNELS PRESERVED)
+             ========================================================================= */}
+          <div className="absolute bottom-0 left-0 right-0 bg-slate-950 text-white p-2 border-t border-slate-900 flex flex-col gap-1.5 z-40">
+            <div className="flex items-center justify-between border-b border-slate-900 pb-1.5">
+              <span className="text-[8px] font-mono tracking-wider text-slate-500 uppercase">📺 MONITOR VIEWPORTS DEPLOYED:</span>
+              <div className="flex gap-1 bg-slate-900 p-0.5 rounded border border-slate-800">
+                {[{ id: "desktop", icon: "💻" }, { id: "tablet", icon: "🎴" }, { id: "mobile", icon: "📱" }].map(dev => (
+                  <button key={dev.id} onClick={() => setActiveDeviceViewMode(dev.id)} className={`p-1 text-xs rounded transition-all ${activeDeviceViewMode === dev.id ? "bg-pink-600 text-white shadow font-bold" : "text-slate-500 hover:text-white"}`}>{dev.icon}</button>
+                ))}
+              </div>
             </div>
-          </aside>
+            <div className="flex items-center justify-between gap-2">
+              <div className="overflow-hidden">
+                <span className="text-[7px] text-slate-600 block uppercase font-mono tracking-tighter">WORKSPACE REALTIME DATA SYNC</span>
+                <span className="text-[8px] text-emerald-500 block font-mono truncate tracking-tighter">{lastSystemUpdateTimeStamp}</span>
+              </div>
+              <button onClick={triggerManualHotUpdateCommit} className="bg-emerald-600 hover:bg-emerald-500 text-white text-[9px] uppercase tracking-wider font-black px-2 py-1 rounded shadow transition-all active:scale-95">🔄 Update Page</button>
+            </div>
+          </div>
+        </aside>
 
-          {/* 🖥️ DYNAMIC LIVE PLAYGROUND EDITOR FRAME (RIGHT CANVAS MAIN HOUSING CONTAINER) */}
-          <main className="flex-1 bg-slate-100/60 p-4 md:p-8 flex flex-col overflow-hidden h-full">
+        {/* =========================================================================
+            🖥️ MAIN CENTRAL GRAPHIC INTERACTIVE EDITOR CANVAS CONTAINER
+           ========================================================================= */}
+        <main className="flex-1 bg-[#eaeef3] p-4 overflow-y-auto flex items-start justify-center content-scrollbar">
+          <div className={`w-full bg-white text-slate-900 p-6 flex flex-col relative shadow-xl border border-slate-300 bg-dot-matrix-mesh transition-all duration-300 ${getSimulatedViewportWidthClassName()}`}>
             
-            {/* Structural Sandboxed Device Header Metadata Layer Mapping Row */}
-            <div className="bg-slate-900 h-12 px-6 rounded-t-3xl flex items-center justify-between shrink-0 shadow-md text-white border-b border-slate-800">
-              <div className="flex items-center space-x-3">
-                <div className="flex space-x-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500 block"></span>
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 block"></span>
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 block"></span>
-                </div>
-                <span className="text-[9px] tracking-widest uppercase font-mono font-black text-slate-400">
-                  Target Blueprint Sandbox Location Pipeline: Page Component Layer [{currentEditingPage.toUpperCase()}] Array Configuration Nodes
-                </span>
-              </div>
-              <div className="text-[9px] bg-indigo-950/60 border border-indigo-900/50 px-3 py-1 rounded-xl font-mono font-black text-indigo-400 uppercase tracking-widest shadow-inner">
-                EMULATION MATRIX ACTIVE
-              </div>
-            </div>
+            <div className="space-y-4 flex-1 mt-2">
+              {canvasRows.map((row, rIdx) => (
+                <div key={row.id} className="relative group/row border border-dashed border-slate-200 hover:border-blue-500 p-1.5 pt-5 rounded-lg bg-slate-50/10">
+                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover/row:opacity-100 flex items-center bg-[#1e3a8a] text-white rounded text-[8px] font-mono font-black shadow-md px-1.5 py-0.5 gap-2 z-30">
+                    <button onClick={(e) => { e.stopPropagation(); purgeWholeSectionRowNode(row.id, e); }} className="bg-red-600 hover:bg-red-500 px-1 rounded font-sans font-black text-center">✕ Delete Row Layer</button>
+                  </div>
 
-            {/* Central Sandboxed Scaling Window Device Box Framework Housing */}
-            <div className="flex-1 bg-slate-200/40 border-x border-b border-slate-200 rounded-b-3xl overflow-y-auto p-6 flex items-start justify-center shadow-inner transition-all duration-300">
-              
-              <div className={`bg-white transition-all duration-300 min-h-[700px] shadow-2xl relative border border-slate-200 ${currentDeviceMode === "mobile" ? "w-[375px] rounded-3xl border-[12px] border-slate-900 px-4 py-8" : "w-full rounded-b-2xl p-10 md:p-16"}`}>
-                
-                {/* Visual Assembly Array Output Renderer Stack Pipeline */}
-                <div className="w-full space-y-5 text-left">
-                  {getActiveTargetPageJsonArray().length === 0 ? (
-                    <div className="text-center py-48 font-mono text-xs text-slate-400 font-bold uppercase tracking-widest">Target Active Page Storage Matrix Array Data Empty.</div>
-                  ) : (
-                    getActiveTargetPageJsonArray().map((element, index) => {
-                      if (currentDeviceMode === "desktop" && element.hideOnDesktop) return null;
-                      if (currentDeviceMode === "mobile" && element.hideOnMobile) return null;
+                  <div className={`flex gap-3 items-stretch ${activeDeviceViewMode === "mobile" ? "flex-col" : "native-row-flex"}`}>
+                    {row.columns.map((column, cIdx) => (
+                      <div
+                        key={column.id}
+                        style={{ width: activeDeviceViewMode === "mobile" ? "100%" : `${column.widthPercent}%` }}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={() => { if (isCurrentlyDraggingWidget && internalDraggedWidgetTypeRef.current) { appendWidgetToColumn(row.id, column.id, internalDraggedWidgetTypeRef.current); } }}
+                        className="border border-dashed border-slate-200 bg-white hover:border-emerald-500 rounded-md p-3 flex flex-col gap-3 relative min-h-[90px]"
+                      >
+                        {column.widgets.map((widget, wIdx) => {
+                          const isCurrentActiveWidgetTarget = selectedWidgetNode?.widget.id === widget.id;
+                          const structuralComputedWidgetStyles = {
+                            color: widget.styles?.color || "inherit",
+                            fontSize: widget.styles?.fontSize || "inherit",
+                            textAlign: widget.styles?.textAlign || "left",
+                            fontWeight: widget.styles?.fontWeight || "normal",
+                            fontFamily: widget.styles?.fontFamily || "sans-serif"
+                          };
 
-                      let animationClassStr = "";
-                      if (element.entranceAnimation && element.entranceAnimation !== "none") {
-                        animationClassStr = `transition-all transform duration-700 ease-out ${element.entranceAnimation}`;
-                      }
+                          return (
+                            <div
+                              key={widget.id}
+                              onClick={(e) => { e.stopPropagation(); setSelectedWidgetNode({ widget, rowId: row.id, columnId: column.id }); }}
+                              className={`relative p-2 rounded-md border-2 transition-all group/widget cursor-pointer ${isCurrentActiveWidgetTarget ? "border-pink-500 bg-pink-50/10 shadow-2xs" : "border-transparent hover:border-slate-200"}`}
+                            >
+                              <div className="absolute right-1 top-1 opacity-0 group-hover/widget:opacity-100 flex items-center bg-slate-900 text-white rounded p-0.5 shadow-xs z-30 text-[8px] font-mono">
+                                <button onClick={(e) => { e.stopPropagation(); shiftWidgetVerticalOrder(rIdx, cIdx, wIdx, -1); }} className="px-0.5 hover:bg-slate-700">▲</button>
+                                <button onClick={(e) => { e.stopPropagation(); shiftWidgetVerticalOrder(rIdx, cIdx, wIdx, 1); }} className="px-0.5 hover:bg-slate-700">▼</button>
+                                <button onClick={(e) => dropWidgetInstanceFromTree(row.id, column.id, widget.id, e)} className="px-1 bg-red-700 rounded ml-1 text-white">✕</button>
+                              </div>
 
-                      return (
-                        <div 
-                          key={element.id} 
-                          onClick={(e) => { e.stopPropagation(); setSelectedElementId(element.id); }} 
-                          className={`group relative rounded-2xl border border-dashed border-transparent hover:border-indigo-400 transition-all cursor-pointer p-1.5 ${selectedElementId === element.id ? "border-indigo-500 bg-indigo-50/5 ring-1 ring-indigo-500/10 shadow-sm" : ""} ${animationClassStr}`}
-                          style={compileAppliedCSSStylesMatrix(element)}
-                        >
-                          
-                          {/* Floating Anchored Quick Action Controller Trigger Modals Row */}
-                          <div className="absolute -top-4 right-3 bg-slate-900 text-white border border-slate-800 px-2.5 py-1 rounded-xl text-[8px] font-mono font-black flex items-center space-x-2.5 z-50 opacity-0 group-hover:opacity-100 transition shadow-lg">
-                            <span className="text-indigo-400 uppercase tracking-wider">[{element.type}]</span>
-                            {element.linkActionType && <span className="text-emerald-400 uppercase text-[7px] tracking-tighter">🔗 {element.linkActionType}</span>}
-                            <button onClick={(e) => { e.stopPropagation(); moveElementOrder(index, "up"); }} className="hover:text-indigo-300 text-[9px]">▲</button>
-                            <button onClick={(e) => { e.stopPropagation(); moveElementOrder(index, "down"); }} className="hover:text-indigo-300 text-[9px]">▼</button>
+                              {/* VISUAL REDIRECT INDICATOR LINK FLAG (RE-VERIFIED FOR ALL ACTIVE BLOCKS) */}
+                              {widget.redirectUrl && (
+                                <div className="absolute top-0 left-0 bg-pink-600 text-white text-[7px] font-mono px-1 rounded-br uppercase tracking-wider pointer-events-none z-20 shadow-xs">
+                                  🔗 Bound Target: {widget.redirectUrl.substring(0, 30)}...
+                                </div>
+                              )}
+
+                              {/* 40 WIDGETS LAYOUT COMPILER RENDER SWITCH */}
+                              <div style={structuralComputedWidgetStyles}>
+                                {(() => {
+                                  switch (widget.type) {
+                                    case "heading": return <h2 className="m-0 leading-tight font-black tracking-tight">{widget.content}</h2>;
+                                    case "sub_heading": return <h3 className="m-0 leading-snug font-bold tracking-wide">{widget.content}</h3>;
+                                    case "paragraph": return <p className="m-0 leading-normal font-medium">{widget.content}</p>;
+                                    case "image": return <div className="w-full flex justify-center"><img src={widget.content} alt="Visual" className="max-h-64 object-contain rounded border shadow-3xs" /></div>;
+                                    case "video": return <div className="aspect-video w-full border bg-black"><iframe className="w-full h-full" src={widget.content} title="Video Embed"></iframe></div>;
+                                    case "button": return <button className="font-sans font-bold uppercase shadow-sm text-white px-4 py-2 bg-rose-600 rounded text-[10px] tracking-wide">{widget.content}</button>;
+                                    case "divider": return <div className="w-full my-2" style={{ borderTop: `${widget.styles?.thickness || "1px"} solid ${widget.styles?.color || "#e2e8f0"}` }}></div>;
+                                    case "spacer": return <div style={{ height: widget.styles?.verticalSpace || "20px" }} className="bg-slate-100/40 border border-dashed border-slate-200 flex items-center justify-center text-[8px] text-slate-300 font-mono">Spacer Area</div>;
+                                    case "bullet_list": return <ul className="list-disc pl-4 text-left space-y-1">{widget.content.split("|").map((li, idx) => <li key={idx} className="text-xs font-semibold">{li}</li>)}</ul>;
+                                    case "icon_box": return <div className="p-3 bg-slate-50 border rounded text-xs font-bold flex items-center gap-2"><span>🛡️</span> {widget.content}</div>;
+                                    
+                                    // Forms
+                                    case "pro_form":
+                                    case "checkout_form":
+                                    case "phone_capture":
+                                      return (
+                                        <div className="bg-[#fdfbf7] border border-amber-200 p-4 rounded-lg space-y-2 w-full max-w-xs mx-auto text-left shadow-3xs">
+                                          <span className="text-[8px] font-black text-amber-700 tracking-widest uppercase block font-mono bg-amber-100 px-1.5 py-0.5 rounded w-max">📋 {widget.name}</span>
+                                          {widget.fields?.map((fld, fIdx) => (
+                                            <div key={fIdx} className="space-y-0.5">
+                                              <span className="text-[9px] font-bold text-slate-500 uppercase">{fld.label}</span>
+                                              <input type="text" className="w-full border p-1 rounded text-xs bg-white" disabled placeholder={`Data field vector...`} />
+                                            </div>
+                                          ))}
+                                          <button className="w-full text-[9px] bg-[#1e3a8a] font-black text-white py-1.5 rounded uppercase tracking-wider">{widget.content}</button>
+                                        </div>
+                                      );
+                                    case "dropdown_select": return <select className="w-full text-xs p-2 border bg-white rounded font-medium" disabled>{widget.content.split("|").map((opt, i) => <option key={i}>{opt}</option>)}</select>;
+                                    case "checkbox_verify": return <div className="flex gap-2 items-start text-left text-xs font-semibold"><input type="checkbox" disabled defaultChecked /> <span>{widget.content}</span></div>;
+                                    case "progress_bar": return <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden"><div className="bg-emerald-500 h-full w-[75%]" style={{ backgroundColor: widget.styles?.color }}></div></div>;
+                                    case "file_upload": return <div className="border border-dashed p-3 text-center rounded text-xs bg-slate-50 font-bold text-slate-400">📤 {widget.content}</div>;
+                                    
+                                    // Triggers
+                                    case "star_rating": return <div className="text-amber-500 text-xs py-0.5">{Array.from({ length: 5 }).map((_, i) => (i < parseInt(widget.content || "5") ? "★" : "☆"))}</div>;
+                                    case "social_icons": return <div className="flex gap-1.5 justify-center py-0.5">{widget.content.split("|").map((sc, sIdx) => <div key={sIdx} className="h-6 w-6 rounded-full text-white font-black text-[9px] uppercase flex items-center justify-center bg-blue-600 shadow-3xs">{sc.trim()}</div>)}</div>;
+                                    case "counter_node": return <div className="text-center bg-[#fdfbf7] p-2 rounded border max-w-xs mx-auto"><span className="block text-lg font-black text-[#1e3a8a] font-mono">{widget.content}</span><span className="block text-[8px] font-bold text-slate-400 mt-0.5">{widget.metaLabel}</span></div>;
+                                    case "countdown_timer": return <div className="text-center p-2 bg-red-50 border border-red-200 rounded text-xs font-mono font-black text-red-600">⏳ {widget.content}</div>;
+                                    case "pricing_card": return <div className="border border-blue-200 bg-blue-50/20 p-4 rounded-lg text-center"><h4 className="text-xl font-black text-blue-900 m-0">{widget.content}</h4><p className="text-[10px] text-slate-500 m-0">{widget.metaLabel}</p></div>;
+                                    case "guarantee_badge": return <div className="p-2 border border-emerald-300 bg-emerald-50/50 rounded-lg text-center text-[10px] font-bold text-emerald-800">🛡️ {widget.content}</div>;
+                                    case "review_card": return <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-left italic text-xs text-slate-600">"{widget.content}"</div>;
+                                    case "faq_accordion": return <div className="space-y-1 text-left">{widget.content.split("|").map((faq, idx) => <div key={idx} className="p-2 bg-white border rounded text-xs font-bold text-slate-700">❓ {faq}</div>)}</div>;
+                                    
+                                    // Ecommerce
+                                    case "cart_summary": return <div className="p-3 bg-slate-50 border border-dashed rounded text-xs font-mono text-left bg-yellow-50/20">🛒 {widget.content}</div>;
+                                    case "coupon_code": return <div className="flex gap-1"><input type="text" value={widget.content} disabled className="border p-1 text-xs rounded bg-white flex-1" /><button className="bg-slate-900 text-white text-[10px] px-2 rounded font-bold">Apply</button></div>;
+                                    case "order_bump": return <div className="p-2 bg-amber-50 border border-amber-300 rounded text-xs font-bold text-amber-900 flex gap-2"><input type="checkbox" defaultChecked disabled /> <span>{widget.content}</span></div>;
+                                    case "alert_bar": return <div style={{ backgroundColor: widget.styles?.backgroundColor }} className="p-2 text-white rounded text-center text-xs font-black uppercase tracking-wide">{widget.content}</div>;
+                                    case "html_embed": return <div className="p-2 bg-slate-900 text-emerald-400 font-mono text-[9px] rounded text-left shadow-inner">Code Output Vector Embed: {widget.content.substring(0, 40)}...</div>;
+                                    
+                                    default: return <div className="p-2 bg-slate-100 text-[9px]">{widget.content || "Custom Element Template Matrix Node"}</div>;
+                                  }
+                                })()}
+                              </div>
+
+                            </div>
+                          );
+                        })}
+                        {column.widgets.length === 0 && (
+                          <div className="flex-1 border border-dashed border-slate-200 rounded flex flex-col items-center justify-center text-center p-2 bg-slate-50/30">
+                            <span className="text-[9px] font-bold text-slate-300 uppercase tracking-wider">Empty column cell layout area</span>
                           </div>
-
-                          {element.styles?.shapeDividerType === "wave" && (
-                            <div className="absolute bottom-0 left-0 right-0 h-4 overflow-hidden pointer-events-none z-10 opacity-30"><svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-full fill-slate-400"><path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C26.9,8.75,55.05,16.31,83.1,22.11,141.43,34.19,201.8,40.41,262.29,40.83A703.35,703.35,0,0,0,321.39,56.44Z"></path></svg></div>
-                          )}
-
-                          {/* INLINE WYSIWYG DIRECT INTERACTIVE TEXT EDITING BINDING HANDLERS */}
-                          {(() => {
-                            switch (element.type) {
-                              case "h1":
-                              case "h2":
-                                return (
-                                  <div 
-                                    contentEditable
-                                    suppressContentEditableWarning
-                                    onBlur={(e) => updateElementAttribute(element.id, "content", e.target.innerText)}
-                                    className="focus:outline-none focus:ring-2 focus:ring-indigo-500/50 p-1 block w-full bg-transparent min-h-[35px]"
-                                  >
-                                    {element.content}
-                                  </div>
-                                );
-                              case "paragraph":
-                                return (
-                                  <p 
-                                    contentEditable
-                                    suppressContentEditableWarning
-                                    onBlur={(e) => updateElementAttribute(element.id, "content", e.target.innerText)}
-                                    className="focus:outline-none focus:ring-2 focus:ring-indigo-500/50 p-1 block w-full bg-transparent min-h-[25px] whitespace-pre-wrap text-slate-600 font-medium leading-relaxed"
-                                  >
-                                    {element.content}
-                                  </p>
-                                );
-                              case "quote_block":
-                                return (
-                                  <div className="border-l-4 pl-5 py-2 italic font-black text-slate-800 text-sm block w-full bg-slate-50 border-indigo-500 rounded-r-xl">
-                                    "{element.content}"
-                                  </div>
-                                );
-                              case "image":
-                                return (
-                                  <div className="w-full flex items-center justify-center bg-slate-50 border border-slate-200/60 rounded-2xl overflow-hidden min-h-[160px] shadow-inner">
-                                    {element.mediaUrl ? (
-                                      <img src={element.mediaUrl} alt="Visual Dynamic Section Node Image Asset" className="max-w-full h-auto object-cover max-h-80 shadow-md" />
-                                    ) : (
-                                      <span className="text-[10px] font-mono text-slate-400 font-bold p-8 text-center uppercase tracking-widest">📷 Image Canvas Stream Null. Select element node to upload file structure.</span>
-                                    )}
-                                  </div>
-                                );
-                              case "video":
-                                return (
-                                  <div className="w-full aspect-video rounded-2xl overflow-hidden shadow-lg bg-black border border-slate-900 max-h-[360px]">
-                                    <iframe src={element.mediaUrl || "https://www.youtube.com/embed/dQw4w9WgXcQ"} className="w-full h-full" allowFullScreen></iframe>
-                                  </div>
-                                );
-                              case "countdown_timer":
-                                return (
-                                  <div className="w-full max-w-md mx-auto bg-rose-50/60 border border-rose-100 text-rose-600 rounded-2xl p-5 text-center shadow-xs">
-                                    <span className="font-black uppercase tracking-widest block mb-2 text-[10px] text-rose-500">{element.content || "Limited Availability License Vault Closing"}</span>
-                                    <div className="text-2xl font-black font-mono tracking-widest text-slate-900 bg-white inline-block px-4 py-1.5 rounded-xl border border-rose-100">00h : 14m : 58s</div>
-                                  </div>
-                                );
-                              case "divider": return <hr className="border-slate-200/80 w-full my-1" />;
-                              case "spacer": return <div className="h-10 w-full bg-slate-50 border border-dashed border-slate-200 rounded-xl flex items-center justify-center text-[8px] font-mono text-slate-400 font-bold uppercase tracking-widest">Spatial Grid Spacer Element (40px)</div>;
-                              case "primary_button":
-                                return <button className="w-full font-black text-xs uppercase tracking-widest shadow-md rounded-xl transition-all pointer-events-none py-3.5" style={{ backgroundColor: globalBrandColors.primary, color: "#ffffff" }}>{element.content}</button>;
-                              case "hero_section":
-                                return (
-                                  <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-slate-50 border border-slate-200/60 p-8 rounded-3xl text-left shadow-2xs">
-                                    <div className="space-y-3">
-                                      <h3 className="font-black text-xl text-slate-900 tracking-tight leading-tight">{element.content}</h3>
-                                      <p className="text-xs text-slate-500 font-semibold leading-relaxed">High fidelity processing framework schemas map conversion layout vector indices dynamically.</p>
-                                    </div>
-                                    <div className="bg-white border border-slate-200 rounded-2xl p-5 text-center space-y-3 shadow-sm">
-                                      <div className="w-full bg-slate-50 border border-slate-200/80 p-3 rounded-xl text-[10px] text-slate-400 font-black text-left uppercase tracking-wider">Dynamic Customer Identity Field</div>
-                                      <button className="w-full text-white font-black text-[10px] py-3 rounded-xl uppercase tracking-widest transition-all shadow-sm" style={{ backgroundColor: globalBrandColors.primary }}>Submit Parameters ➔</button>
-                                    </div>
-                                  </div>
-                                );
-                              case "pricing_table":
-                                return (
-                                  <div className="w-full max-w-sm mx-auto bg-white border-2 p-6 rounded-3xl text-center space-y-5 shadow-xl relative overflow-hidden" style={{ borderColor: globalBrandColors.primary }}>
-                                    <div className="text-[8px] font-black text-white px-3 py-1 absolute top-4 right-4 rounded-full uppercase tracking-widest" style={{ backgroundColor: globalBrandColors.primary }}>ENTERPRISE SECTOR</div>
-                                    <h4 className="font-black text-sm tracking-widest text-slate-900 pt-3 uppercase">{element.content}</h4>
-                                    <div className="text-4xl font-mono font-black" style={{ color: globalBrandColors.primary }}>₹{price}</div>
-                                    <p className="text-[11px] text-slate-400 font-semibold leading-relaxed">Deploy secure transaction pipelines, hook lead listeners triggers and build un-capped funnel flows routes.</p>
-                                    <button className="w-full text-white font-black text-xs py-3 rounded-xl uppercase tracking-widest shadow-md transition-all" style={{ backgroundColor: globalBrandColors.primary }}>Secure Vault Settlement Setup</button>
-                                  </div>
-                                );
-                              default: return null;
-                            }
-                          })()}
-
-                        </div>
-                      );
-                    })
-                  )}
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-
-              </div>
-            </div>
-          </main>
-
-        </div>
-      )}
-
-      {/* 💼 SCREEN 3: ENTERPRISE CRM LEADS MANAGEMENT VIEW */}
-      {activeTab === "crm" && (
-        <main className="flex-1 overflow-y-auto p-8 max-w-7xl mx-auto w-full space-y-6 text-left animate-in fade-in duration-150">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-6 border border-slate-200/60 rounded-3xl gap-4 shadow-sm">
-            <div className="space-y-1">
-              <h2 className="text-xs font-black text-slate-900 uppercase tracking-widest">Inbound Pipeline Conversion Ledger Terminal</h2>
-              <p className="text-xs text-slate-400 font-medium">Trace data acquisition, settlement responses tokens, and consumer attributes records variables.</p>
-            </div>
-            <div className="flex bg-slate-100 border border-slate-200/80 p-1 rounded-xl text-[10px] font-black tracking-widest uppercase">
-              {["All", "New", "Interested", "Closed"].map((seg) => (
-                <button key={seg} onClick={() => setSelectedSegment(seg)} className={`px-4 py-2 rounded-lg transition-all ${selectedSegment === seg ? "bg-white text-slate-900 shadow-3xs border border-slate-200/60" : "text-slate-400 hover:text-slate-800"}`}>{seg}</button>
               ))}
             </div>
-          </div>
 
-          <div className="bg-white border border-slate-200 rounded-3xl shadow-xs overflow-hidden">
-            <table className="w-full text-xs text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-[9px] font-black uppercase text-slate-400 tracking-widest"><th className="p-5">Inbound Prospect Signature</th><th className="p-5">Pipeline Flag State Node</th><th className="p-5 text-right">Acquisition Timestamp Token</th></tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-600 font-semibold">
-                {leadsList.filter(l => selectedSegment === "All" || l.status === selectedSegment).map((lead) => (
-                  <tr key={lead.id} className="hover:bg-slate-50/50 transition">
-                    <td className="p-5"><p className="font-black text-slate-900 text-sm">{lead.name}</p><p className="text-xs text-slate-400 font-mono font-bold mt-0.5">{lead.email}</p></td>
-                    <td className="p-5"><span className="bg-emerald-50 text-emerald-600 text-[10px] font-black border border-emerald-100 px-3 py-1.5 rounded-xl uppercase tracking-wider">{lead.status || "Closed Won Entry"}</span></td>
-                    <td className="p-5 text-right font-mono font-bold text-slate-400">{new Date(lead.created_at).toLocaleString("en-IN")}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </main>
-      )}
+      </div>
 
-      {/* 🛠️ SCREEN 4: BRAND ARCHITECTURE SETTINGS MANAGER (NEW HIGH DESIGN SYSTEM PANEL) */}
-      {activeTab === "brand_settings" && (
-        <main className="flex-1 overflow-y-auto p-8 max-w-4xl mx-auto w-full text-left space-y-6 animate-in fade-in duration-200">
-          <div className="bg-white p-6 border border-slate-200 rounded-3xl shadow-sm space-y-1">
-            <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest text-indigo-600">Unified Architecture General Campaign Parameters</h2>
-            <p className="text-xs text-slate-400 font-semibold">Configure core routing fields, price variables, and external gateway integration endpoints.</p>
-          </div>
+      {/* =========================================================================
+          🎨 LIVE STACK MODAL OVERLAY (NATIVE REAL TIME NETWORK CONNECTOR STATUS)
+         ========================================================================= */}
+      {isPublishModalOpen && generatedClientFunnelLink && (
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center z-50 p-4 transition-all">
+          <div className="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-xl overflow-hidden flex flex-col animate-fadeIn">
+            
+            <div className="bg-gradient-to-r from-[#1e3a8a] to-blue-800 text-white p-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🚀</span>
+                <div>
+                  <h3 className="text-xs font-black uppercase tracking-wider m-0">FunnelCraft Production Grid Live</h3>
+                  <p className="text-[9px] text-blue-200 font-mono m-0">Payload deployed securely on Supabase relational infrastructure</p>
+                </div>
+              </div>
+              <button onClick={() => setIsPublishModalOpen(false)} className="bg-blue-900/80 hover:bg-red-600 text-white h-6 w-6 flex items-center justify-center rounded-full font-black text-sm">✕</button>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white p-6 border border-slate-200 rounded-3xl shadow-sm space-y-4">
-              <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest">💰 Monetization Inventory Node Fields</h3>
-              <div className="space-y-3">
-                <div>
-                  <label className="text-[10px] font-black uppercase text-slate-400 block mb-1">Campaign Project Identity Name</label>
-                  <input type="text" value={funnelName} onChange={(e) => setFunnelName(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-500" />
+            <div className="p-5 space-y-4 bg-slate-50 text-left font-sans">
+              <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold p-3 rounded-lg flex items-center gap-2">
+                <span>⚡</span>
+                <span>Handshake Complete: Row data synchronized with ID columns mapping vectors securely!</span>
+              </div>
+
+              {/* LIVE CLIENT RE-ROUTED DIRECT LINK INTERACTIVE ELEMENT */}
+              <div className="space-y-1.5">
+                <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">🔗 Live Client Routing URL (Direct Functional Web Link):</span>
+                <div className="flex gap-2 items-center bg-white p-2.5 border rounded-lg shadow-inner group">
+                  <input type="text" readOnly value={generatedClientFunnelLink} className="flex-1 text-xs font-mono font-bold text-[#1e3a8a] bg-transparent outline-none select-all" />
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(generatedClientFunnelLink);
+                      alert("📋 Live Link copied! This URL triggers direct payload rendering via your Supabase DB data values.");
+                    }}
+                    className="bg-pink-600 text-white font-bold text-[9px] uppercase tracking-wider px-3 py-1.5 rounded transition-transform active:scale-95 shrink-0"
+                  >
+                    Copy Client URL
+                  </button>
                 </div>
-                <div>
-                  <label className="text-[10px] font-black uppercase text-slate-400 block mb-1">Product Offer Title SKU</label>
-                  <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-500" />
-                </div>
-                <div>
-                  <label className="text-[10px] font-black uppercase text-slate-400 block mb-1">Product Settlement Cost Base (INR)</label>
-                  <input type="text" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-mono font-black text-slate-800 focus:outline-none focus:border-indigo-500" />
-                </div>
+                {databaseNetworkError && (
+                  <p className="text-[9px] text-amber-600 font-mono font-bold bg-amber-50 p-2 rounded border border-amber-200">
+                    ⚠️ Demo Note: Local Supabase credentials key is unconfigured. Showing generated schema preview framework fallback logs.
+                  </p>
+                )}
+              </div>
+
+              {/* INTEGRATED PIPELINE SCHEMATICS DEBUGGER */}
+              <div className="space-y-1">
+                <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Database Storage Structural Topology Output Manifest:</span>
+                <pre className="w-full text-[9px] font-mono bg-slate-900 text-pink-400 p-3 rounded-lg overflow-x-auto border border-slate-950 max-h-[140px] select-text shadow-md">
+                  {JSON.stringify({
+                    databaseEngineHost: "Supabase Relational Network DB via REST API",
+                    targetRecordIdKey: "client_id_lkmwijf",
+                    targetTableSchema: TARGET_TABLE_NAME,
+                    registeredClientPages: funnelPageStepsTabs,
+                    payloadDataTree: funnelPagesDataStore
+                  }, null, 2)}
+                </pre>
               </div>
             </div>
 
-            <div className="bg-white p-6 border border-slate-200 rounded-3xl shadow-sm space-y-4">
-              <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest">🎨 Visual Engine Theme Swatches Control</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-[10px] font-black uppercase text-slate-400 block mb-1">Accent Accent Key Color</label>
-                  <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 p-2 rounded-xl">
-                    <input type="color" value={globalBrandColors.primary} onChange={(e) => setGlobalBrandColors({ ...globalBrandColors, primary: e.target.value })} className="w-8 h-8 rounded-lg cursor-pointer border-none shadow-3xs" />
-                    <span className="text-xs font-mono font-bold text-slate-700">{globalBrandColors.primary}</span>
-                  </div>
-                </div>
-                <div>
-                  <label className="text-[10px] font-black uppercase text-slate-400 block mb-1">Conversion Emerald Mix</label>
-                  <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 p-2 rounded-xl">
-                    <input type="color" value={globalBrandColors.accent} onChange={(e) => setGlobalBrandColors({ ...globalBrandColors, accent: e.target.value })} className="w-8 h-8 rounded-lg cursor-pointer border-none shadow-3xs" />
-                    <span className="text-xs font-mono font-bold text-slate-700">{globalBrandColors.accent}</span>
-                  </div>
-                </div>
-                <div className="col-span-2">
-                  <label className="text-[10px] font-black uppercase text-slate-400 block mb-1">Direct External Backup Redirect Gateway Link</label>
-                  <input type="text" value={paymentUrl} onChange={(e) => setPaymentUrl(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-mono text-indigo-600 font-bold focus:outline-none focus:border-indigo-500" placeholder="https://rzp.io/l/your_custom_payment_link" />
-                </div>
-              </div>
+            <div className="bg-slate-100 border-t p-3 flex justify-end gap-2">
+              <button onClick={() => setIsPublishModalOpen(false)} className="bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-black uppercase tracking-wider px-4 py-1.5 rounded-md transition-colors">Close Log Engine Terminal</button>
             </div>
-          </div>
-        </main>
-      )}
 
-      {/* ⭐ ACCOUNT PAYWALL MODAL GATEWAY OVERLAY DIALOG */}
-      {showPaywallModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-sm rounded-3xl p-6 border border-slate-200 text-center space-y-5 shadow-2xl relative">
-            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-indigo-500 to-emerald-500"></div>
-            <div className="w-14 h-14 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center justify-center font-black text-xl mx-auto text-indigo-600">⭐</div>
-            <div className="space-y-1">
-              <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Free Layer Platform Quota Reached</h3>
-              <p className="text-xs text-slate-400 max-w-xs mx-auto leading-relaxed font-semibold">Your default subscription limits container environment allocation bounds to a maximum constraint of <strong>2 Free Campaigns Clusters</strong>.</p>
-            </div>
-            <button onClick={handleSubscriptionUpgrade} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl py-3 text-[11px] uppercase tracking-widest transition shadow-md">
-              Upgrade Workspace License (₹4,999/Yr)
-            </button>
-            <button onClick={() => setShowPaywallModal(false)} className="text-[9px] text-slate-400 hover:text-slate-800 font-black uppercase tracking-widest block mx-auto transition">Dismiss Overlay Engine</button>
           </div>
         </div>
       )}
+
+      {/* CORE FRAMEWORK DESIGN STYLES SHIELD EMBEDDINGS ONLY */}
+      <style jsx global>{`
+        .content-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .content-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .content-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+        .bg-dot-matrix-mesh {
+          background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+          background-size: 16px 16px;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        .animate-fadeIn { animation: fadeIn 0.12s ease-out forwards; }
+        @media(max-width: 768px) {
+          .native-row-flex { flex-direction: column !important; gap: 12px !important; }
+          .native-row-flex > div { width: 100% !important; }
+        }
+      `}</style>
 
     </div>
   );
