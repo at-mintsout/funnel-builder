@@ -12,13 +12,26 @@ export default function DashboardMasterLayout({ children }) {
 
   useEffect(() => {
     const checkActiveUserSession = async () => {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error || !user) {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        
+        if (error || !user) {
+          router.push("/login");
+          return; // Stop execution if no user
+        } 
+        
+        // Agar user login hai, toh uska naam nikalne ki koshish karein
+        // Supabase mein user.user_metadata ke andar naam save hota hai usually
+        const displayName = user.user_metadata?.full_name || user.email.split('@')[0]; // Fallback to email prefix
+        
+        setUserEmail(displayName); // Ab email ki jagah naam (ya email prefix) set hoga
+        
+      } catch (err) {
+        console.error("Auth check error:", err);
         router.push("/login");
-      } else {
-        setUserEmail(user.email);
       }
     };
+    
     checkActiveUserSession();
   }, [router, pathname]);
 
