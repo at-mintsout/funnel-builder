@@ -1,34 +1,40 @@
 "use client";
+
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 
-export default function LoginPage() {
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
+
+export default function AuthPage() {
+  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isSignUp, setIsSignUp] = useState(false); // Toggle bin login & signup
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
   const router = useRouter();
 
   const handleAuth = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMsg("");
 
     try {
       if (isSignUp) {
-        // SIGNUP LOGIC
-        const { data, error } = await supabase.auth.signUp({ email, password });
+        const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
-        alert("🎉 Signup Successful! Aap automatic login ho gaye hain.");
+        alert("Account created successfully!");
         router.push("/builder");
       } else {
-        // LOGIN LOGIC
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         router.push("/builder");
       }
-    } catch (error) {
-      alert(error.message || "Kuch galat hua!");
+    } catch (err) {
+      setErrorMsg(err.message || "Authentication failed");
     } finally {
       setLoading(false);
     }
@@ -36,54 +42,61 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl space-y-6">
-        <div className="text-center">
-          <h2 className="text-2xl font-black tracking-wider text-indigo-400">FUNNEL CRAFT</h2>
-          <p className="text-xs text-slate-400 mt-2">
-            {isSignUp ? "Naya account banayein aur shuru karein" : "Apne account mein login karein"}
-          </p>
-        </div>
+      <div className="max-w-md w-full bg-slate-900 p-8 rounded-2xl border border-slate-800 shadow-2xl">
+        <h2 className="text-2xl font-bold text-center mb-2">
+          {isSignUp ? "Create your Account" : "Welcome Back"}
+        </h2>
+        <p className="text-slate-400 text-sm text-center mb-6">
+          {isSignUp ? "Start building funnels in seconds" : "Login to manage your funnels"}
+        </p>
+
+        {errorMsg && (
+          <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-lg text-xs mb-4">
+            {errorMsg}
+          </div>
+        )}
 
         <form onSubmit={handleAuth} className="space-y-4">
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Email Address</label>
-            <input 
-              type="email" 
-              placeholder="name@company.com" 
+            <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Email Address</label>
+            <input
+              type="email"
+              required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 text-white"
-              required 
+              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500"
+              placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Password</label>
-            <input 
-              type="password" 
-              placeholder="••••••••" 
+            <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Password</label>
+            <input
+              type="password"
+              required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 text-white"
-              required 
+              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500"
+              placeholder="••••••••"
             />
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl text-sm shadow-lg transition pt-2"
+            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-lg text-sm transition-all disabled:opacity-50"
           >
-            {loading ? "Ruko thoda..." : isSignUp ? "Create Account 🚀" : "Sign In ➔"}
+            {loading ? "Processing..." : isSignUp ? "Sign Up" : "Log In"}
           </button>
         </form>
 
-        <div className="text-center pt-2">
-          <button 
-            onClick={() => setIsSignUp(!isSignUp)} 
-            className="text-xs text-slate-400 hover:text-indigo-400 transition underline"
+        <div className="mt-6 text-center text-xs text-slate-400">
+          {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+          <button
+            onClick={() => setIsSignUp(!isSignUp)}
+            className="text-blue-400 font-semibold hover:underline ml-1"
           >
-            {isSignUp ? "Pehle se account hai? Sign In karein" : "Naya account chahiye? Sign Up karein"}
+            {isSignUp ? "Log In" : "Sign Up"}
           </button>
         </div>
       </div>

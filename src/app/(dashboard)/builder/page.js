@@ -60,8 +60,8 @@ export default function FunnelCraftBuilderCanvas() {
   // =========================================================================
   // 🧭 LIVE DATABASE PIPELINE PATHS (SUPABASE CONFIG MASTER CREDENTIALS)
   // =========================================================================
-  const SUPABASE_PROJECT_URL = "https://your-project-id.supabase.co"; // Replace with your live project url
-  const SUPABASE_ANON_PUBLIC_KEY = "your-anon-public-key-token-here"; // Replace with your database access token key
+  const SUPABASE_PROJECT_URL = process.env.NEXT_PUBLIC_SUPABASE_URL; // Replace with your live project url
+  const SUPABASE_ANON_PUBLIC_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;; // Replace with your database access token key
   const TARGET_TABLE_NAME = "funnels";
 
   // =========================================================================
@@ -322,7 +322,47 @@ const deleteDynamicPageTab = (pageKeyToDelete, eventObj) => {
     const formattedTime = rightNow.toTimeString().split(' ')[0] + " (" + rightNow.toLocaleDateString() + ")";
     setLastSystemUpdateTimeStamp(formattedTime);
   };
+// =========================================================================
+  // 🔄 AUTO-SAVE ENGINE (DEBOUNCED DATABASE SYNC)
+  // =========================================================================
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (!SUPABASE_PROJECT_URL || !SUPABASE_ANON_PUBLIC_KEY || Object.keys(funnelPagesDataStore).length === 0) {
+          return;
+      }
 
+      // Temporarily using a static ID for the current session testing
+      const activeFunnelId = "draft_funnel_id_001"; 
+
+      const payloadToSave = {
+        id: activeFunnelId,
+        name: "My Auto-Saved Funnel", 
+        canvas_state: funnelPagesDataStore,
+        updated_at: new Date().toISOString()
+      };
+
+      try {
+        const response = await fetch(`${SUPABASE_PROJECT_URL}/rest/v1/${TARGET_TABLE_NAME}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_ANON_PUBLIC_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_PUBLIC_KEY}`,
+            "Prefer": "resolution=merge-duplicates" 
+          },
+          body: JSON.stringify(payloadToSave)
+        });
+
+        if (response.ok) {
+          triggerManualHotUpdateCommit(); // UI mein timestamp update karega
+        }
+      } catch (error) {
+        console.error("Auto-save failed:", error);
+      }
+    }, 3000); // 3 seconds ka wait karega type/drag karne ke baad
+
+    return () => clearTimeout(delayDebounceFn); 
+  }, [funnelPagesDataStore]);
   // =========================================================================
   // 📥 NATIVE WORKING SUPABASE DB LIVE ENGINE PUBLISH PUSH OPERATION
   // =========================================================================
