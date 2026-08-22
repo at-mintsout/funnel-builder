@@ -60,8 +60,8 @@ export default function FunnelCraftBuilderCanvas() {
   // =========================================================================
   // 🧭 LIVE DATABASE PIPELINE PATHS (SUPABASE CONFIG MASTER CREDENTIALS)
   // =========================================================================
-  const SUPABASE_PROJECT_URL = process.env.NEXT_PUBLIC_SUPABASE_URL; // Replace with your live project url
-  const SUPABASE_ANON_PUBLIC_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;; // Replace with your database access token key
+  const SUPABASE_PROJECT_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+  const SUPABASE_ANON_PUBLIC_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
   const TARGET_TABLE_NAME = "funnels";
 
   // =========================================================================
@@ -322,7 +322,8 @@ const deleteDynamicPageTab = (pageKeyToDelete, eventObj) => {
     const formattedTime = rightNow.toTimeString().split(' ')[0] + " (" + rightNow.toLocaleDateString() + ")";
     setLastSystemUpdateTimeStamp(formattedTime);
   };
-// =========================================================================
+
+  // =========================================================================
   // 🔄 AUTO-SAVE ENGINE (DEBOUNCED DATABASE SYNC)
   // =========================================================================
   useEffect(() => {
@@ -331,7 +332,6 @@ const deleteDynamicPageTab = (pageKeyToDelete, eventObj) => {
           return;
       }
 
-      // Temporarily using a static ID for the current session testing
       const activeFunnelId = "draft_funnel_id_001"; 
 
       const payloadToSave = {
@@ -354,61 +354,71 @@ const deleteDynamicPageTab = (pageKeyToDelete, eventObj) => {
         });
 
         if (response.ok) {
-          triggerManualHotUpdateCommit(); // UI mein timestamp update karega
+          triggerManualHotUpdateCommit(); 
         }
       } catch (error) {
         console.error("Auto-save failed:", error);
       }
-    }, 3000); // 3 seconds ka wait karega type/drag karne ke baad
+    }, 3000); 
 
     return () => clearTimeout(delayDebounceFn); 
-  }, [funnelPagesDataStore]);
+  }, [funnelPagesDataStore]); 
+
   // =========================================================================
+  // 📥 NATIVE WORKING SUPABASE DB LIVE ENGINE PUBLISH PUSH OPERATION
+  // =========================================================================
+ // =========================================================================
   // 📥 NATIVE WORKING SUPABASE DB LIVE ENGINE PUBLISH PUSH OPERATION
   // =========================================================================
   const handleCompileAndPublishFunnel = async () => {
     setIsDatabasePushLoading(true);
     setDatabaseNetworkError("");
     
-    // 1. Generate unique matching client identifier hash tokens
-    const uniqueClientUrlTokenId = "client_id_lkmwijf"; 
-    const verifiedPublicClientLiveRouterLink = `https://funnelcraft.io/live/${uniqueClientUrlTokenId}`;
-
+    // 1. DYNAMIC URL GENERATION (Fixing the funnelcraft.io issue)
+    const uniqueClientUrlTokenId = crypto.randomUUID();
+    
+    // Use window.location.origin so it works on localhost AND vercel automatically!
+   // Dhyan rakhein ki ye line aise hi likhi ho:
+const verifiedPublicClientLiveRouterLink = `${window.location.origin}/preview?id=${uniqueClientUrlTokenId}`;
     // 2. Packaging structural schemas payload data tree
     const consolidatedDbPayloadSchema = {
       id: uniqueClientUrlTokenId,
-      created_at: new Date().toISOString(),
-      funnel_topology_blueprint: funnelPagesDataStore,
-      registered_active_routes: funnelPageStepsTabs,
-      meta_branding_context: "FunnelCraft Enterprise Matrix Suite Engine"
+      name: `Funnel - ${new Date().toLocaleDateString()}`,
+      canvas_state: funnelPagesDataStore,
+      updated_at: new Date().toISOString()
     };
 
     try {
-      // 3. Native AJAX REST Data stream pipeline query triggers directly targeting your Supabase Table Columns
+      // FORCE CHECK: Ensure keys exist before fetching
+      if (!SUPABASE_PROJECT_URL || !SUPABASE_ANON_PUBLIC_KEY) {
+         throw new Error("Missing Supabase Environment Variables. Check .env.local");
+      }
+
+      // 3. Native AJAX REST Data stream pipeline query
       const dbResponseStream = await fetch(`${SUPABASE_PROJECT_URL}/rest/v1/${TARGET_TABLE_NAME}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "apikey": SUPABASE_ANON_PUBLIC_KEY,
           "Authorization": `Bearer ${SUPABASE_ANON_PUBLIC_KEY}`,
-          "Prefer": "resolution=merge-duplicates" // Autoupsert row grid mapping if ID column token collides
+          "Prefer": "resolution=merge-duplicates" // Autoupsert row 
         },
         body: JSON.stringify(consolidatedDbPayloadSchema)
       });
 
       if (!dbResponseStream.ok) {
-        throw new Error(`Database transaction handshake rejected: ${dbResponseStream.statusText}`);
+        throw new Error(`Supabase Error: ${dbResponseStream.statusText}`);
       }
 
-      // If network protocol completes correctly, make URL view active inside visual popup models
+      // 4. Update UI ONLY if DB save was successful
       setGeneratedClientFunnelLink(verifiedPublicClientLiveRouterLink);
       setIsPublishModalOpen(true);
-    } catch (networkErrorObj) {
-      console.error(networkErrorObj);
-      setDatabaseNetworkError(networkErrorObj.message || "Network handshake dropped out.");
-      // Fallback display mode active even if Supabase config variables remain unconfigured at local runtime lines
-      setGeneratedClientFunnelLink(verifiedPublicClientLiveRouterLink);
-      setIsPublishModalOpen(true);
+      triggerManualHotUpdateCommit(); // Update save timestamp
+
+   } catch (networkErrorObj) {
+      console.error("Publishing Failed:", networkErrorObj);
+      alert("⚠️ Supabase Save Error: " + networkErrorObj.message); // <-- Yeh asli error turant screen par dikhayega
+      setIsPublishModalOpen(false); // Error hone par popup mat kholo
     } finally {
       setIsDatabasePushLoading(false);
     }
@@ -437,7 +447,6 @@ const deleteDynamicPageTab = (pageKeyToDelete, eventObj) => {
         </div>
 
         {/* FUNNEL SEQUENTIAL LIVE TABS PIPELINE + CLIENT NEW DYNAMIC TAB ADDER */}
-       {/* FUNNEL SEQUENTIAL LIVE TABS PIPELINE + CLIENT NEW DYNAMIC TAB ADDER */}
 <div className="flex items-center bg-blue-950 p-0.5 rounded-md border border-blue-800/50 flex-wrap gap-1">
   {funnelPageStepsTabs.map((step) => {
     const isDefaultPage = ["landing", "checkout", "thankyou"].includes(step);
@@ -587,62 +596,109 @@ const deleteDynamicPageTab = (pageKeyToDelete, eventObj) => {
                   </div>
                 )}
 
-                {/* ADVANCED TYPOGRAPHY OVERRIDES FRAME LAYOUT DESIGNS */}
-                <div className="border-t pt-3 space-y-2">
-                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">🎨 Typography & Visual Structural Overrides</span>
+                {/* 🎨 ADVANCED SETTINGS PANEL */}
+                <div className="border-t pt-3 space-y-3">
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider block mb-2 border-b pb-1">⚙️ Appearance Settings</span>
                   
-                  {/* FONT DESIGN WEIGHTS */}
-                  <div className="grid grid-cols-2 gap-1.5">
+                  {/* TEXT COLOR & BACKGROUND COLOR */}
+                  <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <span className="text-[8px] text-slate-400 uppercase font-black block">Font Weight Tiers</span>
+                      <label className="text-[8px] text-slate-400 uppercase font-black block mb-1">Text Color Hex</label>
+                      <input 
+                        type="color" 
+                        value={selectedWidgetNode.widget.styles?.color || "#000000"} 
+                        onChange={(e) => updateSelectedWidgetAttributes({}, { color: e.target.value })} 
+                        className="w-full h-8 p-0 cursor-pointer border rounded"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[8px] text-slate-400 uppercase font-black block mb-1">Background Hex</label>
+                      <input 
+                        type="color" 
+                        value={selectedWidgetNode.widget.styles?.backgroundColor || "#ffffff"} 
+                        onChange={(e) => updateSelectedWidgetAttributes({}, { backgroundColor: e.target.value })} 
+                        className="w-full h-8 p-0 cursor-pointer border rounded"
+                      />
+                    </div>
+                  </div>
+
+                  {/* TYPOGRAPHY (Size & Weight) */}
+                  <div className="grid grid-cols-2 gap-2 bg-slate-50 p-2 rounded border border-slate-100">
+                    <div>
+                      <label className="text-[8px] text-slate-400 uppercase font-black block mb-1">Font Size (px)</label>
+                      <div className="flex items-center gap-1">
+                        <input 
+                          type="range" min="10" max="72" 
+                          value={parseInt(selectedWidgetNode.widget.styles?.fontSize || "14")} 
+                          onChange={(e) => updateSelectedWidgetAttributes({}, { fontSize: `${e.target.value}px` })} 
+                          className="w-full accent-pink-500"
+                        />
+                        <span className="text-[9px] font-mono text-slate-500 w-6 text-right">{parseInt(selectedWidgetNode.widget.styles?.fontSize || "14")}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[8px] text-slate-400 uppercase font-black block mb-1">Font Weight</label>
                       <select 
                         value={selectedWidgetNode.widget.styles?.fontWeight || "400"} 
                         onChange={(e) => updateSelectedWidgetAttributes({}, { fontWeight: e.target.value })}
-                        className="w-full text-[10px] p-1.5 border bg-white rounded font-bold"
+                        className="w-full text-[10px] p-1 border bg-white rounded font-bold outline-none"
                       >
-                        <option value="300">Light (300)</option>
-                        <option value="400">Regular (400)</option>
-                        <option value="700">Bold (700)</option>
-                        <option value="900">Black (900)</option>
-                      </select>
-                    </div>
-
-                    {/* FONT FAMILIES CONTROL STRUCT SYSTEM */}
-                    <div>
-                      <span className="text-[8px] text-slate-400 uppercase font-black block">Typography Profile</span>
-                      <select 
-                        value={selectedWidgetNode.widget.styles?.fontFamily || "sans-serif"} 
-                        onChange={(e) => updateSelectedWidgetAttributes({}, { fontFamily: e.target.value })}
-                        className="w-full text-[10px] p-1.5 border bg-white rounded font-bold"
-                      >
-                        <option value="sans-serif">System Sans</option>
-                        <option value="serif">Classic Serif</option>
-                        <option value="mono">Developer Monospace</option>
+                        <option value="300">Light</option>
+                        <option value="400">Regular</option>
+                        <option value="600">Semi-Bold</option>
+                        <option value="700">Bold</option>
+                        <option value="900">Black</option>
                       </select>
                     </div>
                   </div>
 
-                  {/* ELEMENT COLORS AND TRACK SIZE SCALE MATRICES */}
-                  <div className="grid grid-cols-2 gap-1.5">
-                    <div>
-                      <span className="text-[8px] text-slate-400 uppercase font-black block">Dimension Scale</span>
-                      <input type="text" value={selectedWidgetNode.widget.styles?.fontSize || "14px"} onChange={(e) => updateSelectedWidgetAttributes({}, { fontSize: e.target.value })} className="w-full text-[10px] p-1 border rounded font-mono"/>
-                    </div>
-                    <div>
-                      <span className="text-[8px] text-slate-400 uppercase font-black block">Color Vector Hex</span>
-                      <input type="text" value={selectedWidgetNode.widget.styles?.color || "#000000"} onChange={(e) => updateSelectedWidgetAttributes({}, { color: e.target.value })} className="w-full text-[10px] p-1 border rounded font-mono"/>
-                    </div>
-                  </div>
-
-                  {/* HORIZONTAL CELL LAYOUT ELEMENT ALIGNMENT */}
+                  {/* ALIGNMENT */}
                   <div>
-                    <span className="text-[8px] text-slate-400 uppercase font-black block">Text Alignment Position Matrix</span>
-                    <div className="grid grid-cols-3 gap-1 p-0.5 bg-slate-100 rounded text-center text-[9px] font-bold">
-                      {["left", "center", "right"].map(pos => (
-                        <button key={pos} onClick={() => updateSelectedWidgetAttributes({}, { textAlign: pos })} className={`p-1 rounded uppercase ${selectedWidgetNode.widget.styles?.textAlign === pos ? "bg-white text-pink-600 shadow-2xs font-black" : "text-slate-400"}`}>{pos}</button>
+                    <label className="text-[8px] text-slate-400 uppercase font-black block mb-1">Alignment</label>
+                    <div className="flex gap-1 p-0.5 bg-slate-200 rounded text-center text-[10px]">
+                      {["left", "center", "right", "justify"].map(pos => (
+                        <button 
+                          key={pos} 
+                          onClick={() => updateSelectedWidgetAttributes({}, { textAlign: pos })} 
+                          className={`flex-1 py-1 rounded transition-colors ${selectedWidgetNode.widget.styles?.textAlign === pos ? "bg-white text-pink-600 shadow-sm font-black" : "text-slate-500 hover:text-slate-700"}`}
+                        >
+                          {pos === 'left' ? '⫷' : pos === 'center' ? '☰' : pos === 'right' ? '⫸' : '▤'}
+                        </button>
                       ))}
                     </div>
                   </div>
+                  
+                  {/* SPACING (Padding) */}
+                  <div className="bg-slate-50 p-2 rounded border border-slate-100">
+                    <label className="text-[8px] text-slate-400 uppercase font-black block mb-1">Inner Spacing (Padding)</label>
+                    <div className="grid grid-cols-2 gap-2">
+                       <div className="flex items-center gap-1">
+                          <span className="text-[8px] font-mono text-slate-400">Y</span>
+                          <input 
+                            type="range" min="0" max="100" 
+                            value={parseInt(selectedWidgetNode.widget.styles?.paddingY || "0")} 
+                            onChange={(e) => {
+                               const val = e.target.value;
+                               updateSelectedWidgetAttributes({}, { paddingY: val, paddingTop: `${val}px`, paddingBottom: `${val}px` });
+                            }} 
+                            className="w-full accent-blue-500"
+                          />
+                       </div>
+                       <div className="flex items-center gap-1">
+                          <span className="text-[8px] font-mono text-slate-400">X</span>
+                          <input 
+                            type="range" min="0" max="100" 
+                            value={parseInt(selectedWidgetNode.widget.styles?.paddingX || "0")} 
+                            onChange={(e) => {
+                               const val = e.target.value;
+                               updateSelectedWidgetAttributes({}, { paddingX: val, paddingLeft: `${val}px`, paddingRight: `${val}px` });
+                            }} 
+                            className="w-full accent-emerald-500"
+                          />
+                       </div>
+                    </div>
+                  </div>
+
                 </div>
 
               </div>
@@ -700,7 +756,12 @@ const deleteDynamicPageTab = (pageKeyToDelete, eventObj) => {
                             fontSize: widget.styles?.fontSize || "inherit",
                             textAlign: widget.styles?.textAlign || "left",
                             fontWeight: widget.styles?.fontWeight || "normal",
-                            fontFamily: widget.styles?.fontFamily || "sans-serif"
+                            fontFamily: widget.styles?.fontFamily || "sans-serif",
+                            backgroundColor: widget.styles?.backgroundColor || "transparent",
+                            paddingTop: widget.styles?.paddingTop || "0px",
+                            paddingBottom: widget.styles?.paddingBottom || "0px",
+                            paddingLeft: widget.styles?.paddingLeft || "0px",
+                            paddingRight: widget.styles?.paddingRight || "0px",
                           };
 
                           return (
