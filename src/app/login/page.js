@@ -1,104 +1,133 @@
 "use client";
-
 import { useState } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
-
-export default function AuthPage() {
-  const [isSignUp, setIsSignUp] = useState(false);
+export default function LoginPage() {
+  const router = useRouter();
+  const [isLogin, setIsLogin] = useState(true);
+  
+  // States
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-  const router = useRouter();
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleAuth = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setErrorMsg("");
+    setErrorMessage("");
 
     try {
-      if (isSignUp) {
-        const { error } = await supabase.auth.signUp({ email, password });
-        if (error) throw error;
-        alert("Account created successfully!");
-        router.push("/builder");
-      } else {
+      if (isLogin) {
+        // LOGIN
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        
+        alert("🎉 Login Successful!");
+        router.push("/builder"); 
+        
+      } else {
+        // SIGNUP (With Name & Phone)
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: name,
+              phone_number: phone,
+            }
+          }
+        });
+        if (error) throw error;
+
+        alert("🚀 Account Created Successfully!");
         router.push("/builder");
       }
-    } catch (err) {
-      setErrorMsg(err.message || "Authentication failed");
+    } catch (error) {
+      setErrorMessage(error.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-slate-900 p-8 rounded-2xl border border-slate-800 shadow-2xl">
-        <h2 className="text-2xl font-bold text-center mb-2">
-          {isSignUp ? "Create your Account" : "Welcome Back"}
-        </h2>
-        <p className="text-slate-400 text-sm text-center mb-6">
-          {isSignUp ? "Start building funnels in seconds" : "Login to manage your funnels"}
-        </p>
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
+        
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-black text-[#0d216b]">FUNNELCRAFT</h1>
+          <p className="text-slate-500 mt-2">
+            {isLogin ? "Login to your account" : "Create your account"}
+          </p>
+        </div>
 
-        {errorMsg && (
-          <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-lg text-xs mb-4">
-            {errorMsg}
+        {errorMessage && (
+          <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm mb-4 border border-red-200">
+            {errorMessage}
           </div>
         )}
 
         <form onSubmit={handleAuth} className="space-y-4">
+          
+          {/* Sirf Signup ke time Name aur Phone dikhayenge */}
+          {!isLogin && (
+            <>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1">Full Name</label>
+                <input 
+                  type="text" required={!isLogin}
+                  value={name} onChange={(e) => setName(e.target.value)}
+                  className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#0d216b] outline-none"
+                  placeholder="John Doe"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1">Mobile Number</label>
+                <input 
+                  type="tel" required={!isLogin}
+                  value={phone} onChange={(e) => setPhone(e.target.value)}
+                  className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#0d216b] outline-none"
+                  placeholder="+91 9876543210"
+                />
+              </div>
+            </>
+          )}
+
           <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Email Address</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500"
+            <label className="block text-sm font-bold text-slate-700 mb-1">Email Address</label>
+            <input 
+              type="email" required
+              value={email} onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#0d216b] outline-none"
               placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase mb-1">Password</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500"
-              placeholder="••••••••"
+            <label className="block text-sm font-bold text-slate-700 mb-1">Password</label>
+            <input 
+              type="password" required
+              value={password} onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#0d216b] outline-none"
+              placeholder="Min 6 characters"
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-lg text-sm transition-all disabled:opacity-50"
-          >
-            {loading ? "Processing..." : isSignUp ? "Sign Up" : "Log In"}
+          <button type="submit" disabled={loading} className="w-full bg-[#0d216b] text-white font-bold py-3 rounded-md hover:bg-blue-900 transition-all">
+            {loading ? "Processing..." : isLogin ? "Sign In" : "Create Account"}
           </button>
         </form>
 
-        <div className="mt-6 text-center text-xs text-slate-400">
-          {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
-          <button
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="text-blue-400 font-semibold hover:underline ml-1"
-          >
-            {isSignUp ? "Log In" : "Sign Up"}
+        <div className="text-center mt-6">
+          <button onClick={() => setIsLogin(!isLogin)} className="text-sm text-indigo-600 hover:underline font-semibold">
+            {isLogin ? "Need an account? Sign up here" : "Already have an account? Login"}
           </button>
         </div>
+
       </div>
     </div>
   );
