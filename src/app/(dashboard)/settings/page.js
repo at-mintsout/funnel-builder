@@ -3,17 +3,16 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
 export default function CoreSettingsPage() {
-  const [activeTab, setActiveTab] = useState("tracking"); // Default tab abhi ke liye tracking rakha hai
+  const [activeTab, setActiveTab] = useState("domains"); // Default tab abhi Domains rakha hai testing ke liye
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Form States - Payments
+  // Form States
   const [razorpayKey, setRazorpayKey] = useState("");
   const [razorpaySecret, setRazorpaySecret] = useState("");
-  
-  // Form States - Tracking (NEW)
   const [fbPixel, setFbPixel] = useState("");
   const [gaTracking, setGaTracking] = useState("");
+  const [customDomain, setCustomDomain] = useState(""); // NEW: Domain State
 
   // Simulated User ID 
   const CURRENT_USER_ID = "demo-user-123"; 
@@ -23,7 +22,7 @@ export default function CoreSettingsPage() {
       try {
         const { data, error } = await supabase
           .from("user_settings")
-          .select("razorpay_key_id, razorpay_secret, fb_pixel_id, ga_tracking_id")
+          .select("razorpay_key_id, razorpay_secret, fb_pixel_id, ga_tracking_id, custom_domain")
           .eq("user_id", CURRENT_USER_ID)
           .maybeSingle();
 
@@ -34,6 +33,7 @@ export default function CoreSettingsPage() {
           setRazorpaySecret(data.razorpay_secret || "");
           setFbPixel(data.fb_pixel_id || "");
           setGaTracking(data.ga_tracking_id || "");
+          setCustomDomain(data.custom_domain || "");
         }
       } catch (err) {
         console.error("Error fetching settings:", err.message);
@@ -58,6 +58,7 @@ export default function CoreSettingsPage() {
           razorpay_secret: razorpaySecret,
           fb_pixel_id: fbPixel,
           ga_tracking_id: gaTracking,
+          custom_domain: customDomain,
           updated_at: new Date().toISOString()
         }, { onConflict: 'user_id' }); 
 
@@ -109,11 +110,7 @@ export default function CoreSettingsPage() {
           {/* TAB 1: PAYMENTS */}
           {activeTab === "payments" && (
             <div className="animate-fadeIn">
-              <h2 className="text-xl font-bold text-[#0f172a] border-b pb-4 mb-6 flex items-center justify-between">
-                <span>Razorpay Setup</span>
-                {razorpayKey && <span className="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded-full uppercase tracking-widest">Active</span>}
-              </h2>
-              
+              <h2 className="text-xl font-bold text-[#0f172a] border-b pb-4 mb-6">Razorpay Setup</h2>
               <form onSubmit={handleSaveSettings} className="space-y-6">
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Razorpay Key ID</label>
@@ -124,69 +121,98 @@ export default function CoreSettingsPage() {
                   <input type="password" placeholder="••••••••••••••••••••••••" value={razorpaySecret} onChange={(e) => setRazorpaySecret(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:bg-white focus:border-indigo-500 transition-all font-mono" />
                 </div>
                 <div className="pt-4 border-t border-slate-100">
-                  <button type="submit" disabled={isSaving} className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-8 py-3 rounded-lg shadow-md transition-all active:scale-95 disabled:opacity-70">{isSaving ? "Saving..." : "Save Payment Settings"}</button>
+                  <button type="submit" disabled={isSaving} className="bg-indigo-600 text-white font-bold px-8 py-3 rounded-lg hover:bg-indigo-500 transition-all">Save Payments</button>
                 </div>
               </form>
             </div>
           )}
 
-          {/* TAB 2: TRACKING & ANALYTICS (NEW) */}
+          {/* TAB 2: TRACKING */}
           {activeTab === "tracking" && (
             <div className="animate-fadeIn">
               <h2 className="text-xl font-bold text-[#0f172a] border-b pb-4 mb-6">Tracking & Analytics</h2>
-              
               <form onSubmit={handleSaveSettings} className="space-y-6">
-                <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-lg text-sm text-emerald-800 mb-6">
-                  <strong>Tip:</strong> Enter your Pixel IDs below. We will automatically inject the optimized tracking code into your live funnels.
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Facebook Pixel ID</label>
+                  <input type="text" placeholder="123456789012345" value={fbPixel} onChange={(e) => setFbPixel(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:bg-white focus:border-indigo-500 font-mono" />
                 </div>
-
-                {/* Facebook Pixel */}
-                <div className="p-5 border border-slate-200 rounded-xl hover:border-indigo-300 transition-colors">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="h-8 w-8 bg-blue-600 text-white rounded flex items-center justify-center font-bold">f</div>
-                    <label className="text-sm font-bold text-slate-700">Facebook Pixel ID</label>
-                  </div>
-                  <input 
-                    type="text" 
-                    placeholder="e.g. 123456789012345" 
-                    value={fbPixel}
-                    onChange={(e) => setFbPixel(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:bg-white focus:border-indigo-500 font-mono"
-                  />
-                  <p className="text-[10px] text-slate-400 mt-2">Used for tracking pageviews and lead/purchase conversions.</p>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Google Analytics (GA4) ID</label>
+                  <input type="text" placeholder="G-XXXXXXXXXX" value={gaTracking} onChange={(e) => setGaTracking(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:bg-white focus:border-indigo-500 font-mono" />
                 </div>
-
-                {/* Google Analytics 4 */}
-                <div className="p-5 border border-slate-200 rounded-xl hover:border-indigo-300 transition-colors">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="h-8 w-8 bg-amber-500 text-white rounded flex items-center justify-center font-bold">G</div>
-                    <label className="text-sm font-bold text-slate-700">Google Analytics (GA4) ID</label>
-                  </div>
-                  <input 
-                    type="text" 
-                    placeholder="e.g. G-XXXXXXXXXX" 
-                    value={gaTracking}
-                    onChange={(e) => setGaTracking(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:bg-white focus:border-indigo-500 font-mono"
-                  />
-                  <p className="text-[10px] text-slate-400 mt-2">Measurement ID for universal tracking.</p>
-                </div>
-
                 <div className="pt-4 border-t border-slate-100">
+                  <button type="submit" disabled={isSaving} className="bg-indigo-600 text-white font-bold px-8 py-3 rounded-lg hover:bg-indigo-500 transition-all">Save Tracking</button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* TAB 3: CUSTOM DOMAINS (NEW) */}
+          {activeTab === "domains" && (
+            <div className="animate-fadeIn">
+              <h2 className="text-xl font-bold text-[#0f172a] border-b pb-4 mb-6 flex justify-between items-center">
+                <span>Custom Domain</span>
+                {customDomain && <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-1 rounded-full uppercase tracking-widest font-bold">Configured</span>}
+              </h2>
+              
+              <div className="bg-slate-900 text-white p-6 rounded-xl mb-6 shadow-lg">
+                <h3 className="text-sm font-black uppercase tracking-widest text-indigo-400 mb-2">DNS Configuration Setup</h3>
+                <p className="text-xs text-slate-400 mb-4 leading-relaxed">To connect your custom domain (like <code className="text-emerald-400 bg-slate-800 px-1 py-0.5 rounded">offer.yourbrand.com</code>), add the following CNAME record inside your domain provider's DNS settings (GoDaddy, Hostinger, Namecheap, etc).</p>
+                
+                <div className="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
+                  <table className="w-full text-left text-xs font-mono">
+                    <thead className="bg-slate-950 text-slate-500">
+                      <tr>
+                        <th className="px-4 py-2 font-semibold">Type</th>
+                        <th className="px-4 py-2 font-semibold">Name / Host</th>
+                        <th className="px-4 py-2 font-semibold">Value / Target</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-700">
+                      <tr>
+                        <td className="px-4 py-3 font-bold text-emerald-400">CNAME</td>
+                        <td className="px-4 py-3">offer <span className="text-slate-500 text-[10px]">(or your subdomain)</span></td>
+                        <td className="px-4 py-3 font-bold text-white">cname.vercel-dns.com</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <form onSubmit={handleSaveSettings} className="space-y-6">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Your Connected Domain</label>
+                  <div className="flex rounded-lg overflow-hidden border border-slate-200 focus-within:ring-2 focus-within:ring-indigo-100 transition-all shadow-sm">
+                    <span className="bg-slate-100 text-slate-500 px-4 py-3 font-mono text-sm border-r border-slate-200 flex items-center">https://</span>
+                    <input 
+                      type="text" 
+                      placeholder="offer.yourdomain.com" 
+                      value={customDomain}
+                      onChange={(e) => setCustomDomain(e.target.value.toLowerCase().replace("https://", "").replace("http://", "").trim())}
+                      className="w-full px-4 py-3 bg-white text-sm outline-none font-mono text-indigo-700 font-bold"
+                    />
+                  </div>
+                  <p className="text-[10px] text-slate-400 mt-2">Do not include https:// in the input field above.</p>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex gap-4">
                   <button type="submit" disabled={isSaving} className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-8 py-3 rounded-lg shadow-md transition-all active:scale-95 disabled:opacity-70">
-                    {isSaving ? "Saving scripts..." : "Save Tracking Codes"}
+                    {isSaving ? "Saving Domain..." : "Connect Domain"}
+                  </button>
+                  <button type="button" onClick={() => window.open(`http://${customDomain}`, '_blank')} disabled={!customDomain} className="bg-white border border-slate-300 text-slate-700 font-bold px-6 py-3 rounded-lg hover:bg-slate-50 transition-all disabled:opacity-50 flex items-center gap-2">
+                    Test Link ➔
                   </button>
                 </div>
               </form>
             </div>
           )}
 
-          {/* DUMMY STATES FOR OTHER TABS */}
-          {activeTab !== "payments" && activeTab !== "tracking" && (
+          {/* TAB 4: CRM */}
+          {activeTab === "crm" && (
             <div className="flex flex-col items-center justify-center py-20 text-center animate-fadeIn">
               <span className="text-4xl mb-4">🚧</span>
-              <h3 className="text-lg font-bold text-slate-700">Module Under Construction</h3>
-              <p className="text-slate-500 text-sm mt-2">Next module loading soon...</p>
+              <h3 className="text-lg font-bold text-slate-700">CRM Module Under Construction</h3>
+              <p className="text-slate-500 text-sm mt-2">Final module loading soon...</p>
             </div>
           )}
 
