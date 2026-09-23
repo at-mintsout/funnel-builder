@@ -1,11 +1,11 @@
 "use client";
-import { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 export default function FunnelPublicPreviewRuntimeEngine() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-950 flex items-center justify-center text-indigo-400 font-mono text-xs">Loading Preview...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center font-mono text-xs text-indigo-500">Loading Preview Engine...</div>}>
       <PreviewCoreExecutionEngine />
     </Suspense>
   );
@@ -27,7 +27,7 @@ function PreviewCoreExecutionEngine() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // Razorpay Checkout Script Dynamically Load karenge
+    // Razorpay Checkout Script Dynamically Load
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
     script.async = true;
@@ -58,7 +58,7 @@ function PreviewCoreExecutionEngine() {
     fetchFunnel();
   }, [activeId]);
 
-  // Razorpay Payment Handler (Updated to /payment-api)
+  // Razorpay Payment Handler (Aapka original logic)
   const handlePayment = async () => {
     setIsSubmitting(true);
     try {
@@ -86,9 +86,7 @@ function PreviewCoreExecutionEngine() {
           name: leadName || "Customer",
           email: leadEmail || "customer@example.com",
         },
-        theme: {
-          color: "#0d216b",
-        },
+        theme: { color: "#0d216b" },
       };
 
       const paymentWindow = new window.Razorpay(options);
@@ -123,9 +121,6 @@ function PreviewCoreExecutionEngine() {
          alert("🎉 Success!");
       }
       
-      setLeadName("");
-      setLeadEmail("");
-      
     } catch (err) {
       alert("Error saving data: " + err.message);
     } finally {
@@ -134,67 +129,113 @@ function PreviewCoreExecutionEngine() {
   };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center font-mono text-xs text-slate-400">Loading Funnel Canvas...</div>;
-  if (!activeId || !funnelData) return <div className="min-h-screen flex items-center justify-center">Funnel Not Found</div>;
+  if (!activeId || !funnelData) return <div className="min-h-screen flex items-center justify-center font-bold text-slate-500">Funnel Not Found</div>;
 
   const canvasRows = funnelData.canvas_state?.[activeStep] || [];
 
   return (
-    <div className="min-h-screen bg-white text-slate-800 flex flex-col items-center py-10 px-4">
-      <div className="w-full max-w-4xl space-y-6">
+    <div className="min-h-screen bg-white text-slate-800 flex flex-col items-center py-10 px-4 overflow-x-hidden">
+      <div className="w-full max-w-5xl space-y-6">
         
         {canvasRows.length > 0 ? (
           canvasRows.map((row) => (
             <div key={row.id} className="flex gap-4 w-full flex-wrap md:flex-nowrap">
               {row.columns.map((col) => (
-                <div key={col.id} style={{ width: `${col.widthPercent}%` }} className="flex flex-col gap-4 w-full min-w-[250px]">
+                <div key={col.id} style={{ width: `${col.widthPercent}%` }} className="flex flex-col w-full min-w-[250px] p-2">
                   {col.widgets.map((widget) => {
-                    
-                    if (widget.type === "heading") return <h1 key={widget.id} className="font-black text-3xl" style={widget.styles}>{widget.content}</h1>;
-                    if (widget.type === "paragraph") return <p key={widget.id} className="text-slate-600" style={widget.styles}>{widget.content}</p>;
-                    
-                    if (widget.type === "form" || widget.type === "button" || widget.type.includes("form")) {
-                      return (
-                        <div key={widget.id} className="flex flex-col gap-3 p-6 bg-yellow-50 border border-yellow-200 rounded-xl shadow-sm">
-                          {activeStep === "checkout" ? (
-                            <>
-                              <h3 className="font-bold text-lg text-[#0d216b]">Complete Your Order</h3>
-                              <p className="text-sm text-slate-600">Amount to pay: ₹500</p>
-                              <button 
-                                onClick={handlePayment} 
-                                disabled={isSubmitting}
-                                className="mt-4 px-6 py-3 bg-green-600 text-white font-black uppercase tracking-wide rounded-md shadow hover:bg-green-700 disabled:opacity-50"
-                              >
-                                {isSubmitting ? "Processing..." : "Pay Now (₹500)"}
-                              </button>
-                            </>
-                          ) : (
-                            <form onSubmit={handleLeadSubmit} className="flex flex-col gap-3">
-                              <label className="text-xs font-bold text-slate-600 uppercase">Full Name</label>
-                              <input type="text" placeholder="Enter your name" className="px-4 py-2 border rounded-md outline-none text-sm" value={leadName} onChange={(e) => setLeadName(e.target.value)} />
-                              <label className="text-xs font-bold text-slate-600 uppercase mt-2">Primary Email</label>
-                              <input type="email" placeholder="Enter your email" className="px-4 py-2 border rounded-md outline-none text-sm" value={leadEmail} onChange={(e) => setLeadEmail(e.target.value)} />
-                              <button type="submit" disabled={isSubmitting} className="mt-4 px-6 py-3 bg-[#0d216b] text-white font-black uppercase tracking-wide rounded-md shadow hover:bg-blue-900 disabled:opacity-50">
-                                {isSubmitting ? "Processing..." : (widget.content || "Submit & Next Step")}
-                              </button>
-                            </form>
-                          )}
-                        </div>
-                      );
-                    }
+                    // Extract styles exactly as they are in the builder
+                    const globalStyles = {
+                      color: widget.styles?.color || "inherit",
+                      fontSize: widget.styles?.fontSize || "inherit",
+                      textAlign: widget.styles?.textAlign || "left",
+                      fontWeight: widget.styles?.fontWeight || "normal",
+                      backgroundColor: widget.styles?.backgroundColor || "transparent",
+                      paddingTop: widget.styles?.paddingTop || "0px",
+                      paddingBottom: widget.styles?.paddingBottom || "0px",
+                      paddingLeft: widget.styles?.paddingLeft || "0px",
+                      paddingRight: widget.styles?.paddingRight || "0px",
+                    };
 
-                    return <div key={widget.id}>{widget.content}</div>;
+                    const wType = widget.type;
+
+                    return (
+                      <div key={widget.id} style={globalStyles} className="w-full my-2">
+                        {/* 🌟 MERGED SMART RENDERER */}
+                        {(() => {
+                          // 1. Text Nodes
+                          if (["h1","h2","h3","h4","h5","h6","heading","sub_heading"].includes(wType)) return <h2 className="m-0 leading-tight">{widget.content}</h2>;
+                          if (wType === "paragraph") return <p className="m-0 leading-relaxed">{widget.content}</p>;
+                          if (wType === "blockquote") return <blockquote className="border-l-4 border-indigo-500 pl-4 italic m-0">{widget.content}</blockquote>;
+                          if (wType === "code_block") return <pre className="p-3 bg-slate-900 text-emerald-400 rounded text-[11px] overflow-x-auto">{widget.content}</pre>;
+                          if (wType === "urgency_text") return <p className="font-bold border-l-4 border-red-500 pl-3 bg-red-50 py-2">{widget.content}</p>;
+                          if (wType === "confetti_trigger") return <div className="text-6xl text-center py-6">🎉🎊🎉</div>;
+                          if (wType === "trust_badges") return <div className="text-center text-xs font-bold text-slate-400 uppercase tracking-widest border-t border-b py-2">{widget.content}</div>;
+                          
+                          // 2. Media Nodes (Yeh raw link ko video/image mein convert karega)
+                          if (wType === "image") return <div className="flex justify-center"><img src={widget.content} className="max-w-full h-auto rounded shadow-sm" alt="Visual" /></div>;
+                          if (["video", "video_embed", "youtube_embed"].includes(wType)) return <div className="aspect-video bg-black rounded shadow overflow-hidden w-full"><iframe className="w-full h-full" src={widget.content} allowFullScreen></iframe></div>;
+                          
+                          // 3. Utilities
+                          if (wType === "spacer") return <div style={{ height: widget.styles?.verticalSpace || "40px" }}></div>;
+                          if (wType === "divider") return <div style={{ borderTop: `${widget.styles?.thickness || "2px"} solid ${widget.styles?.color || "#e2e8f0"}`, margin: `${widget.styles?.verticalMargin || "20px"} 0` }}></div>;
+                          
+                          // 4. INTERACTIVE FORMS & CHECKOUT (Aapke logic par based UI)
+                          if (wType.includes("form") || wType.includes("checkout") || wType.includes("button") || wType === "add_to_cart") {
+                            return (
+                              <div className="flex flex-col gap-3 p-6 bg-white border border-slate-200 rounded-xl shadow-lg max-w-md mx-auto w-full">
+                                {activeStep === "checkout" ? (
+                                  <>
+                                    <h3 className="font-black text-xl text-[#0d216b] text-center border-b pb-3 mb-2">Secure Checkout</h3>
+                                    <div className="flex justify-between text-sm font-bold text-slate-600 mb-4">
+                                      <span>Total Amount:</span>
+                                      <span className="text-green-600">₹500.00</span>
+                                    </div>
+                                    <button 
+                                      onClick={handlePayment} 
+                                      disabled={isSubmitting}
+                                      className="w-full px-6 py-4 bg-green-600 text-white font-black uppercase tracking-wide rounded-lg shadow-md hover:bg-green-700 disabled:opacity-50 transition-all flex justify-center items-center gap-2"
+                                    >
+                                      {isSubmitting ? "Processing Securely..." : "🔒 Pay ₹500 Now"}
+                                    </button>
+                                    <p className="text-[10px] text-center text-slate-400 mt-2">Powered by Razorpay Secure 128-bit Encryption</p>
+                                  </>
+                                ) : (
+                                  <form onSubmit={handleLeadSubmit} className="flex flex-col gap-4">
+                                    <h3 className="font-bold text-lg text-[#0d216b] text-center mb-2">{widget.name || "Sign Up Now"}</h3>
+                                    <div>
+                                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Full Name</label>
+                                      <input type="text" placeholder="Enter your full name" required className="w-full px-4 py-3 border border-slate-200 rounded-lg outline-none text-sm bg-slate-50 focus:bg-white focus:border-indigo-500 transition-colors" value={leadName} onChange={(e) => setLeadName(e.target.value)} />
+                                    </div>
+                                    <div>
+                                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Email Address</label>
+                                      <input type="email" placeholder="Enter your best email" required className="w-full px-4 py-3 border border-slate-200 rounded-lg outline-none text-sm bg-slate-50 focus:bg-white focus:border-indigo-500 transition-colors" value={leadEmail} onChange={(e) => setLeadEmail(e.target.value)} />
+                                    </div>
+                                    <button type="submit" disabled={isSubmitting} className="mt-2 w-full px-6 py-4 bg-[#0d216b] text-white font-black uppercase tracking-wide rounded-lg shadow-md hover:bg-blue-900 disabled:opacity-50 transition-all">
+                                      {isSubmitting ? "Saving..." : (widget.content || "Submit & Next Step ➔")}
+                                    </button>
+                                  </form>
+                                )}
+                              </div>
+                            );
+                          }
+
+                          // 5. Fallback (Agar koi widget match na ho)
+                          return <div className="p-2 border border-dashed border-slate-300 text-slate-400 text-xs text-center">{widget.content}</div>;
+                        })()}
+                      </div>
+                    );
                   })}
                 </div>
               ))}
             </div>
           ))
         ) : (
-          <div className="text-center bg-slate-100 p-10 rounded-lg">
-             <h2 className="text-xl font-bold text-slate-500 uppercase">{activeStep} PAGE NOT DESIGNED YET</h2>
-             <p className="text-sm mt-2">Please add some widgets to the {activeStep} page in the builder and hit publish.</p>
+          <div className="text-center bg-slate-50 border border-slate-200 p-16 rounded-2xl shadow-inner">
+             <div className="text-4xl mb-4">🚧</div>
+             <h2 className="text-2xl font-black text-slate-700 uppercase tracking-wider">{activeStep} PAGE NOT DESIGNED YET</h2>
+             <p className="text-slate-500 mt-2">Please add widgets to the {activeStep} step in your builder and hit publish to see them here.</p>
           </div>
         )}
-
       </div>
     </div>
   );
