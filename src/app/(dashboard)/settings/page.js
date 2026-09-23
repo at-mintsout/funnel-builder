@@ -3,24 +3,27 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
 export default function CoreSettingsPage() {
-  const [activeTab, setActiveTab] = useState("payments");
+  const [activeTab, setActiveTab] = useState("tracking"); // Default tab abhi ke liye tracking rakha hai
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Form States
+  // Form States - Payments
   const [razorpayKey, setRazorpayKey] = useState("");
   const [razorpaySecret, setRazorpaySecret] = useState("");
+  
+  // Form States - Tracking (NEW)
+  const [fbPixel, setFbPixel] = useState("");
+  const [gaTracking, setGaTracking] = useState("");
 
-  // Simulated User ID (Jab actual Auth lagayenge tab isko Supabase Auth se replace karenge)
+  // Simulated User ID 
   const CURRENT_USER_ID = "demo-user-123"; 
 
-  // Page load hote hi database se saved keys fetch karna
   useEffect(() => {
     const fetchSettings = async () => {
       try {
         const { data, error } = await supabase
           .from("user_settings")
-          .select("razorpay_key_id, razorpay_secret")
+          .select("razorpay_key_id, razorpay_secret, fb_pixel_id, ga_tracking_id")
           .eq("user_id", CURRENT_USER_ID)
           .maybeSingle();
 
@@ -29,6 +32,8 @@ export default function CoreSettingsPage() {
         if (data) {
           setRazorpayKey(data.razorpay_key_id || "");
           setRazorpaySecret(data.razorpay_secret || "");
+          setFbPixel(data.fb_pixel_id || "");
+          setGaTracking(data.ga_tracking_id || "");
         }
       } catch (err) {
         console.error("Error fetching settings:", err.message);
@@ -40,21 +45,21 @@ export default function CoreSettingsPage() {
     fetchSettings();
   }, []);
 
-  // Keys ko database mein save ya update karna
   const handleSaveSettings = async (e) => {
     e.preventDefault();
     setIsSaving(true);
 
     try {
-      // Upsert: Agar data pehle se hai toh update karega, nahi hai toh naya banayega
       const { error } = await supabase
         .from("user_settings")
         .upsert({ 
           user_id: CURRENT_USER_ID, 
           razorpay_key_id: razorpayKey, 
           razorpay_secret: razorpaySecret,
+          fb_pixel_id: fbPixel,
+          ga_tracking_id: gaTracking,
           updated_at: new Date().toISOString()
-        }, { onConflict: 'user_id' }); // user_id ke basis par check karega
+        }, { onConflict: 'user_id' }); 
 
       if (error) throw error;
       alert("✅ Settings saved successfully!");
@@ -106,45 +111,70 @@ export default function CoreSettingsPage() {
             <div className="animate-fadeIn">
               <h2 className="text-xl font-bold text-[#0f172a] border-b pb-4 mb-6 flex items-center justify-between">
                 <span>Razorpay Setup</span>
-                <span className="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded-full uppercase tracking-widest">Active</span>
+                {razorpayKey && <span className="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded-full uppercase tracking-widest">Active</span>}
               </h2>
               
               <form onSubmit={handleSaveSettings} className="space-y-6">
-                <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg text-sm text-blue-800 mb-6">
-                  <strong>Note:</strong> Jab aapke funnel par koi purchase karega, toh payment seedha in API keys se jude Razorpay account mein jayegi.
-                </div>
-
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Razorpay Key ID</label>
-                  <input 
-                    type="text" 
-                    placeholder="rzp_live_xxxxxxxxxxxxxx" 
-                    value={razorpayKey}
-                    onChange={(e) => setRazorpayKey(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all font-mono"
-                    required
-                  />
+                  <input type="text" placeholder="rzp_live_xxxxxxxxxxxxxx" value={razorpayKey} onChange={(e) => setRazorpayKey(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:bg-white focus:border-indigo-500 transition-all font-mono" />
                 </div>
-
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Razorpay Secret Key</label>
+                  <input type="password" placeholder="••••••••••••••••••••••••" value={razorpaySecret} onChange={(e) => setRazorpaySecret(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:bg-white focus:border-indigo-500 transition-all font-mono" />
+                </div>
+                <div className="pt-4 border-t border-slate-100">
+                  <button type="submit" disabled={isSaving} className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-8 py-3 rounded-lg shadow-md transition-all active:scale-95 disabled:opacity-70">{isSaving ? "Saving..." : "Save Payment Settings"}</button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* TAB 2: TRACKING & ANALYTICS (NEW) */}
+          {activeTab === "tracking" && (
+            <div className="animate-fadeIn">
+              <h2 className="text-xl font-bold text-[#0f172a] border-b pb-4 mb-6">Tracking & Analytics</h2>
+              
+              <form onSubmit={handleSaveSettings} className="space-y-6">
+                <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-lg text-sm text-emerald-800 mb-6">
+                  <strong>Tip:</strong> Enter your Pixel IDs below. We will automatically inject the optimized tracking code into your live funnels.
+                </div>
+
+                {/* Facebook Pixel */}
+                <div className="p-5 border border-slate-200 rounded-xl hover:border-indigo-300 transition-colors">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-8 w-8 bg-blue-600 text-white rounded flex items-center justify-center font-bold">f</div>
+                    <label className="text-sm font-bold text-slate-700">Facebook Pixel ID</label>
+                  </div>
                   <input 
-                    type="password" 
-                    placeholder="••••••••••••••••••••••••" 
-                    value={razorpaySecret}
-                    onChange={(e) => setRazorpaySecret(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all font-mono"
-                    required
+                    type="text" 
+                    placeholder="e.g. 123456789012345" 
+                    value={fbPixel}
+                    onChange={(e) => setFbPixel(e.target.value)}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:bg-white focus:border-indigo-500 font-mono"
                   />
+                  <p className="text-[10px] text-slate-400 mt-2">Used for tracking pageviews and lead/purchase conversions.</p>
+                </div>
+
+                {/* Google Analytics 4 */}
+                <div className="p-5 border border-slate-200 rounded-xl hover:border-indigo-300 transition-colors">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-8 w-8 bg-amber-500 text-white rounded flex items-center justify-center font-bold">G</div>
+                    <label className="text-sm font-bold text-slate-700">Google Analytics (GA4) ID</label>
+                  </div>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. G-XXXXXXXXXX" 
+                    value={gaTracking}
+                    onChange={(e) => setGaTracking(e.target.value)}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:bg-white focus:border-indigo-500 font-mono"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-2">Measurement ID for universal tracking.</p>
                 </div>
 
                 <div className="pt-4 border-t border-slate-100">
-                  <button 
-                    type="submit" 
-                    disabled={isSaving}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-8 py-3 rounded-lg shadow-md transition-all active:scale-95 disabled:opacity-70"
-                  >
-                    {isSaving ? "Saving securely..." : "Save Payment Settings"}
+                  <button type="submit" disabled={isSaving} className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-8 py-3 rounded-lg shadow-md transition-all active:scale-95 disabled:opacity-70">
+                    {isSaving ? "Saving scripts..." : "Save Tracking Codes"}
                   </button>
                 </div>
               </form>
@@ -152,11 +182,11 @@ export default function CoreSettingsPage() {
           )}
 
           {/* DUMMY STATES FOR OTHER TABS */}
-          {activeTab !== "payments" && (
+          {activeTab !== "payments" && activeTab !== "tracking" && (
             <div className="flex flex-col items-center justify-center py-20 text-center animate-fadeIn">
               <span className="text-4xl mb-4">🚧</span>
               <h3 className="text-lg font-bold text-slate-700">Module Under Construction</h3>
-              <p className="text-slate-500 text-sm mt-2">Hum isko step-by-step integrate karenge. Abhi Payments par focus hai.</p>
+              <p className="text-slate-500 text-sm mt-2">Next module loading soon...</p>
             </div>
           )}
 
