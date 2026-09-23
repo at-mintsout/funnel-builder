@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation"; 
+
 // =========================================================================
 // 🌐 CONFIG MASTER DATA WIDGET REGISTRY SYSTEMS (150 PROFESSIONAL ELEMENTS)
 // =========================================================================
@@ -172,6 +173,161 @@ const ELEMENTOR_WIDGET_CATALOG = [
   { type: "webbook_trigger", name: "Zapier/Webhook", category: "advanced", icon: "🔗", defaultContent: "Send data payload to endpoint" }
 ];
 
+// =========================================================================
+// 🌟 NEW: TEMPLATE GALLERY DATA ENGINE
+// =========================================================================
+const PREBUILT_TEMPLATES = [
+  {
+    id: "tpl_digital_product",
+    name: "Digital Product Funnel",
+    icon: "💻",
+    description: "Sell e-books, courses, or digital templates. Includes VSL & Checkout.",
+    data: {
+      landing: [
+        { id: "r1", columns: [{ id: "c1", widthPercent: 100, widgets: [
+          { id: "w1", type: "h1", content: "Master The Art of Digital Scaling", styles: { textAlign: "center", color: "#0f172a", fontSize: "42px", fontWeight: "900", paddingBottom: "20px" } },
+          { id: "w2", type: "paragraph", content: "Learn the exact blueprint we used to scale our online business to 7 figures.", styles: { textAlign: "center", fontSize: "18px", color: "#475569" } },
+          { id: "w3", type: "video_embed", content: "https://www.youtube.com/embed/dQw4w9WgXcQ", styles: { paddingTop: "30px", paddingBottom: "30px" } },
+          { id: "w4", type: "button_primary", content: "Buy Now for $49", styles: { backgroundColor: "#ef4444", color: "#ffffff", padding: "15px 30px", fontSize: "20px", borderRadius: "8px", textAlign: "center" } }
+        ]}]}
+      ],
+      checkout: [
+        { id: "r2", columns: [{ id: "c2", widthPercent: 100, widgets: [
+          { id: "w5", type: "h2", content: "Secure Checkout", styles: { textAlign: "center", paddingBottom: "20px" } },
+          { id: "w6", type: "form_checkout", content: "Complete Order" },
+          { id: "w7", type: "trust_badges", content: "SSL | Stripe | Secure", styles: { textAlign: "center", paddingTop: "20px" } }
+        ]}]}
+      ],
+      thankyou: [
+        { id: "r3", columns: [{ id: "c3", widthPercent: 100, widgets: [
+          { id: "w8", type: "confetti_trigger", content: "Success" },
+          { id: "w9", type: "h2", content: "Payment Successful! 🎉", styles: { textAlign: "center", color: "#10b981", paddingTop: "50px" } },
+          { id: "w10", type: "button_outline", content: "Download Your Product Here", styles: { textAlign: "center", color: "#4f46e5" } }
+        ]}]}
+      ]
+    }
+  },
+  {
+    id: "tpl_webinar",
+    name: "Webinar Registration",
+    icon: "🎥",
+    description: "Capture leads and register attendees for automated webinars.",
+    data: {
+      landing: [
+        { id: "r1", columns: [{ id: "c1", widthPercent: 100, widgets: [
+          { id: "w1", type: "urgency_text", content: "Live Training: 300 Seats Capacity", styles: { textAlign: "center", color: "#ef4444" } },
+          { id: "w2", type: "h1", content: "How to Build SaaS Without Coding", styles: { textAlign: "center", fontSize: "38px" } },
+          { id: "w3", type: "countdown_timer", content: "Starting in 15:00", styles: { textAlign: "center", paddingTop: "20px", paddingBottom: "20px" } },
+          { id: "w4", type: "form_optin", content: "Reserve My Seat Now", fields: [{ label: "Email Address", type: "email" }] }
+        ]}]}
+      ],
+      checkout: [
+        { id: "r2", columns: [{ id: "c2", widthPercent: 100, widgets: [
+          { id: "w5", type: "h2", content: "You're Registered!", styles: { textAlign: "center", color: "#0f172a" } },
+          { id: "w6", type: "paragraph", content: "Mark your calendar for Sunday at 8 PM EST.", styles: { textAlign: "center" } }
+        ]}]}
+      ],
+      thankyou: [
+        { id: "r3", columns: [{ id: "c3", widthPercent: 100, widgets: [
+          { id: "w7", type: "h3", content: "Webinar Replay", styles: { textAlign: "center" } },
+          { id: "w8", type: "video_embed", content: "https://www.youtube.com/embed/dQw4w9WgXcQ" },
+          { id: "w9", type: "button_animated", content: "Join The Coaching Program", styles: { backgroundColor: "#f59e0b", color: "#fff", textAlign: "center" } }
+        ]}]}
+      ]
+    }
+  },
+  {
+    id: "tpl_ecommerce",
+    name: "Physical Product E-com",
+    icon: "📦",
+    description: "Direct response physical product sales page with order bumps.",
+    data: {
+      landing: [
+        { id: "r1", columns: [
+          { id: "c1", widthPercent: 50, widgets: [{ id: "w1", type: "image", content: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80" }] },
+          { id: "c2", widthPercent: 50, widgets: [
+            { id: "w2", type: "h2", content: "Premium Noise Cancelling Headphones", styles: { paddingBottom: "10px" } },
+            { id: "w3", type: "product_rating", content: "4.9/5 (1,200 Reviews)" },
+            { id: "w4", type: "paragraph", content: "Experience studio-quality sound with 40-hour battery life.", styles: { paddingTop: "10px" } },
+            { id: "w5", type: "add_to_cart", content: "Add to Cart - $199", styles: { paddingTop: "20px" } }
+          ]}
+        ]}
+      ],
+      checkout: [
+        { id: "r2", columns: [{ id: "c3", widthPercent: 100, widgets: [
+          { id: "w6", type: "form_checkout", content: "Complete Order" },
+          { id: "w7", type: "order_bump", content: "Yes, add 2-year warranty for $19" }
+        ]}]}
+      ],
+      thankyou: [
+        { id: "r3", columns: [{ id: "c4", widthPercent: 100, widgets: [
+          { id: "w8", type: "h2", content: "Order Confirmed!", styles: { textAlign: "center" } },
+          { id: "w9", type: "paragraph", content: "Your order #10923 is being packed.", styles: { textAlign: "center" } }
+        ]}]}
+      ]
+    }
+  },
+  {
+    id: "tpl_agency",
+    name: "Agency Lead Gen",
+    icon: "🏢",
+    description: "Perfect for service providers looking to book discovery calls.",
+    data: {
+      landing: [
+        { id: "r1", columns: [{ id: "c1", widthPercent: 100, widgets: [
+          { id: "w1", type: "h1", content: "We Scale B2B Brands to 8 Figures", styles: { textAlign: "center" } },
+          { id: "w2", type: "trust_badges", content: "As seen on: Forbes | TechCrunch | WSJ", styles: { textAlign: "center", paddingBottom: "30px" } },
+          { id: "w3", type: "feature_grid", content: "SEO | Paid Ads | Web Design | Copywriting" },
+          { id: "w4", type: "button_primary", content: "Apply To Work With Us", styles: { textAlign: "center" } }
+        ]}]}
+      ],
+      checkout: [
+        { id: "r2", columns: [{ id: "c2", widthPercent: 100, widgets: [
+          { id: "w5", type: "h2", content: "Book Your Discovery Call", styles: { textAlign: "center" } },
+          { id: "w6", type: "form_contact", content: "Submit Request" }
+        ]}]}
+      ],
+      thankyou: [
+        { id: "r3", columns: [{ id: "c3", widthPercent: 100, widgets: [
+          { id: "w7", type: "h2", content: "Application Received.", styles: { textAlign: "center" } },
+          { id: "w8", type: "paragraph", content: "Please prepare your P&L sheet before our call.", styles: { textAlign: "center" } },
+          { id: "w9", type: "social_share", content: "Follow us on LinkedIn", styles: { textAlign: "center" } }
+        ]}]}
+      ]
+    }
+  },
+  {
+    id: "tpl_youtube",
+    name: "YouTube Channel Growth",
+    icon: "▶️",
+    description: "Drive traffic from shorts, capture emails, force subscriptions.",
+    data: {
+      landing: [
+        { id: "r1", columns: [{ id: "c1", widthPercent: 100, widgets: [
+          { id: "w1", type: "h2", content: "Get My Free Finance Excel Sheet", styles: { textAlign: "center" } },
+          { id: "w2", type: "video_embed", content: "https://www.youtube.com/embed/dQw4w9WgXcQ" },
+          { id: "w3", type: "form_optin", content: "Send Me The Sheet", fields: [{ label: "Email Address", type: "email" }] }
+        ]}]}
+      ],
+      checkout: [
+        { id: "r2", columns: [{ id: "c2", widthPercent: 100, widgets: [
+          { id: "w4", type: "urgency_text", content: "Wait! Step 2 is Required", styles: { textAlign: "center", color: "#ef4444", fontSize: "24px" } },
+          { id: "w5", type: "paragraph", content: "You must subscribe to the channel to unlock the download link.", styles: { textAlign: "center" } },
+          { id: "w6", type: "youtube_subscribe", content: "Subscribe Now", styles: { textAlign: "center", paddingTop: "20px" } }
+        ]}]}
+      ],
+      thankyou: [
+        { id: "r3", columns: [{ id: "c3", widthPercent: 100, widgets: [
+          { id: "w7", type: "h3", content: "Here is your file!", styles: { textAlign: "center", color: "#10b981" } },
+          { id: "w8", type: "button_outline", content: "Download Finance_Sheet.xlsx", styles: { textAlign: "center" } },
+          { id: "w9", type: "h4", content: "Watch this next:", styles: { paddingTop: "40px", textAlign: "center" } },
+          { id: "w10", type: "video_embed", content: "https://www.youtube.com/embed/dQw4w9WgXcQ" }
+        ]}]}
+      ]
+    }
+  }
+];
+
 export default function FunnelCraftBuilderCanvas() {
   const router = useRouter();
 
@@ -193,6 +349,9 @@ export default function FunnelCraftBuilderCanvas() {
   const [generatedClientFunnelLink, setGeneratedClientFunnelLink] = useState("");
   const [isDatabasePushLoading, setIsDatabasePushLoading] = useState(false);
   const [databaseNetworkError, setDatabaseNetworkError] = useState("");
+  
+  // 🌟 NEW: TEMPLATE GALLERY MODAL STATE
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
 
   // =========================================================================
   // 🧠 GLOBAL MULTI-PAGE ENGINE WORKSPACE DATA TREE STORE
@@ -240,6 +399,26 @@ export default function FunnelCraftBuilderCanvas() {
       const newlyComputedRows = typeof mutatorArgumentPayload === "function" ? mutatorArgumentPayload(activeRowsBuffer) : mutatorArgumentPayload;
       return { ...previousMasterStore, [activePageStep]: newlyComputedRows };
     });
+  };
+
+  // =========================================================================
+  // 🌟 NEW: TEMPLATE INJECTION FUNCTION
+  // =========================================================================
+  const handleLoadTemplate = (templateId) => {
+    const template = PREBUILT_TEMPLATES.find(t => t.id === templateId);
+    if (!template) return;
+    
+    if(!confirm("Loading a template will overwrite your current funnel design. Continue?")) return;
+
+    // Set the tabs to match the template keys
+    setFunnelPageStepsTabs(Object.keys(template.data));
+    // Inject the payload
+    setFunnelPagesDataStore(template.data);
+    // Reset view
+    setActivePageStep("landing");
+    setSelectedWidgetNode(null);
+    setIsTemplateModalOpen(false);
+    triggerManualHotUpdateCommit();
   };
 
   // =========================================================================
@@ -485,6 +664,15 @@ export default function FunnelCraftBuilderCanvas() {
 
         <div className="flex items-center gap-4">
           <span className="text-[10px] text-slate-400 font-mono hidden lg:block">Synced: {lastSystemUpdateTimeStamp}</span>
+          
+          {/* 🌟 NEW: TEMPLATE GALLERY BUTTON IN HEADER */}
+          <button 
+            onClick={() => setIsTemplateModalOpen(true)}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wider shadow transition-all flex items-center gap-2"
+          >
+            <span>✨</span> Templates
+          </button>
+
           <button 
             onClick={handleCompileAndPublishFunnel} disabled={isDatabasePushLoading}
             className={`bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-1.5 rounded text-xs font-black uppercase tracking-wider shadow transition-all active:scale-95 ${isDatabasePushLoading ? "opacity-70 cursor-wait" : ""}`}
@@ -560,7 +748,10 @@ export default function FunnelCraftBuilderCanvas() {
                 <div className="text-4xl mb-4 text-indigo-300">✨</div>
                 <h2 className="text-xl font-bold text-slate-800 mb-2">Start Building Your Funnel</h2>
                 <p className="text-sm text-slate-500 mb-6">Drag and drop any of the 150+ widgets from the left panel.</p>
-                <button onClick={() => addNewSectionRowLayout(1)} className="px-6 py-2 bg-indigo-600 text-white text-xs font-bold uppercase rounded shadow">Add Section Row</button>
+                <div className="flex gap-4">
+                  <button onClick={() => addNewSectionRowLayout(1)} className="px-6 py-2 bg-indigo-600 text-white text-xs font-bold uppercase rounded shadow">Add Section Row</button>
+                  <button onClick={() => setIsTemplateModalOpen(true)} className="px-6 py-2 bg-emerald-600 text-white text-xs font-bold uppercase rounded shadow">Load Template</button>
+                </div>
               </div>
             ) : (
               <div className="p-3 space-y-3">
@@ -621,33 +812,35 @@ export default function FunnelCraftBuilderCanvas() {
                                     if (wType === "paragraph") return <p className="m-0 leading-relaxed">{widget.content}</p>;
                                     if (wType === "blockquote") return <blockquote className="border-l-4 border-indigo-500 pl-4 italic m-0">{widget.content}</blockquote>;
                                     if (wType === "code_block") return <pre className="p-3 rounded text-[11px] overflow-x-auto">{widget.content}</pre>;
+                                    if (wType === "urgency_text") return <p className="font-bold border-l-4 border-red-500 pl-3 bg-red-50 py-2">{widget.content}</p>;
                                     
                                     // Media
-                                    if (wType === "image") return <div className="flex justify-center"><img src={widget.content} className="max-w-full h-auto rounded" alt="Visual" /></div>;
-                                    if (["video", "video_embed", "youtube_embed"].includes(wType)) return <div className="aspect-video bg-black"><iframe className="w-full h-full" src={widget.content}></iframe></div>;
+                                    if (wType === "image") return <div className="flex justify-center"><img src={widget.content} className="max-w-full h-auto rounded shadow-sm" alt="Visual" /></div>;
+                                    if (["video", "video_embed", "youtube_embed"].includes(wType)) return <div className="aspect-video bg-black rounded shadow"><iframe className="w-full h-full" src={widget.content}></iframe></div>;
                                     
                                     // Utilities
                                     if (wType === "spacer") return <div style={{ height: widget.styles?.verticalSpace || "40px" }} className={`${isActive ? 'bg-indigo-50 border border-indigo-200 dashed' : ''}`}></div>;
                                     if (wType === "divider") return <div style={{ borderTop: `${widget.styles?.thickness || "2px"} solid ${widget.styles?.color || "#e2e8f0"}`, margin: `${widget.styles?.verticalMargin || "20px"} 0` }}></div>;
                                     
                                     // Buttons
-                                    if (wType.includes("button")) return <button className="font-bold border-none" style={{...widget.styles, borderRadius: widget.styles?.borderRadius || '4px'}}>{widget.content}</button>;
+                                    if (wType.includes("button")) return <button className="font-bold border-none w-full shadow-sm" style={{...widget.styles, borderRadius: widget.styles?.borderRadius || '4px'}}>{widget.content}</button>;
 
                                     // Forms
-                                    if (wType === "form_optin" || wType === "pro_form") return (
-                                      <div className="bg-white p-4 rounded border shadow-sm w-full max-w-sm mx-auto text-left">
-                                        <div className="space-y-3">
-                                          {widget.fields?.map((f,i)=><input key={i} placeholder={f.label} disabled className="w-full border p-2 rounded text-xs bg-slate-50"/>)}
-                                          <button className="w-full bg-[#1e3a8a] text-white font-bold py-2 rounded text-xs uppercase">{widget.content}</button>
+                                    if (wType === "form_optin" || wType === "pro_form" || wType === "form_checkout" || wType === "form_contact") return (
+                                      <div className="bg-white p-6 rounded-lg border border-slate-200 shadow w-full max-w-sm mx-auto text-left">
+                                        <div className="space-y-4">
+                                          <h4 className="font-bold text-center text-slate-700">{widget.name}</h4>
+                                          {widget.fields?.map((f,i)=><input key={i} placeholder={f.label} disabled className="w-full border p-2 rounded text-xs bg-slate-50"/>) || <input placeholder="Dummy Input" disabled className="w-full border p-2 rounded text-xs bg-slate-50"/>}
+                                          <button className="w-full bg-[#1e3a8a] text-white font-bold py-3 rounded text-xs uppercase shadow-sm">{widget.content}</button>
                                         </div>
                                       </div>
                                     );
 
                                     // Catch-all placeholder for complex interactive widgets (Stripe, Crypto, Maps, etc.)
                                     return (
-                                      <div className="p-3 bg-slate-50 border border-dashed border-slate-300 rounded text-center opacity-80 flex flex-col items-center justify-center min-h-[60px]">
-                                        <span className="text-[10px] font-black uppercase text-indigo-700">{widget.name} Component</span>
-                                        <span className="text-[9px] text-slate-500 mt-1 truncate w-full">{widget.content}</span>
+                                      <div className="p-4 bg-white border border-slate-200 shadow-sm rounded text-center flex flex-col items-center justify-center">
+                                        <span className="text-[12px] font-black uppercase text-indigo-700">{widget.name} Component</span>
+                                        <span className="text-[10px] text-slate-500 mt-1 truncate w-full">{widget.content}</span>
                                       </div>
                                     );
                                   })()}
@@ -703,7 +896,7 @@ export default function FunnelCraftBuilderCanvas() {
                       <label className="text-[10px] font-bold text-slate-700 uppercase">Image URL</label>
                       <input type="text" value={selectedWidgetNode.widget.content} onChange={(e) => updateSelectedWidgetAttributes({ content: e.target.value })} className="w-full text-xs p-2 border rounded" />
                       <div className="relative border border-dashed p-2 text-center mt-2 bg-white cursor-pointer hover:bg-slate-100">
-                        <input type="file" accept="image/*" onChange={handleWidgetLocalImageBufferStream} className="absolute inset-0 opacity-0 cursor-pointer" />
+                        <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" />
                         <span className="text-[9px] font-bold text-slate-500">Upload Image</span>
                       </div>
                     </div>
@@ -778,6 +971,47 @@ export default function FunnelCraftBuilderCanvas() {
           </aside>
         )}
       </div>
+
+      {/* =========================================================================
+          🌟 NEW: TEMPLATE GALLERY MODAL UI
+         ========================================================================= */}
+      {isTemplateModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
+          <div className="bg-white rounded shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col animate-fadeIn">
+            
+            <div className="bg-slate-900 text-white p-4 flex items-center justify-between border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">✨</span>
+                <div>
+                  <h3 className="text-sm font-black uppercase tracking-wider m-0">Template Gallery</h3>
+                  <p className="text-[10px] text-slate-400 font-mono m-0">Load pre-built 3-page structural blueprints.</p>
+                </div>
+              </div>
+              <button onClick={() => setIsTemplateModalOpen(false)} className="hover:text-red-400 font-black text-lg">✕</button>
+            </div>
+
+            <div className="p-6 bg-slate-50 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-h-[70vh] overflow-y-auto">
+              {PREBUILT_TEMPLATES.map((template) => (
+                <div key={template.id} className="bg-white border border-slate-200 rounded-lg p-5 flex flex-col hover:shadow-xl hover:border-indigo-400 transition-all cursor-pointer group" onClick={() => handleLoadTemplate(template.id)}>
+                  <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">{template.icon}</div>
+                  <h4 className="font-bold text-slate-800 text-sm mb-1">{template.name}</h4>
+                  <p className="text-[11px] text-slate-500 flex-1 leading-relaxed">{template.description}</p>
+                  
+                  <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <div className="flex gap-1">
+                      {Object.keys(template.data).map((pageName, idx) => (
+                        <span key={idx} className="bg-slate-100 text-slate-500 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">{pageName}</span>
+                      ))}
+                    </div>
+                    <span className="text-[10px] font-black text-indigo-600 uppercase tracking-wider group-hover:text-indigo-800">Load ➔</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+          </div>
+        </div>
+      )}
 
       {/* =========================================================================
           🎨 LIVE PUBLISH SUCCESS MODAL (PRESERVED FROM ORIGINAL)
