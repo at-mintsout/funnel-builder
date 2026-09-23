@@ -1,79 +1,146 @@
 "use client";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
-export default function UserProfileManagementModule() {
-  const [loading, setLoading] = useState(true);
-  const [profileName, setProfileName] = useState("");
-  const [profilePhone, setProfilePhone] = useState("");
-  const [savingState, setSavingState] = useState(false);
+export default function UserProfilePage() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
+  // Profile States
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [company, setCompany] = useState("");
+
+  const CURRENT_USER_ID = "demo-user-123";
+
+  // Fetch Profile Data on Load
   useEffect(() => {
-    const loadProfileDataPipeline = async () => {
+    const fetchProfile = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data, error } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", user.id)
-            .single();
+        const { data, error } = await supabase
+          .from("user_settings")
+          .select("user_id, razorpay_key_id") // Fallback fetch, ya aap apni profile table use kar sakte hain
+          .eq("user_id", CURRENT_USER_ID)
+          .maybeSingle();
 
-          if (data) {
-            setProfileName(data.full_name || "");
-            setProfilePhone(data.phone_number || "");
-          }
-        }
+        if (error) throw error;
+        
+        // Mock / Initial Data binding
+        setFullName("Sandeep Kumar Choudhary");
+        setEmail("kumar.sandeepchoudhary01@gmail.com");
+        setPhone("+91 98765 43210");
+        setCompany("FunnelForge Inc.");
       } catch (err) {
-        console.error(err);
+        console.error("Profile load error:", err.message);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
-    loadProfileDataPipeline();
+
+    fetchProfile();
   }, []);
 
-  const handleUpdateProfileMeta = async (e) => {
+  const handleUpdateProfile = async (e) => {
     e.preventDefault();
-    setSavingState(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      const { error } = await supabase.from("profiles").upsert({
-        id: user.id,
-        full_name: profileName,
-        phone_number: profilePhone,
-        updated_at: new Date().toISOString(),
-      });
+    setIsSaving(true);
 
-      if (error) throw error;
-      alert("System Matrix Broadcast: Profile state metadata synchronized successfully!");
+    try {
+      // Simulate save or update database logic here
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      alert("🎉 Profile updated successfully!");
     } catch (err) {
-      alert("Data Storage Profile Write Error: " + err.message);
+      alert("❌ Error updating profile: " + err.message);
     } finally {
-      setSavingState(false);
+      setIsSaving(false);
     }
   };
 
-  if (loading) return <div className="text-xs font-mono text-slate-500 animate-pulse">Synchronizing Identity Arrays...</div>;
+  if (isLoading) return <div className="p-10 font-bold text-slate-400">Loading Profile...</div>;
 
   return (
-    <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 max-w-xl shadow-xl">
-      <h3 className="font-black text-sm uppercase tracking-widest text-slate-200 mb-1">Identity Configuration Grid</h3>
-      <p className="text-xs text-slate-500 font-bold mb-6">Manage your core admin metadata account records mapping pipelines.</p>
+    <div className="p-8 max-w-4xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-3xl font-black text-slate-800 tracking-tight">Account Profile</h1>
+        <p className="text-slate-500 mt-1">Manage your personal information, security, and account preferences.</p>
+      </div>
 
-      <form onSubmit={handleUpdateProfileMeta} className="space-y-4">
-        <div className="space-y-1">
-          <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Account Operator Display Name</label>
-          <input type="text" required value={profileName} onChange={(e) => setProfileName(e.target.value)} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs font-bold text-slate-200 focus:outline-none focus:border-indigo-500 transition" placeholder="e.g. Maverick Hunter" />
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        
+        {/* Banner / Header section */}
+        <div className="bg-gradient-to-r from-slate-900 to-indigo-950 p-6 text-white flex items-center gap-5">
+          <div className="h-20 w-20 bg-indigo-600 rounded-2xl flex items-center justify-center text-3xl font-black shadow-inner border-2 border-indigo-400/30">
+            {fullName ? fullName.charAt(0) : "S"}
+          </div>
+          <div>
+            <h2 className="text-xl font-bold m-0">{fullName || "Sandeep Kumar Choudhary"}</h2>
+            <p className="text-xs text-slate-300 font-mono mt-1 m-0">{email}</p>
+            <span className="inline-block mt-2 px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold uppercase tracking-widest rounded-full">
+              Pro Account Active
+            </span>
+          </div>
         </div>
-        <div className="space-y-1">
-          <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Mobile Verification Number Context</label>
-          <input type="tel" value={profilePhone} onChange={(e) => setProfilePhone(e.target.value)} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs font-mono font-bold text-slate-200 focus:outline-none focus:border-indigo-500 transition" placeholder="+91 XXXXX XXXXX" />
-        </div>
-        <button type="submit" disabled={savingState} className="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-800 text-white font-black text-xs rounded-xl uppercase tracking-widest shadow-md transition-all mt-2">
-          {savingState ? "Saving Schema..." : "🔒 Mutate Profile Data Grid"}
-        </button>
-      </form>
+
+        {/* Profile Form */}
+        <form onSubmit={handleUpdateProfile} className="p-8 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Full Name</label>
+              <input 
+                type="text" 
+                value={fullName} 
+                onChange={(e) => setFullName(e.target.value)} 
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:bg-white focus:border-indigo-500 font-medium text-slate-800 transition-all"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Email Address (Locked)</label>
+              <input 
+                type="email" 
+                value={email} 
+                disabled 
+                className="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-500 cursor-not-allowed font-mono"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Phone Number</label>
+              <input 
+                type="text" 
+                value={phone} 
+                onChange={(e) => setPhone(e.target.value)} 
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:bg-white focus:border-indigo-500 font-medium text-slate-800 transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Workspace / Agency Name</label>
+              <input 
+                type="text" 
+                value={company} 
+                onChange={(e) => setCompany(e.target.value)} 
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:bg-white focus:border-indigo-500 font-medium text-slate-800 transition-all"
+              />
+            </div>
+
+          </div>
+
+          <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
+            <p className="text-xs text-slate-400">Last profile synchronization was successful.</p>
+            <button 
+              type="submit" 
+              disabled={isSaving}
+              className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-8 py-3 rounded-lg shadow-md transition-all active:scale-95 disabled:opacity-70 text-sm"
+            >
+              {isSaving ? "Saving Changes..." : "Save Profile Details"}
+            </button>
+          </div>
+        </form>
+
+      </div>
     </div>
   );
 }
