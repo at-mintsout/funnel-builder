@@ -1,9 +1,38 @@
 "use client";
 import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function UserSubscriptionTierModule() {
   const [currentTier, setCurrentTier] = useState("Growth Plan Tier");
   const [loadingPlan, setLoadingPlan] = useState(null);
+
+  const CURRENT_USER_ID = "demo-user-123"; // Aapke user ki ID ya auth session id
+
+  // 1. Load active plan from Supabase on mount
+  useEffect(() => {
+    const fetchUserPlan = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("user_settings")
+          .select("active_plan")
+          .eq("user_id", CURRENT_USER_ID)
+          .maybeSingle();
+
+        if (data && data.active_plan) {
+          setCurrentTier(data.active_plan);
+        }
+      } catch (err) {
+        console.error("Error fetching plan:", err.message);
+      }
+    };
+    fetchUserPlan();
+
+    // Load Razorpay Script dynamically
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
 
   const applicationPlansMatrix = [
     { 
@@ -32,18 +61,29 @@ export default function UserSubscriptionTierModule() {
     },
   ];
 
-  useEffect(() => {
-    // Load Razorpay Script dynamically
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
+  // Function to update plan in Supabase Database automatically
+  const updatePlanInDatabase = async (planName) => {
+    try {
+      const { error } = await supabase
+        .from("user_settings")
+        .upsert({ 
+          user_id: CURRENT_USER_ID, 
+          active_plan: planName,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id' });
 
-  // Direct Frontend Razorpay Checkout Handler (No Missing API Errors)
+      if (error) throw error;
+      setCurrentTier(planName);
+    } catch (err) {
+      console.error("Database upgrade error:", err.message);
+      alert("⚠️ Payment successful, but failed to sync plan with database: " + err.message);
+    }
+  };
+
+  // Direct Frontend Razorpay Checkout Handler with Auto-DB Upgrade
   const handleUpgrade = async (plan) => {
     if (plan.rawPrice === 0) {
-      setCurrentTier(plan.name);
+      await updatePlanInDatabase(plan.name);
       alert(`✅ Switched to ${plan.name} successfully!`);
       return;
     }
@@ -56,14 +96,15 @@ export default function UserSubscriptionTierModule() {
       }
 
       const options = {
-        key: "rzp_test_TSvymNXmAY7Wpq", // Aap apni live/test key yahan use kar sakte hain
+        key: "rzp_test_TSvymNXmAY7Wpq", // Aap apni test/live key yahan use kar sakte hain
         amount: plan.rawPrice * 100, // Amount in paise
         currency: "INR",
         name: "FunnelForge Subscriptions",
         description: `Upgrade protocol to ${plan.name}`,
-        handler: function (response) {
-          setCurrentTier(plan.name);
-          alert(`🎉 Payment Verified! Deployment upgraded to ${plan.name}. Payment ID: ${response.razorpay_payment_id}`);
+        handler: async function (response) {
+          // 🚀 AUTOMATIC DATABASE UPGRADE ON SUCCESSFUL PAYMENT
+          await updatePlanInDatabase(plan.name);
+          alert(`🎉 Payment Verified! Deployment automatically upgraded to ${plan.name}. Payment ID: ${response.razorpay_payment_id}`);
         },
         prefill: {
           name: "Sandeep Kumar",
