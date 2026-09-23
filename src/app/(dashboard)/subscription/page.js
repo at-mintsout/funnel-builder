@@ -5,7 +5,6 @@ export default function UserSubscriptionTierModule() {
   const [currentTier, setCurrentTier] = useState("Growth Plan Tier");
   const [loadingPlan, setLoadingPlan] = useState(null);
 
-  // 💡 Flexible Plans Matrix: Aap yahan se prices aur features kabhi bhi badal sakte hain!
   const applicationPlansMatrix = [
     { 
       id: "starter", 
@@ -41,9 +40,8 @@ export default function UserSubscriptionTierModule() {
     document.body.appendChild(script);
   }, []);
 
-  // Razorpay Upgrade Trigger Handler
+  // Direct Frontend Razorpay Checkout Handler (No Missing API Errors)
   const handleUpgrade = async (plan) => {
-    // Agar plan Free (₹0) hai, toh direct active kar do
     if (plan.rawPrice === 0) {
       setCurrentTier(plan.name);
       alert(`✅ Switched to ${plan.name} successfully!`);
@@ -51,26 +49,21 @@ export default function UserSubscriptionTierModule() {
     }
 
     setLoadingPlan(plan.name);
-    try {
-      // Backend payment order creation
-      const response = await fetch("/api/payment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: plan.rawPrice }),
-      });
 
-      const order = await response.json();
-      
-      // Fallback agar backend api na ho toh direct Razorpay test checkout open ho jayega
+    try {
+      if (!window.Razorpay) {
+        throw new Error("Razorpay SDK failed to load. Check your internet connection.");
+      }
+
       const options = {
-        key: "rzp_test_TSvymNXmAY7Wpq", // Aap yahan apni live/test key daal sakte hain
-        amount: order.amount || plan.rawPrice * 100,
+        key: "rzp_test_TSvymNXmAY7Wpq", // Aap apni live/test key yahan use kar sakte hain
+        amount: plan.rawPrice * 100, // Amount in paise
         currency: "INR",
         name: "FunnelForge Subscriptions",
         description: `Upgrade protocol to ${plan.name}`,
         handler: function (response) {
           setCurrentTier(plan.name);
-          alert(`🎉 Payment Verified! Deployment upgraded to ${plan.name}. ID: ${response.razorpay_payment_id}`);
+          alert(`🎉 Payment Verified! Deployment upgraded to ${plan.name}. Payment ID: ${response.razorpay_payment_id}`);
         },
         prefill: {
           name: "Sandeep Kumar",
@@ -117,7 +110,7 @@ export default function UserSubscriptionTierModule() {
                 : "bg-indigo-600 hover:bg-indigo-700 border-indigo-500 text-white shadow-md active:scale-95"
               }`}
             >
-              {loadingPlan === plan.name ? "Processing Gateway..." : plan.active ? "Current Deployment Active" : "Trigger Tier Upgrade Protocol ➔"}
+              {loadingPlan === plan.name ? "Opening Gateway..." : plan.active ? "Current Deployment Active" : "Trigger Tier Upgrade Protocol ➔"}
             </button>
           </div>
         ))}
