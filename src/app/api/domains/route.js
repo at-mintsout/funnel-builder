@@ -6,14 +6,15 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request) {
   try {
+    // Upgraded: Added 'webhookUrl' to capture the CRM setting dynamically
     const { customerEmail, customerName, productName, thanksMessage, webhookUrl } = await request.json();
 
-    // 🛡️ Basic Security Validation
+    // 🛡️ Basic Security Validation (Prevents API crashing on empty submissions)
     if (!customerEmail || !customerName) {
       return NextResponse.json({ success: false, error: "Missing required contact fields." }, { status: 400 });
     }
 
-    // 1. 📧 Sending automated transactional email via Resend
+    // 1. 📧 Sending automated transactional email via Resend (ORIGINAL CORE PRESERVED)
     const emailPromise = resend.emails.send({
       from: "FunnelCraft <onboarding@resend.dev>", // Free testing tier domain
       to: [customerEmail],
@@ -38,7 +39,7 @@ export async function POST(request) {
       `,
     });
 
-    // 2. 🔗 CRM Webhook Automation Engine (Parallel execution)
+    // 2. 🔗 CRM Webhook Automation Engine (NEW SILENT UPGRADE)
     let webhookPromise = null;
     if (webhookUrl) {
        webhookPromise = fetch(webhookUrl, {
@@ -51,9 +52,10 @@ export async function POST(request) {
            productName,
            timestamp: new Date().toISOString()
          })
-       }).catch(err => console.error("Silent Webhook Warning:", err));
+       }).catch(err => console.error("Silent Webhook Warning:", err)); // Doesn't break email if webhook fails
     }
 
+    // ⚡ Execute Email & CRM Webhook parallelly for maximum speed
     const [emailData] = await Promise.all([emailPromise, webhookPromise]);
 
     return NextResponse.json({ success: true, data: emailData });
