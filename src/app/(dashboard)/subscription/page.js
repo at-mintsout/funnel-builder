@@ -1,14 +1,92 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function UserSubscriptionTierModule() {
   const [currentTier, setCurrentTier] = useState("Growth Plan Tier");
+  const [loadingPlan, setLoadingPlan] = useState(null);
 
+  // 💡 Flexible Plans Matrix: Aap yahan se prices aur features kabhi bhi badal sakte hain!
   const applicationPlansMatrix = [
-    { name: "Starter Core Box", price: "₹0", desc: "For entry level sandbox automation testing arrays.", active: false },
-    { name: "Growth Plan Tier", price: "₹2,999/mo", desc: "Unlimited active funnel runtimes with Razorpay pipelines.", active: true },
-    { name: "Enterprise Protocol Cluster", price: "Custom Call", desc: "For massive cross-organization scaling clusters.", active: false },
+    { 
+      id: "starter", 
+      name: "Starter Core Box", 
+      price: "₹0", 
+      rawPrice: 0,
+      desc: "For entry level sandbox automation testing arrays.", 
+      active: currentTier === "Starter Core Box" 
+    },
+    { 
+      id: "growth", 
+      name: "Growth Plan Tier", 
+      price: "₹2,999/mo", 
+      rawPrice: 2999,
+      desc: "Unlimited active funnel runtimes with Razorpay pipelines.", 
+      active: currentTier === "Growth Plan Tier" 
+    },
+    { 
+      id: "enterprise", 
+      name: "Enterprise Protocol Cluster", 
+      price: "Custom Call", 
+      rawPrice: 9999,
+      desc: "For massive cross-organization scaling clusters.", 
+      active: currentTier === "Enterprise Protocol Cluster" 
+    },
   ];
+
+  useEffect(() => {
+    // Load Razorpay Script dynamically
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+
+  // Razorpay Upgrade Trigger Handler
+  const handleUpgrade = async (plan) => {
+    // Agar plan Free (₹0) hai, toh direct active kar do
+    if (plan.rawPrice === 0) {
+      setCurrentTier(plan.name);
+      alert(`✅ Switched to ${plan.name} successfully!`);
+      return;
+    }
+
+    setLoadingPlan(plan.name);
+    try {
+      // Backend payment order creation
+      const response = await fetch("/api/payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: plan.rawPrice }),
+      });
+
+      const order = await response.json();
+      
+      // Fallback agar backend api na ho toh direct Razorpay test checkout open ho jayega
+      const options = {
+        key: "rzp_test_TSvymNXmAY7Wpq", // Aap yahan apni live/test key daal sakte hain
+        amount: order.amount || plan.rawPrice * 100,
+        currency: "INR",
+        name: "FunnelForge Subscriptions",
+        description: `Upgrade protocol to ${plan.name}`,
+        handler: function (response) {
+          setCurrentTier(plan.name);
+          alert(`🎉 Payment Verified! Deployment upgraded to ${plan.name}. ID: ${response.razorpay_payment_id}`);
+        },
+        prefill: {
+          name: "Sandeep Kumar",
+          email: "kumar.sandeepchoudhary01@gmail.com",
+        },
+        theme: { color: "#4f46e5" },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      alert("Payment Gateway Error: " + err.message);
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -29,8 +107,17 @@ export default function UserSubscriptionTierModule() {
               <div className="text-3xl font-mono font-black text-white">{plan.price}</div>
               <p className="text-xs text-slate-500 font-semibold leading-relaxed">{plan.desc}</p>
             </div>
-            <button disabled={plan.active} className={`w-full font-black text-[10px] tracking-widest uppercase py-3.5 rounded-xl border mt-6 transition-all ${plan.active ? "bg-slate-900 border-slate-800 text-slate-500 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700 border-indigo-500 text-white shadow-md"}`}>
-              {plan.active ? "Current Deployment Active" : "Trigger Tier Upgrade Protocol ➔"}
+            
+            <button 
+              disabled={plan.active || loadingPlan === plan.name}
+              onClick={() => handleUpgrade(plan)}
+              className={`w-full font-black text-[10px] tracking-widest uppercase py-3.5 rounded-xl border mt-6 transition-all ${
+                plan.active 
+                ? "bg-slate-900 border-slate-800 text-slate-500 cursor-not-allowed" 
+                : "bg-indigo-600 hover:bg-indigo-700 border-indigo-500 text-white shadow-md active:scale-95"
+              }`}
+            >
+              {loadingPlan === plan.name ? "Processing Gateway..." : plan.active ? "Current Deployment Active" : "Trigger Tier Upgrade Protocol ➔"}
             </button>
           </div>
         ))}
