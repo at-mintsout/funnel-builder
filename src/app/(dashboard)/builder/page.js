@@ -174,7 +174,7 @@ const ELEMENTOR_WIDGET_CATALOG = [
 ];
 
 // =========================================================================
-// 🌟 NEW: TEMPLATE GALLERY DATA ENGINE
+// 🌟 TEMPLATE GALLERY DATA ENGINE
 // =========================================================================
 const PREBUILT_TEMPLATES = [
   {
@@ -295,36 +295,6 @@ const PREBUILT_TEMPLATES = [
         ]}]}
       ]
     }
-  },
-  {
-    id: "tpl_youtube",
-    name: "YouTube Channel Growth",
-    icon: "▶️",
-    description: "Drive traffic from shorts, capture emails, force subscriptions.",
-    data: {
-      landing: [
-        { id: "r1", columns: [{ id: "c1", widthPercent: 100, widgets: [
-          { id: "w1", type: "h2", content: "Get My Free Finance Excel Sheet", styles: { textAlign: "center" } },
-          { id: "w2", type: "video_embed", content: "https://www.youtube.com/embed/dQw4w9WgXcQ" },
-          { id: "w3", type: "form_optin", content: "Send Me The Sheet", fields: [{ label: "Email Address", type: "email" }] }
-        ]}]}
-      ],
-      checkout: [
-        { id: "r2", columns: [{ id: "c2", widthPercent: 100, widgets: [
-          { id: "w4", type: "urgency_text", content: "Wait! Step 2 is Required", styles: { textAlign: "center", color: "#ef4444", fontSize: "24px" } },
-          { id: "w5", type: "paragraph", content: "You must subscribe to the channel to unlock the download link.", styles: { textAlign: "center" } },
-          { id: "w6", type: "youtube_subscribe", content: "Subscribe Now", styles: { textAlign: "center", paddingTop: "20px" } }
-        ]}]}
-      ],
-      thankyou: [
-        { id: "r3", columns: [{ id: "c3", widthPercent: 100, widgets: [
-          { id: "w7", type: "h3", content: "Here is your file!", styles: { textAlign: "center", color: "#10b981" } },
-          { id: "w8", type: "button_outline", content: "Download Finance_Sheet.xlsx", styles: { textAlign: "center" } },
-          { id: "w9", type: "h4", content: "Watch this next:", styles: { paddingTop: "40px", textAlign: "center" } },
-          { id: "w10", type: "video_embed", content: "https://www.youtube.com/embed/dQw4w9WgXcQ" }
-        ]}]}
-      ]
-    }
   }
 ];
 
@@ -348,39 +318,23 @@ export default function FunnelCraftBuilderCanvas() {
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
   const [generatedClientFunnelLink, setGeneratedClientFunnelLink] = useState("");
   const [isDatabasePushLoading, setIsDatabasePushLoading] = useState(false);
-  const [databaseNetworkError, setDatabaseNetworkError] = useState("");
   
-  // 🌟 NEW: TEMPLATE GALLERY MODAL STATE
+  // MODAL STATES
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  
+  // 🤖 AI GENERATION STATES (NEW UPGRADES)
+  const [isAIGenerating, setIsAIGenerating] = useState(false);
+  const [isAIFunnelModalOpen, setIsAIFunnelModalOpen] = useState(false);
+  const [aiFunnelPrompt, setAiFunnelPrompt] = useState("");
+  const [isBuildingFullFunnel, setIsBuildingFullFunnel] = useState(false);
 
   // =========================================================================
   // 🧠 GLOBAL MULTI-PAGE ENGINE WORKSPACE DATA TREE STORE
   // =========================================================================
   const [funnelPagesDataStore, setFunnelPagesDataStore] = useState({
-    landing: [{
-      id: "row_init_1",
-      columns: [
-        { id: "col_1_1", widthPercent: 60, widgets: [
-          { id: "wdgt_1", type: "h1", content: "We Create High Converting Traffic Funnels", redirectUrl: "", styles: { color: "#1e3a8a", fontSize: "32px", textAlign: "left", fontWeight: "900" } },
-          { id: "wdgt_3", type: "paragraph", content: "Welcome to FunnelCraft! Drag and drop structural layout systems to capture enterprise workflows.", styles: { color: "#475569", fontSize: "14px", textAlign: "left" } }
-        ]},
-        { id: "col_1_2", widthPercent: 40, widgets: [
-          { id: "wdgt_5", type: "form_optin", content: "Claim Free Access Seat", fields: [{ label: "Full Name", type: "text" }, { label: "Primary Email", type: "email" }] }
-        ]}
-      ]
-    }],
-    checkout: [{
-      id: "row_chk_1",
-      columns: [{ id: "col_chk_1_1", widthPercent: 100, widgets: [
-        { id: "wdgt_chk_title", type: "h2", content: "Secure Operational Gateway Checkout Terminal", styles: { color: "#1e3a8a", fontSize: "28px", textAlign: "center", fontWeight: "900" } }
-      ]}]
-    }],
-    thankyou: [{
-      id: "row_ty_1",
-      columns: [{ id: "col_ty_1_1", widthPercent: 100, widgets: [
-        { id: "wdgt_ty_icon", type: "paragraph", content: "🎉 Transaction Completed Successfully!", styles: { fontSize: "24px", textAlign: "center", fontWeight: "bold" } }
-      ]}]
-    }]
+    landing: [],
+    checkout: [],
+    thankyou: []
   });
 
   const canvasRows = funnelPagesDataStore[activePageStep] || [];
@@ -402,7 +356,77 @@ export default function FunnelCraftBuilderCanvas() {
   };
 
   // =========================================================================
-  // 🌟 NEW: TEMPLATE INJECTION FUNCTION
+  // 🤖 FULL FUNNEL AI BUILDER ENGINE
+  // =========================================================================
+  const handleGenerateFullFunnelWithAI = async (e) => {
+    e.preventDefault();
+    if(!aiFunnelPrompt.trim()) return alert("Please describe your business first!");
+    
+    setIsBuildingFullFunnel(true);
+    try {
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          prompt: aiFunnelPrompt,
+          type: "generate_funnel" 
+        })
+      });
+      
+      const data = await res.json();
+      if (!data.result) throw new Error(data.error || "AI returned empty.");
+
+      // Parse JSON safely
+      let parsedAI;
+      try {
+        const cleanJSONString = data.result.replace(/```json/g, '').replace(/```/g, '').trim();
+        parsedAI = JSON.parse(cleanJSONString);
+      } catch(e) {
+        throw new Error("AI returned invalid data format. Please try again.");
+      }
+
+      // Construct a dynamic high-converting blueprint using AI's text
+      const newAiFunnelData = {
+        landing: [
+          { id: `row_ai_1`, columns: [{ id: `col_ai_1`, widthPercent: 100, widgets: [
+            { id: `w_ai_1`, type: "h1", content: parsedAI.landing_headline || "Your Main Headline Here", styles: { textAlign: "center", color: "#0f172a", fontSize: "42px", fontWeight: "900", paddingBottom: "20px" } },
+            { id: `w_ai_2`, type: "paragraph", content: parsedAI.landing_subheadline || "Your descriptive subheadline here.", styles: { textAlign: "center", fontSize: "18px", color: "#475569" } },
+            { id: `w_ai_3`, type: "feature_grid", content: parsedAI.features_text || "Feature 1|Feature 2|Feature 3", styles: { paddingTop: "20px", paddingBottom: "30px" } },
+            { id: `w_ai_4`, type: "button_primary", content: parsedAI.cta_text || "Get Started Now", styles: { backgroundColor: "#4f46e5", color: "#ffffff", padding: "15px 30px", fontSize: "20px", borderRadius: "8px", textAlign: "center" } }
+          ]}]}
+        ],
+        checkout: [
+          { id: `row_ai_2`, columns: [{ id: `col_ai_2`, widthPercent: 100, widgets: [
+            { id: `w_ai_5`, type: "h2", content: parsedAI.checkout_title || "Complete Your Order", styles: { textAlign: "center", paddingBottom: "20px" } },
+            { id: `w_ai_6`, type: "form_checkout", content: "Checkout" },
+            { id: `w_ai_7`, type: "trust_badges", content: "SSL | Secure", styles: { textAlign: "center", paddingTop: "20px" } }
+          ]}]}
+        ],
+        thankyou: [
+          { id: `row_ai_3`, columns: [{ id: `col_ai_3`, widthPercent: 100, widgets: [
+            { id: `w_ai_8`, type: "confetti_trigger", content: "Success" },
+            { id: `w_ai_9`, type: "h2", content: parsedAI.thankyou_message || "Thank you for your order!", styles: { textAlign: "center", color: "#10b981", paddingTop: "50px" } }
+          ]}]}
+        ]
+      };
+
+      setFunnelPageStepsTabs(["landing", "checkout", "thankyou"]);
+      setFunnelPagesDataStore(newAiFunnelData);
+      setActivePageStep("landing");
+      setIsAIFunnelModalOpen(false);
+      setAiFunnelPrompt("");
+      triggerManualHotUpdateCommit();
+
+    } catch (error) {
+      alert("AI Generation Error: " + error.message);
+    } finally {
+      setIsBuildingFullFunnel(false);
+    }
+  };
+
+
+  // =========================================================================
+  // 🌟 TEMPLATE INJECTION FUNCTION
   // =========================================================================
   const handleLoadTemplate = (templateId) => {
     const template = PREBUILT_TEMPLATES.find(t => t.id === templateId);
@@ -410,11 +434,8 @@ export default function FunnelCraftBuilderCanvas() {
     
     if(!confirm("Loading a template will overwrite your current funnel design. Continue?")) return;
 
-    // Set the tabs to match the template keys
     setFunnelPageStepsTabs(Object.keys(template.data));
-    // Inject the payload
     setFunnelPagesDataStore(template.data);
-    // Reset view
     setActivePageStep("landing");
     setSelectedWidgetNode(null);
     setIsTemplateModalOpen(false);
@@ -467,7 +488,6 @@ export default function FunnelCraftBuilderCanvas() {
   };
 
   const appendWidgetToColumn = (targetRowId, targetColumnId, elementWidgetType) => {
-    // 💡 Auto-handle layout widgets
     if (elementWidgetType.startsWith("layout_")) {
       let cols = 1;
       if (elementWidgetType === "layout_2") cols = 2;
@@ -548,6 +568,36 @@ export default function FunnelCraftBuilderCanvas() {
   const triggerManualHotUpdateCommit = () => setLastSystemUpdateTimeStamp(new Date().toLocaleTimeString());
 
   // =========================================================================
+  // 🤖 WIDGET AI ENGINE HOOK (Text Rewriting)
+  // =========================================================================
+  const handleMagicAI = async () => {
+    if (!selectedWidgetNode || !selectedWidgetNode.widget.content) return;
+    
+    setIsAIGenerating(true);
+    try {
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          prompt: selectedWidgetNode.widget.content,
+          type: selectedWidgetNode.widget.type 
+        })
+      });
+      
+      const data = await res.json();
+      if (data.result) {
+        updateSelectedWidgetAttributes({ content: data.result });
+      } else {
+        alert("AI failed: " + data.error);
+      }
+    } catch (error) {
+      alert("Network error connecting to AI.");
+    } finally {
+      setIsAIGenerating(false);
+    }
+  };
+
+  // =========================================================================
   // 🔄 AUTO-SAVE ENGINE 
   // =========================================================================
   useEffect(() => {
@@ -570,7 +620,6 @@ export default function FunnelCraftBuilderCanvas() {
   // =========================================================================
   const handleCompileAndPublishFunnel = async () => {
     setIsDatabasePushLoading(true);
-    setDatabaseNetworkError("");
     
     try {
       if (!SUPABASE_PROJECT_URL || !SUPABASE_ANON_PUBLIC_KEY) {
@@ -662,10 +711,17 @@ export default function FunnelCraftBuilderCanvas() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <span className="text-[10px] text-slate-400 font-mono hidden lg:block">Synced: {lastSystemUpdateTimeStamp}</span>
           
-          {/* 🌟 NEW: TEMPLATE GALLERY BUTTON IN HEADER */}
+          {/* 🌟 NEW: AUTO-BUILD AI FUNNEL BUTTON */}
+          <button 
+            onClick={() => setIsAIFunnelModalOpen(true)}
+            className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wider shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-2 border border-indigo-400/30"
+          >
+            <span>🤖</span> Build with AI
+          </button>
+
           <button 
             onClick={() => setIsTemplateModalOpen(true)}
             className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wider shadow transition-all flex items-center gap-2"
@@ -675,7 +731,7 @@ export default function FunnelCraftBuilderCanvas() {
 
           <button 
             onClick={handleCompileAndPublishFunnel} disabled={isDatabasePushLoading}
-            className={`bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-1.5 rounded text-xs font-black uppercase tracking-wider shadow transition-all active:scale-95 ${isDatabasePushLoading ? "opacity-70 cursor-wait" : ""}`}
+            className={`bg-slate-700 hover:bg-slate-600 text-white px-5 py-1.5 rounded text-xs font-black uppercase tracking-wider shadow transition-all active:scale-95 ${isDatabasePushLoading ? "opacity-70 cursor-wait" : ""}`}
           >
             {isDatabasePushLoading ? "Syncing DB..." : "🚀 Publish Funnel"}
           </button>
@@ -750,7 +806,8 @@ export default function FunnelCraftBuilderCanvas() {
                 <p className="text-sm text-slate-500 mb-6">Drag and drop any of the 150+ widgets from the left panel.</p>
                 <div className="flex gap-4">
                   <button onClick={() => addNewSectionRowLayout(1)} className="px-6 py-2 bg-indigo-600 text-white text-xs font-bold uppercase rounded shadow">Add Section Row</button>
-                  <button onClick={() => setIsTemplateModalOpen(true)} className="px-6 py-2 bg-emerald-600 text-white text-xs font-bold uppercase rounded shadow">Load Template</button>
+                  {/* AI Empty State Button */}
+                  <button onClick={() => setIsAIFunnelModalOpen(true)} className="px-6 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-xs font-bold uppercase rounded shadow border border-indigo-400/50 flex gap-2"><span>🤖</span> Auto-Build with AI</button>
                 </div>
               </div>
             ) : (
@@ -836,7 +893,7 @@ export default function FunnelCraftBuilderCanvas() {
                                       </div>
                                     );
 
-                                    // Catch-all placeholder for complex interactive widgets (Stripe, Crypto, Maps, etc.)
+                                    // Catch-all placeholder for complex interactive widgets
                                     return (
                                       <div className="p-4 bg-white border border-slate-200 shadow-sm rounded text-center flex flex-col items-center justify-center">
                                         <span className="text-[12px] font-black uppercase text-indigo-700">{widget.name} Component</span>
@@ -904,6 +961,15 @@ export default function FunnelCraftBuilderCanvas() {
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold text-slate-700 uppercase">Primary Content / Value</label>
                       <textarea rows={4} value={selectedWidgetNode.widget.content} onChange={(e) => updateSelectedWidgetAttributes({ content: e.target.value })} className="w-full text-xs p-2 border rounded outline-none focus:border-indigo-500" />
+                      
+                      {/* ✨ WIDGET AI MAGIC BUTTON */}
+                      <button 
+                        onClick={handleMagicAI}
+                        disabled={isAIGenerating}
+                        className="w-full mt-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-bold py-2 px-3 rounded flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 transition-all"
+                      >
+                        {isAIGenerating ? "🤖 AI is writing..." : "✨ Enhance with AI"}
+                      </button>
                     </div>
                   )}
                 </div>
@@ -973,7 +1039,59 @@ export default function FunnelCraftBuilderCanvas() {
       </div>
 
       {/* =========================================================================
-          🌟 NEW: TEMPLATE GALLERY MODAL UI
+          🌟 NEW: AI FUNNEL BUILDER MODAL UI (THE MAGIC HAPPENS HERE)
+         ========================================================================= */}
+      {isAIFunnelModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col animate-fadeIn border border-indigo-200">
+            
+            <div className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white p-5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="text-3xl">🤖</span>
+                <div>
+                  <h3 className="text-lg font-black uppercase tracking-wider m-0">Auto-Build Funnel</h3>
+                  <p className="text-xs text-indigo-100 font-medium m-0">Describe your business, AI does the rest.</p>
+                </div>
+              </div>
+              <button onClick={() => setIsAIFunnelModalOpen(false)} className="hover:text-indigo-200 font-black text-xl">✕</button>
+            </div>
+
+            <div className="p-6 bg-slate-50 flex flex-col gap-4">
+              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">What are you selling?</label>
+              <textarea 
+                rows="4" 
+                placeholder="e.g. I am selling a 30-day fitness coaching program for busy moms who want to lose weight without giving up their favorite foods."
+                value={aiFunnelPrompt}
+                onChange={(e) => setAiFunnelPrompt(e.target.value)}
+                className="w-full p-4 rounded-xl border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none text-sm transition-all resize-none shadow-inner"
+              ></textarea>
+              
+              <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-xl flex gap-3 mt-2">
+                <span className="text-indigo-500 text-lg">💡</span>
+                <p className="text-[11px] text-indigo-800 font-medium leading-relaxed">
+                  Our AI will instantly generate a high-converting 3-step funnel (Landing, Checkout, Thank You) with professional copywriting tailored exactly to your product.
+                </p>
+              </div>
+
+              <button 
+                onClick={handleGenerateFullFunnelWithAI}
+                disabled={isBuildingFullFunnel || !aiFunnelPrompt.trim()}
+                className="w-full mt-2 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 text-white font-black text-sm uppercase tracking-wider py-4 rounded-xl transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2"
+              >
+                {isBuildingFullFunnel ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    Analyzing Market & Building...
+                  </>
+                ) : "✨ Generate My Funnel"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          🌟 TEMPLATE GALLERY MODAL UI
          ========================================================================= */}
       {isTemplateModalOpen && (
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
@@ -1014,7 +1132,7 @@ export default function FunnelCraftBuilderCanvas() {
       )}
 
       {/* =========================================================================
-          🎨 LIVE PUBLISH SUCCESS MODAL (PRESERVED FROM ORIGINAL)
+          🎨 LIVE PUBLISH SUCCESS MODAL
          ========================================================================= */}
       {isPublishModalOpen && generatedClientFunnelLink && (
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
