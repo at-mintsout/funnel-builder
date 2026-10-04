@@ -68,7 +68,6 @@ export async function POST(req) {
 
     const generatedText = data.choices[0].message.content;
     
-    // JSON block ko smartly extract karna
     let cleanText = generatedText;
     const firstBrace = cleanText.indexOf('{');
     const lastBrace = cleanText.lastIndexOf('}');
