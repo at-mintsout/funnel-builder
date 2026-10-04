@@ -21,8 +21,8 @@ export async function POST(req) {
       ? `You are a funnel builder. Return ONLY a JSON object: {"landing_headline":"...","landing_subheadline":"...","features_text":"...","cta_text":"...","checkout_title":"...","thankyou_message":"..."}`
       : "You are a copywriter. Write a short, high-converting marketing text. Max 2 sentences.";
 
-    // 👇 YAHAN HUMNE MODEL KA NAAM CHANGE KARKE 'gemini-1.5-flash-latest' KAR DIYA HAI
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
+    // 👇 YAHAN HUMNE SABSE STABLE MODEL 'gemini-pro' LAGA DIYA HAI
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ contents: [{ parts: [{ text: `${systemInstruction}\n\nUser Input: ${prompt}` }] }] })
@@ -37,7 +37,7 @@ export async function POST(req) {
 
     const generatedText = data.candidates[0].content.parts[0].text;
     
-    // Agar output mein JSON formatting (```json) aa jaye toh usko saaf karna
+    // Output se markdown formatting (```json) saaf karna
     let cleanText = generatedText.replace(/```json/g, '').replace(/```/g, '').trim();
     
     return NextResponse.json({ result: cleanText });
