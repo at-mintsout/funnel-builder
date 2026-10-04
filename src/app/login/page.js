@@ -23,7 +23,7 @@ export default function LoginPage() {
 
     try {
       if (isLogin) {
-        // LOGIN
+        // 🔐 LOGIN LOGIC
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         
@@ -31,8 +31,8 @@ export default function LoginPage() {
         router.push("/builder"); 
         
       } else {
-        // SIGNUP (With Name & Phone)
-        const { error } = await supabase.auth.signUp({
+        // 🚀 SIGNUP LOGIC
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -42,13 +42,34 @@ export default function LoginPage() {
             }
           }
         });
+        
         if (error) throw error;
 
-        alert("🚀 Account Created Successfully!");
-        router.push("/builder");
+        // Save user details to Database after successful signup
+        if (data.user) {
+          const { error: dbError } = await supabase
+            .from("user_settings")
+            .upsert({
+              user_id: data.user.id,
+              full_name: name,
+              phone: phone,
+              email: email,
+              active_plan: "Starter Core Box" // Default free plan
+            });
+            
+          if (dbError) {
+            console.error("Database Save Error:", dbError.message);
+          }
+        }
+
+        alert("🚀 Account Created Successfully! Please Sign In.");
+        // Clear fields and switch to login tab
+        setPassword("");
+        setIsLogin(true); 
       }
     } catch (error) {
-      setErrorMessage(error.message);
+      // Clean error message fallback
+      setErrorMessage(error.message || "Failed to fetch. Please check your internet or Supabase URL.");
     } finally {
       setLoading(false);
     }
@@ -56,17 +77,17 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
+      <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 border border-slate-100">
         
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-black text-[#0d216b]">FUNNELCRAFT</h1>
-          <p className="text-slate-500 mt-2">
-            {isLogin ? "Login to your account" : "Create your account"}
+          <h1 className="text-3xl font-black text-[#0f172a] tracking-tight">FUNNELFORGE</h1>
+          <p className="text-slate-500 mt-2 font-medium">
+            {isLogin ? "Login to your workspace" : "Create your account"}
           </p>
         </div>
 
         {errorMessage && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm mb-4 border border-red-200">
+          <div className="bg-red-50 text-red-600 p-4 rounded-lg text-sm font-semibold mb-6 border border-red-100">
             {errorMessage}
           </div>
         )}
@@ -77,54 +98,54 @@ export default function LoginPage() {
           {!isLogin && (
             <>
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1">Full Name</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Full Name</label>
                 <input 
                   type="text" required={!isLogin}
                   value={name} onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#0d216b] outline-none"
-                  placeholder="John Doe"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  placeholder="e.g. Maverick Hunter"
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1">Mobile Number</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Mobile Number</label>
                 <input 
                   type="tel" required={!isLogin}
                   value={phone} onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#0d216b] outline-none"
-                  placeholder="+91 9876543210"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  placeholder="+91 XXXXX XXXXX"
                 />
               </div>
             </>
           )}
 
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1">Email Address</label>
+            <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Email Address</label>
             <input 
               type="email" required
               value={email} onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#0d216b] outline-none"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
               placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1">Password</label>
+            <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Password</label>
             <input 
-              type="password" required
+              type="password" required minLength={6}
               value={password} onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#0d216b] outline-none"
-              placeholder="Min 6 characters"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              placeholder="••••••••"
             />
           </div>
 
-          <button type="submit" disabled={loading} className="w-full bg-[#0d216b] text-white font-bold py-3 rounded-md hover:bg-blue-900 transition-all">
-            {loading ? "Processing..." : isLogin ? "Sign In" : "Create Account"}
+          <button type="submit" disabled={loading} className="w-full bg-[#0f172a] text-white font-bold py-3.5 rounded-lg hover:bg-slate-800 transition-all disabled:opacity-70 mt-2 shadow-md">
+            {loading ? "Processing Protocol..." : isLogin ? "Access Workspace" : "Create Account"}
           </button>
         </form>
 
-        <div className="text-center mt-6">
-          <button onClick={() => setIsLogin(!isLogin)} className="text-sm text-indigo-600 hover:underline font-semibold">
-            {isLogin ? "Need an account? Sign up here" : "Already have an account? Login"}
+        <div className="text-center mt-6 pt-4 border-t border-slate-100">
+          <button onClick={() => setIsLogin(!isLogin)} className="text-sm text-indigo-600 hover:text-indigo-500 font-bold transition-colors">
+            {isLogin ? "Need an account? Sign up here ➔" : "Already have an account? Login ➔"}
           </button>
         </div>
 
