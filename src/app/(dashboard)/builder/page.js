@@ -386,36 +386,51 @@ export default function FunnelCraftBuilderCanvas() {
       }
 
       // Construct a dynamic high-converting blueprint using AI's text
-      const newAiFunnelData = {
-        landing: [
-          { id: `row_ai_1`, columns: [{ id: `col_ai_1`, widthPercent: 100, widgets: [
-            { id: `w_ai_1`, type: "h1", content: parsedAI.landing_headline || "Your Main Headline Here", styles: { textAlign: "center", color: "#0f172a", fontSize: "42px", fontWeight: "900", paddingBottom: "20px" } },
-            { id: `w_ai_2`, type: "paragraph", content: parsedAI.landing_subheadline || "Your descriptive subheadline here.", styles: { textAlign: "center", fontSize: "18px", color: "#475569" } },
-            { id: `w_ai_3`, type: "feature_grid", content: parsedAI.features_text || "Feature 1|Feature 2|Feature 3", styles: { paddingTop: "20px", paddingBottom: "30px" } },
-            { id: `w_ai_4`, type: "button_primary", content: parsedAI.cta_text || "Get Started Now", styles: { backgroundColor: "#4f46e5", color: "#ffffff", padding: "15px 30px", fontSize: "20px", borderRadius: "8px", textAlign: "center" } }
-          ]}]}
-        ],
-        checkout: [
-          { id: `row_ai_2`, columns: [{ id: `col_ai_2`, widthPercent: 100, widgets: [
-            { id: `w_ai_5`, type: "h2", content: parsedAI.checkout_title || "Complete Your Order", styles: { textAlign: "center", paddingBottom: "20px" } },
-            { id: `w_ai_6`, type: "form_checkout", content: "Checkout" },
-            { id: `w_ai_7`, type: "trust_badges", content: "SSL | Secure", styles: { textAlign: "center", paddingTop: "20px" } }
-          ]}]}
-        ],
-        thankyou: [
-          { id: `row_ai_3`, columns: [{ id: `col_ai_3`, widthPercent: 100, widgets: [
-            { id: `w_ai_8`, type: "confetti_trigger", content: "Success" },
-            { id: `w_ai_9`, type: "h2", content: parsedAI.thankyou_message || "Thank you for your order!", styles: { textAlign: "center", color: "#10b981", paddingTop: "50px" } }
-          ]}]}
-        ]
-      };
+        // =========================================================================
+  // 🤖 FULL FUNNEL AI BUILDER ENGINE (UNLOCKED VERSION)
+  // =========================================================================
+  const handleGenerateFullFunnelWithAI = async (e) => {
+    e.preventDefault();
+    if(!aiFunnelPrompt.trim()) return alert("Please describe your business first!");
+    
+    setIsBuildingFullFunnel(true);
+    try {
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          prompt: aiFunnelPrompt,
+          type: "generate_funnel" 
+        })
+      });
+      
+      const data = await res.json();
+      if (!data.result) throw new Error(data.error || "AI returned empty.");
 
-      setFunnelPageStepsTabs(["landing", "checkout", "thankyou"]);
-      setFunnelPagesDataStore(newAiFunnelData);
-      setActivePageStep("landing");
-      setIsAIFunnelModalOpen(false);
-      setAiFunnelPrompt("");
-      triggerManualHotUpdateCommit();
+      // Parse JSON safely
+      let parsedAI;
+      try {
+        const cleanJSONString = data.result.replace(/```json/g, '').replace(/```/g, '').trim();
+        parsedAI = JSON.parse(cleanJSONString);
+      } catch(e) {
+        throw new Error("AI returned invalid data format. Please try again.");
+      }
+
+      // 🌟 YAHAN LIMITATION HATA DI GAYI HAI: Ab AI jo bhi poora structure bhejega, wahi directly canvas par aayega
+      if(parsedAI.landing) {
+        setFunnelPageStepsTabs(["landing", "checkout", "thankyou"]);
+        setFunnelPagesDataStore({
+          landing: parsedAI.landing,
+          checkout: parsedAI.checkout || [],
+          thankyou: parsedAI.thankyou || []
+        });
+        setActivePageStep("landing");
+        setIsAIFunnelModalOpen(false);
+        setAiFunnelPrompt("");
+        triggerManualHotUpdateCommit();
+      } else {
+        throw new Error("AI did not generate the correct page structure.");
+      }
 
     } catch (error) {
       alert("AI Generation Error: " + error.message);
