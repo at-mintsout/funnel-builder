@@ -70,10 +70,22 @@ let systemInstruction = type === "generate_funnel"
       throw new Error(data.error?.message || "Groq AI Error");
     }
 
-    const generatedText = data.choices[0].message.content;
+        const generatedText = data.choices[0].message.content;
     
-    // JSON formatting saaf karna
-    let cleanText = generatedText.replace(/```json/g, '').replace(/```/g, '').trim();
+    // 🛠️ NAYA LOGIC: AI ke answer se sirf pure JSON block ko extract karna
+    let cleanText = generatedText;
+    
+    // Pehla '{' aur aakhiri '}' dhoondho
+    const firstBrace = cleanText.indexOf('{');
+    const lastBrace = cleanText.lastIndexOf('}');
+    
+    if (firstBrace !== -1 && lastBrace !== -1) {
+      // Sirf brackets ke andar ka data lo
+      cleanText = cleanText.substring(firstBrace, lastBrace + 1);
+    } else {
+      // Fallback: Agar bracket nahi mila toh markdown hatao
+      cleanText = cleanText.replace(/```json/g, '').replace(/```/g, '').trim();
+    }
     
     return NextResponse.json({ result: cleanText });
 
