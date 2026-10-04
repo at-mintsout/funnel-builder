@@ -1,60 +1,47 @@
 import { NextResponse } from "next/server";
 
+// YEH NAYA FUNCTION HAI SERVER TEST KARNE KE LIYE
+export async function GET() {
+  const apiKey = process.env.GEMINI_API_KEY;
+  return NextResponse.json({
+    status: "AI Backend is LIVE! 🚀",
+    isApiKeyFound: !!apiKey,
+    message: apiKey ? "API Key server ko mil gayi hai, ab AI chalega!" : "API Key abhi bhi MISSING hai Vercel par."
+  });
+}
+
 export async function POST(req) {
   try {
     const { prompt, type } = await req.json();
     const apiKey = process.env.GEMINI_API_KEY;
 
-    // 1. Check if API Key exists
     if (!apiKey) {
-      return NextResponse.json({ error: "Vercel Environment mein GEMINI_API_KEY missing hai." }, { status: 500 });
+      return NextResponse.json({ error: "Vercel Environment mein API Key missing hai." }, { status: 500 });
     }
 
-    let systemInstruction = "";
-    if (type === "generate_funnel") {
-      systemInstruction = `You are an expert marketer and funnel builder. The user will give a business idea. You MUST return ONLY a valid JSON object with the following exact keys, containing high-converting marketing copy for their funnel. Do not include markdown code blocks (\`\`\`json).
-      {
-        "landing_headline": "Punchy main headline (max 8 words)",
-        "landing_subheadline": "Persuasive subheadline explaining the benefit (max 20 words)",
-        "features_text": "Benefit 1 | Benefit 2 | Benefit 3",
-        "cta_text": "Action-driven button text (e.g., Get Started Now)",
-        "checkout_title": "Reassuring checkout headline",
-        "thankyou_message": "Congratulatory thank you message"
-      }`;
-    } else {
-      systemInstruction = type === "h1" || type === "h2" || type === "h3"
-        ? "You are a world-class copywriter. Write a short, punchy, high-converting marketing headline based on the user's input. Max 10 words. Return only the raw text."
-        : "You are an expert marketer. Expand the user's input into a persuasive, conversion-focused paragraph. Max 3 sentences. Return only the raw text.";
-    }
-
-    const fullPrompt = `${systemInstruction}\n\nUser Input: ${prompt}`;
+    let systemInstruction = type === "generate_funnel"
+      ? `You are a funnel builder. Return ONLY a JSON object: {"landing_headline":"...","landing_subheadline":"...","features_text":"...","cta_text":"...","checkout_title":"...","thankyou_message":"..."}`
+      : "You are a copywriter. Write a short, high-converting marketing text. Max 2 sentences.";
 
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: fullPrompt }] }]
-      })
+      body: JSON.stringify({ contents: [{ parts: [{ text: `${systemInstruction}\n\nUser Input: ${prompt}` }] }] })
     });
 
     const data = await response.json();
 
-    // 2. BULLETPROOF CHECK: Agar answer missing hai toh crash mat karo, actual error return karo
-    if (!data.candidates || data.candidates.length === 0 || !data.candidates[0].content) {
-      console.error("Google AI Error Response:", JSON.stringify(data, null, 2));
-      
-      // Agar API key galat hai ya quota khatam hai, toh Google ka asli message bhej do
-      const googleErrMsg = data.error?.message || "Google Gemini Safety Block or Empty Response";
-      throw new Error(googleErrMsg);
+    // Agar Google ne error bheja toh crash hone se bachao
+    if (!response.ok || !data.candidates) {
+      const googleError = data.error?.message || "Google blocked the request or sent empty data.";
+      throw new Error(`Google API Reject: ${googleError}`);
     }
 
-    // 3. Sab theek hai toh text extract karo
     const generatedText = data.candidates[0].content.parts[0].text;
-
     return NextResponse.json({ result: generatedText.replace(/\*/g, '').trim() });
 
   } catch (error) {
-    console.error("AI Error Triggered:", error.message);
+    console.error("AI Route Error:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
