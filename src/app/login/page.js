@@ -80,7 +80,7 @@ export default function LoginPage() {
       <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 border border-slate-100">
         
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-black text-[#0f172a] tracking-tight">FUNNELFORGE</h1>
+          <h1 className="text-3xl font-black text-[#0f172a] tracking-tight">FREE AI FUNNEL BUILDER</h1>
           <p className="text-slate-500 mt-2 font-medium">
             {isLogin ? "Login to your workspace" : "Create your account"}
           </p>

@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "FunnelForge Engine Studio",
+  title: "FREE AI FUNNEL BUILDER Engine Studio",
   description: "High-Performance Campaign Ingestion Framework",
 };
 

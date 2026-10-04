@@ -45,7 +45,7 @@ export default function DashboardPage() {
       {/* Sidebar */}
       <div className="w-64 bg-[#0d216b] text-white p-6 flex flex-col justify-between hidden md:flex">
         <div>
-          <h2 className="text-2xl font-black tracking-wider mb-10">FUNNELCRAFT</h2>
+          <h2 className="text-2xl font-black tracking-wider mb-10">BUILDER</h2>
           <nav className="space-y-4">
             <a href="/dashboard" className="block py-2.5 px-4 rounded bg-blue-900 font-semibold">📊 Dashboard</a>
             <a href="/builder" className="block py-2.5 px-4 rounded hover:bg-blue-900 transition">🛠️ Funnel Builder</a>

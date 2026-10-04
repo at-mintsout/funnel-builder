@@ -15,7 +15,7 @@ export async function POST(request) {
 
     // 1. 📧 Sending automated transactional email via Resend
     const emailPromise = resend.emails.send({
-      from: "FunnelCraft <onboarding@resend.dev>", // Free testing tier domain
+      from: "BUILDER <onboarding@resend.dev>", // Free testing tier domain
       to: [customerEmail],
       subject: `🎉 Access Granted: ${productName}!`,
       html: `
@@ -32,7 +32,7 @@ export async function POST(request) {
           </div>
           
           <p style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: 30px;">
-            Powered by FunnelCraft Automation Engine 🚀
+            Powered by BUILDER Automation Engine 🚀
           </p>
         </div>
       `,

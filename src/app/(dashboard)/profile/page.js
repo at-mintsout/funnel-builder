@@ -26,7 +26,7 @@ export default function UserProfilePage() {
         setFullName("Sandeep Kumar Choudhary");
         setEmail("kumar.sandeepchoudhary01@gmail.com");
         setPhone("+91 98765 43210");
-        setCompany("FunnelForge Inc.");
+        setCompany("FREE AI FUNNEL BUILDER Inc.");
       } catch (err) {
         console.error("Profile load error:", err.message);
       } finally {

@@ -54,7 +54,7 @@ export default function CRMDashboard() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `funnelcraft_leads_${new Date().toLocaleDateString()}.csv`);
+    link.setAttribute("download", `BUILDER_leads_${new Date().toLocaleDateString()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -67,7 +67,7 @@ export default function CRMDashboard() {
       <aside className="w-64 bg-[#0f172a] text-white flex flex-col hidden md:flex shrink-0 shadow-xl z-20">
         <div className="p-6 flex items-center gap-3 border-b border-slate-800">
           <div className="h-8 w-8 bg-indigo-500 rounded-lg flex items-center justify-center font-black text-sm shadow-lg">FC</div>
-          <span className="font-black text-lg tracking-widest uppercase">FunnelCraft</span>
+          <span className="font-black text-lg tracking-widest uppercase">BUILDER</span>
         </div>
         
         <nav className="flex-1 p-4 space-y-2">

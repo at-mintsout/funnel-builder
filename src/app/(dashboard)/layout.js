@@ -64,7 +64,7 @@ export default function DashboardMasterLayout({ children }) {
           <div className="h-12 flex items-center justify-between px-4 border-b border-slate-100 bg-white">
             <div className={`flex items-center gap-2.5 ${!sidebarOpen && "justify-center w-full"}`}>
               <span className="text-base bg-gradient-to-br from-blue-500 to-blue-600 text-white p-1 rounded-lg font-bold shadow-sm shadow-blue-500/20">🎯</span>
-              {sidebarOpen && <span className="font-extrabold text-xs uppercase tracking-widest bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">FunnelForge</span>}
+              {sidebarOpen && <span className="font-extrabold text-xs uppercase tracking-widest bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">FREE AI FUNNEL BUILDER</span>}
             </div>
             {sidebarOpen && (
               <button onClick={() => setSidebarOpen(false)} className="p-1 rounded-md border border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors text-[10px]">◂◂</button>

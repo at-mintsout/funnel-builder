@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export default function FunnelCraftLandingPage() {
+export default function BUILDERLandingPage() {
   const router = useRouter();
   const [heroEmail, setHeroEmail] = useState("");
 
@@ -25,7 +25,7 @@ export default function FunnelCraftLandingPage() {
         <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
           <Link href="/" className="flex items-center gap-2 group">
             <div className="w-8 h-8 bg-gradient-to-tr from-indigo-600 to-violet-600 rounded-lg flex items-center justify-center font-black text-xl shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform">F</div>
-            <span className="text-xl font-black tracking-tight text-white">FUNNELCRAFT</span>
+            <span className="text-xl font-black tracking-tight text-white">BUILDER</span>
           </Link>
           
           <div className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-300">
@@ -173,7 +173,7 @@ export default function FunnelCraftLandingPage() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2 opacity-50">
             <div className="w-6 h-6 bg-slate-700 rounded-md flex items-center justify-center font-black text-xs text-slate-400">F</div>
-            <span className="font-black tracking-tight text-slate-500">FUNNELCRAFT</span>
+            <span className="font-black tracking-tight text-slate-500">BUILDER</span>
           </div>
           <div className="flex gap-6 text-xs font-bold text-slate-500">
             <a href="#" className="hover:text-slate-300">Privacy Policy</a>
@@ -181,7 +181,7 @@ export default function FunnelCraftLandingPage() {
             <a href="#" className="hover:text-slate-300">API Docs</a>
           </div>
           <div className="text-xs text-slate-600 font-medium">
-            © 2026 FunnelCraft Inc. All Rights Reserved.
+            © 2026 BUILDER Inc. All Rights Reserved.
           </div>
         </div>
       </footer>

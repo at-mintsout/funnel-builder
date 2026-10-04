@@ -75,7 +75,7 @@ function PreviewCoreExecutionEngine() {
         key: "rzp_test_TSvymNXmAY7Wpq",
         amount: order.amount,
         currency: order.currency,
-        name: "FunnelCraft Checkout",
+        name: "BUILDER Checkout",
         description: "Test Product Payment",
         order_id: order.id,
         handler: async function (response) {

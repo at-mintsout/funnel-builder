@@ -99,7 +99,7 @@ export default function UserSubscriptionTierModule() {
         key: "rzp_test_TSvymNXmAY7Wpq", // Aap apni test/live key yahan use kar sakte hain
         amount: plan.rawPrice * 100, // Amount in paise
         currency: "INR",
-        name: "FunnelForge Subscriptions",
+        name: "FREE AI FUNNEL BUILDER Subscriptions",
         description: `Upgrade protocol to ${plan.name}`,
         handler: async function (response) {
           // 🚀 AUTOMATIC DATABASE UPGRADE ON SUCCESSFUL PAYMENT
