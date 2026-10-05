@@ -356,37 +356,6 @@ export default function FunnelCraftBuilderCanvas() {
   };
 
   // =========================================================================
-  // 🤖 FULL FUNNEL AI BUILDER ENGINE
-  // =========================================================================
-  const handleGenerateFullFunnelWithAI = async (e) => {
-    e.preventDefault();
-    if(!aiFunnelPrompt.trim()) return alert("Please describe your business first!");
-    
-    setIsBuildingFullFunnel(true);
-    try {
-      const res = await fetch("/api/ai", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          prompt: aiFunnelPrompt,
-          type: "generate_funnel" 
-        })
-      });
-      
-      const data = await res.json();
-      if (!data.result) throw new Error(data.error || "AI returned empty.");
-
-      // Parse JSON safely
-      let parsedAI;
-      try {
-        const cleanJSONString = data.result.replace(/```json/g, '').replace(/```/g, '').trim();
-        parsedAI = JSON.parse(cleanJSONString);
-      } catch(e) {
-        throw new Error("AI returned invalid data format. Please try again.");
-      }
-
-      // Construct a dynamic high-converting blueprint using AI's text
-        // =========================================================================
   // 🤖 FULL FUNNEL AI BUILDER ENGINE (UNLOCKED VERSION)
   // =========================================================================
   const handleGenerateFullFunnelWithAI = async (e) => {
@@ -753,7 +722,7 @@ export default function FunnelCraftBuilderCanvas() {
         </div>
       </header>
 
-      {/* 🏗️ 3-COLUMN WORKSPACE */}
+      {/* 🏗️️ 3-COLUMN WORKSPACE */}
       <div className="flex-1 flex overflow-hidden">
         
         {/* ⬅️ LEFT: 180px HALF-WIDTH WIDGETS SIDEBAR */}
