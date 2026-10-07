@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation"; 
-import { PREBUILT_TEMPLATES } from "@/app/(dashboard)/builder/data/templates";
+import { PREBUILT_TEMPLATES } from "@/app/(dashboard)/builder/data/templates"; // Verified absolute path
 
 // =========================================================================
 // 🌐 CONFIG MASTER DATA WIDGET REGISTRY SYSTEMS (150 PROFESSIONAL ELEMENTS)
@@ -203,7 +203,7 @@ export default function WebsiteBuilderCanvas() {
   
   // UI Appearance States
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // NEW: Sidebar toggle state
+  const [isFullScreen, setIsFullScreen] = useState(true); // NEW: Full Screen toggle state
 
   const [aiForm, setAiForm] = useState({
     businessCategory: "", productName: "", targetLocation: "India", productCategories: "", rate: "", discount: "", finalPrice: "", description: ""
@@ -536,18 +536,20 @@ export default function WebsiteBuilderCanvas() {
   ];
 
   return (
-    <div className={`fixed inset-0 z-50 flex flex-col ${isDarkMode ? 'bg-slate-900 text-slate-100' : 'bg-[#f8fafc] text-slate-800'} font-sans overflow-hidden transition-colors duration-300`}>
+    // FIX: Using isFullScreen toggle to control whether builder overlays dashboard or sits inside it
+    <div className={`flex flex-col ${isDarkMode ? 'bg-slate-900 text-slate-100' : 'bg-[#f8fafc] text-slate-800'} font-sans overflow-hidden transition-all duration-300 ${isFullScreen ? 'fixed inset-0 z-50' : 'relative h-[85vh] rounded-xl shadow-2xl border border-slate-300 mt-2'}`}>
       
       {/* 🛸 PREMIUM FLUSH HEADER */}
       <header className={`h-14 ${isDarkMode ? 'bg-black border-b border-slate-800' : 'bg-[#0f172a]'} text-white px-4 flex items-center justify-between shrink-0 shadow-md z-40 transition-colors`}>
         <div className="flex items-center gap-4">
           
-          {/* MENU TOGGLE BUTTON (NEW) */}
+          {/* FULL SCREEN TOGGLE BUTTON (NEW) */}
           <button 
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+            onClick={() => setIsFullScreen(!isFullScreen)} 
             className="p-1.5 hover:bg-slate-700 rounded text-xl transition-colors flex items-center justify-center leading-none"
+            title={isFullScreen ? "Exit Full Screen" : "Enter Full Screen"}
           >
-            ☰
+            {isFullScreen ? '↙️' : '☰'}
           </button>
 
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push("/dashboard")}>
@@ -593,8 +595,8 @@ export default function WebsiteBuilderCanvas() {
       {/* 🏗 3-COLUMN WORKSPACE */}
       <div className="flex-1 flex overflow-hidden">
         
-        {/* ⬅️ LEFT SIDEBAR (CONDITIONAL RENDER FOR MENU TOGGLE) */}
-        <aside className={`${isSidebarOpen ? 'flex' : 'hidden'} w-[200px] ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'} border-r flex-col shrink-0 shadow-sm z-30 select-none transition-all`}>
+        {/* ⬅️ LEFT SIDEBAR (Always flex now, hiding logic removed) */}
+        <aside className={`flex w-[200px] ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'} border-r flex-col shrink-0 shadow-sm z-30 select-none transition-colors`}>
           <div className={`p-2 border-b ${isDarkMode ? 'border-slate-700 bg-slate-900' : 'border-slate-100 bg-slate-50'}`}>
             <button onClick={() => router.push("/dashboard")} className="w-full flex justify-center items-center gap-2 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] font-bold uppercase tracking-wider shadow transition-all">
               📊 Dashboard
@@ -741,7 +743,7 @@ export default function WebsiteBuilderCanvas() {
                                     }
                                     if (wType === "audio_player") return <audio src={widget.content} controls className="w-full mt-2" />;
                                     
-                                    // Charts Fake Rendering (Visual placeholder for Builder view)
+                                    // Charts Fake Rendering
                                     if (wType.includes("chart")) return (
                                       <div className="w-full h-40 bg-slate-50 border flex items-end justify-around p-4 rounded gap-2 shadow-inner">
                                         <div className="w-full bg-indigo-300 h-[40%] rounded-t"></div>
@@ -916,7 +918,7 @@ export default function WebsiteBuilderCanvas() {
       </div>
 
       {/* =========================================================================
-          🌟 NEW: ADVANCED AI WEBSITE BUILDER MODAL UI (FULL UI RESTORED)
+          🌟 NEW: ADVANCED AI WEBSITE BUILDER MODAL UI
          ========================================================================= */}
       {isAIFunnelModalOpen && (
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4 transition-all">
@@ -987,7 +989,7 @@ export default function WebsiteBuilderCanvas() {
       )}
 
       {/* =========================================================================
-          🌟 TEMPLATE GALLERY MODAL UI (FULL UI RESTORED)
+          🌟 TEMPLATE GALLERY MODAL UI 
          ========================================================================= */}
       {isTemplateModalOpen && (
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4 transition-all">
