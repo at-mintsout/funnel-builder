@@ -994,7 +994,50 @@ export default function FunnelCraftBuilderCanvas() {
           </div>
         </div>
       )}
+      {/* =========================================================================
+          🎨 LIVE PUBLISH SUCCESS MODAL (ADDED BACK)
+         ========================================================================= */}
+      {isPublishModalOpen && generatedClientFunnelLink && (
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
+          <div className={`rounded shadow-2xl border w-full max-w-xl overflow-hidden flex flex-col animate-fadeIn ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white'}`}>
+            
+            <div className="bg-gradient-to-r from-[#0f172a] to-slate-800 text-white p-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🚀</span>
+                <div>
+                  <h3 className="text-xs font-black uppercase tracking-wider m-0">FunnelCraft Live Deployment</h3>
+                  <p className="text-[9px] text-slate-300 font-mono m-0">Payload deployed securely</p>
+                </div>
+              </div>
+              <button onClick={() => setIsPublishModalOpen(false)} className="hover:text-red-400 font-black text-sm">✕</button>
+            </div>
 
+            <div className={`p-5 space-y-4 text-left font-sans ${isDarkMode ? 'bg-slate-800' : 'bg-slate-50'}`}>
+              <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold p-3 rounded flex items-center gap-2">
+                <span>⚡</span>
+                <span>Success: Funnel saved to database!</span>
+              </div>
+
+              <div className="space-y-1.5">
+                <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">🔗 Live Client Routing URL:</span>
+                <div className={`flex gap-2 items-center p-2 border rounded shadow-inner ${isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-white'}`}>
+                  <input type="text" readOnly value={generatedClientFunnelLink} className={`flex-1 text-[11px] font-mono font-bold bg-transparent outline-none select-all ${isDarkMode ? 'text-indigo-300' : 'text-[#1e3a8a]'}`} />
+                  <button 
+                    onClick={() => { navigator.clipboard.writeText(generatedClientFunnelLink); alert("📋 Live Link copied!"); }}
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[9px] uppercase tracking-wider px-3 py-1.5 rounded transition-transform active:scale-95"
+                  >
+                    Copy Link
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className={`border-t p-3 flex justify-end ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-slate-100'}`}>
+              <button onClick={() => setIsPublishModalOpen(false)} className="bg-slate-300 hover:bg-slate-400 text-slate-800 text-[10px] font-bold uppercase tracking-wider px-4 py-1.5 rounded transition-colors">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* STYLES */}
       <style jsx global>{`
         .content-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
