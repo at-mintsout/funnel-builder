@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation"; 
 import { PREBUILT_TEMPLATES } from "@/data/templates"; // Templates coming from your new file
-
 // =========================================================================
 // 🌐 CONFIG MASTER DATA WIDGET REGISTRY SYSTEMS (150 PROFESSIONAL ELEMENTS)
 // =========================================================================
