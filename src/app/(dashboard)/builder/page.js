@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation"; 
-import { PREBUILT_TEMPLATES } from "@/Data/templates"; // Import path with Capital 'D' as discussed
+import { PREBUILT_TEMPLATES } from "./data/templates";
 
 // =========================================================================
 // 🌐 CONFIG MASTER DATA WIDGET REGISTRY SYSTEMS (150 PROFESSIONAL ELEMENTS)
