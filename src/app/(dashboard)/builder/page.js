@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation"; 
+import { PREBUILT_TEMPLATES } from "@/data/templates"; // Templates coming from your new file
 
 // =========================================================================
 // 🌐 CONFIG MASTER DATA WIDGET REGISTRY SYSTEMS (150 PROFESSIONAL ELEMENTS)
@@ -35,21 +36,21 @@ const ELEMENTOR_WIDGET_CATALOG = [
   { type: "marquee", name: "Scrolling Marquee", category: "text", icon: "↔️", defaultContent: "Special Discount! 50% OFF All Plans • Limited Time •" },
   { type: "text_outline", name: "Outline Text", category: "text", icon: "🔲", defaultContent: "HOLLOW FONT" },
   { type: "code_block", name: "Code Snippet", category: "text", icon: "💻", defaultContent: "console.log('Hello World');", styles: { backgroundColor: "#1e293b", color: "#10b981" } },
-  { type: "bullet_list", name: "Standard List", category: "text", icon: "•", defaultContent: "Feature One|Feature Two|Feature Three" },
-  { type: "check_list", name: "Checkmark List", category: "text", icon: "✓", defaultContent: "High Speed|Secure|Reliable" },
-  { type: "cross_list", name: "Cross List", category: "text", icon: "✗", defaultContent: "No Hidden Fees|No Setup Cost" },
-  { type: "numbered_list", name: "Numbered List", category: "text", icon: "🔢", defaultContent: "Step 1: Sign up|Step 2: Connect|Step 3: Profit" },
+  { type: "bullet_list", name: "Standard List", category: "text", icon: "•", defaultContent: "Feature One\nFeature Two\nFeature Three" },
+  { type: "check_list", name: "Checkmark List", category: "text", icon: "✓", defaultContent: "High Speed\nSecure\nReliable" },
+  { type: "cross_list", name: "Cross List", category: "text", icon: "✗", defaultContent: "No Hidden Fees\nNo Setup Cost" },
+  { type: "numbered_list", name: "Numbered List", category: "text", icon: "🔢", defaultContent: "Step 1: Sign up\nStep 2: Connect\nStep 3: Profit" },
 
   // --- 📸 3. MEDIA & VISUALS (15) ---
   { type: "image", name: "Single Image", category: "media", icon: "🖼", defaultContent: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80", imageSourceMode: "url" },
   { type: "video_embed", name: "YouTube/Vimeo", category: "media", icon: "▷", defaultContent: "https://www.youtube.com/embed/dQw4w9WgXcQ" },
-  { type: "audio_player", name: "Audio/Podcast", category: "media", icon: "♬", defaultContent: "Listen to our latest episode" },
+  { type: "audio_player", name: "Audio/Podcast", category: "media", icon: "♬", defaultContent: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
   { type: "lottie_anim", name: "Lottie Animation", category: "media", icon: "✨", defaultContent: "Paste Lottie JSON URL" },
   { type: "svg_icon", name: "SVG Icon Block", category: "media", icon: "⭐", defaultContent: "Rocket" },
   { type: "image_gallery", name: "Grid Gallery", category: "media", icon: "🗂️", defaultContent: "Img1|Img2|Img3" },
   { type: "carousel", name: "Image Slider", category: "media", icon: "🎠", defaultContent: "Slide 1|Slide 2" },
   { type: "before_after", name: "Before/After Slider", category: "media", icon: "🌗", defaultContent: "Before.jpg|After.jpg" },
-  { type: "pdf_viewer", name: "PDF Document", category: "media", icon: "📄", defaultContent: "Embed PDF Report here" },
+  { type: "pdf_viewer", name: "PDF Document", category: "media", icon: "📄", defaultContent: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
   { type: "3d_model", name: "3D Viewer", category: "media", icon: "🧊", defaultContent: "3D Asset URL" },
   { type: "avatar", name: "User Avatar", category: "media", icon: "👤", defaultContent: "Initials: JD" },
   { type: "gif_player", name: "Giphy Embed", category: "media", icon: "🎬", defaultContent: "Funny Meme GIF" },
@@ -86,8 +87,8 @@ const ELEMENTOR_WIDGET_CATALOG = [
 
   // --- 🎯 5. MARKETING & CONVERSION (30) ---
   { type: "button_primary", name: "Primary CTA", category: "marketing", icon: "🔥", defaultContent: "Get Started Now", styles: { backgroundColor: "#4f46e5", color: "#ffffff", padding: "14px 28px", borderRadius: "8px" } },
-  { type: "button_outline", name: "Outline Button", category: "marketing", icon: "🔳", defaultContent: "Learn More", styles: { color: "#4f46e5", backgroundColor: "transparent" } },
-  { type: "button_animated", name: "Pulsing Button", category: "marketing", icon: "💓", defaultContent: "Claim Offer", styles: { backgroundColor: "#ef4444", color: "#ffffff" } },
+  { type: "button_outline", name: "Outline Button", category: "marketing", icon: "🔳", defaultContent: "Learn More", styles: { color: "#4f46e5", backgroundColor: "transparent", padding: "14px 28px", borderRadius: "8px", border: "2px solid #4f46e5" } },
+  { type: "button_animated", name: "Pulsing Button", category: "marketing", icon: "💓", defaultContent: "Claim Offer", styles: { backgroundColor: "#ef4444", color: "#ffffff", padding: "14px 28px", borderRadius: "8px" } },
   { type: "countdown_timer", name: "Scarcity Countdown", category: "marketing", icon: "⏳", defaultContent: "Offer ends in 15:00 minutes" },
   { type: "evergreen_timer", name: "Evergreen Timer", category: "marketing", icon: "⏱️", defaultContent: "Resets every 24 hours for user" },
   { type: "pricing_table", name: "Pricing Tiers", category: "marketing", icon: "💲", defaultContent: "Basic: $9 | Pro: $29 | Elite: $99" },
@@ -118,7 +119,7 @@ const ELEMENTOR_WIDGET_CATALOG = [
 
   // --- 🛒 6. E-COMMERCE & WEB3 (20) ---
   { type: "product_card", name: "Product Card", category: "ecommerce", icon: "🛍️", defaultContent: "T-Shirt - $20" },
-  { type: "add_to_cart", name: "Add to Cart Btn", category: "ecommerce", icon: "🛒", defaultContent: "Add to Cart - $19.99" },
+  { type: "add_to_cart", name: "Add to Cart Btn", category: "ecommerce", icon: "🛒", defaultContent: "Add to Cart - $19.99", styles: { backgroundColor: "#10b981", color: "#ffffff", padding: "14px 28px", borderRadius: "8px" } },
   { type: "cart_summary", name: "Order Summary", category: "ecommerce", icon: "🧾", defaultContent: "Subtotal: $19.99 | Tax: $2.00 | Total: $21.99" },
   { type: "stripe_element", name: "Stripe Payment", category: "ecommerce", icon: "💳", defaultContent: "Credit Card Gateway (Stripe)" },
   { type: "paypal_btn", name: "PayPal Express", category: "ecommerce", icon: "🅿️", defaultContent: "Pay with PayPal" },
@@ -173,131 +174,6 @@ const ELEMENTOR_WIDGET_CATALOG = [
   { type: "webbook_trigger", name: "Zapier/Webhook", category: "advanced", icon: "🔗", defaultContent: "Send data payload to endpoint" }
 ];
 
-// =========================================================================
-// 🌟 TEMPLATE GALLERY DATA ENGINE
-// =========================================================================
-const PREBUILT_TEMPLATES = [
-  {
-    id: "tpl_digital_product",
-    name: "Digital Product Website",
-    icon: "💻",
-    description: "Sell e-books, courses, or digital templates. Includes VSL & Checkout.",
-    data: {
-      landing: [
-        { id: "r1", columns: [{ id: "c1", widthPercent: 100, widgets: [
-          { id: "w1", type: "h1", content: "Master The Art of Digital Scaling", styles: { textAlign: "center", color: "#0f172a", fontSize: "42px", fontWeight: "900", paddingBottom: "20px" } },
-          { id: "w2", type: "paragraph", content: "Learn the exact blueprint we used to scale our online business to 7 figures.", styles: { textAlign: "center", fontSize: "18px", color: "#475569" } },
-          { id: "w3", type: "video_embed", content: "https://www.youtube.com/embed/dQw4w9WgXcQ", styles: { paddingTop: "30px", paddingBottom: "30px" } },
-          { id: "w4", type: "button_primary", content: "Buy Now for $49", styles: { backgroundColor: "#ef4444", color: "#ffffff", padding: "15px 30px", fontSize: "20px", borderRadius: "8px", textAlign: "center" } }
-        ]}]}
-      ],
-      checkout: [
-        { id: "r2", columns: [{ id: "c2", widthPercent: 100, widgets: [
-          { id: "w5", type: "h2", content: "Secure Checkout", styles: { textAlign: "center", paddingBottom: "20px" } },
-          { id: "w6", type: "form_checkout", content: "Complete Order" },
-          { id: "w7", type: "trust_badges", content: "SSL | Stripe | Secure", styles: { textAlign: "center", paddingTop: "20px" } }
-        ]}]}
-      ],
-      thankyou: [
-        { id: "r3", columns: [{ id: "c3", widthPercent: 100, widgets: [
-          { id: "w8", type: "confetti_trigger", content: "Success" },
-          { id: "w9", type: "h2", content: "Payment Successful! 🎉", styles: { textAlign: "center", color: "#10b981", paddingTop: "50px" } },
-          { id: "w10", type: "button_outline", content: "Download Your Product Here", styles: { textAlign: "center", color: "#4f46e5" } }
-        ]}]}
-      ]
-    }
-  },
-  {
-    id: "tpl_webinar",
-    name: "Webinar Registration",
-    icon: "🎥",
-    description: "Capture leads and register attendees for automated webinars.",
-    data: {
-      landing: [
-        { id: "r1", columns: [{ id: "c1", widthPercent: 100, widgets: [
-          { id: "w1", type: "urgency_text", content: "Live Training: 300 Seats Capacity", styles: { textAlign: "center", color: "#ef4444" } },
-          { id: "w2", type: "h1", content: "How to Build SaaS Without Coding", styles: { textAlign: "center", fontSize: "38px" } },
-          { id: "w3", type: "countdown_timer", content: "Starting in 15:00", styles: { textAlign: "center", paddingTop: "20px", paddingBottom: "20px" } },
-          { id: "w4", type: "form_optin", content: "Reserve My Seat Now", fields: [{ label: "Email Address", type: "email" }] }
-        ]}]}
-      ],
-      checkout: [
-        { id: "r2", columns: [{ id: "c2", widthPercent: 100, widgets: [
-          { id: "w5", type: "h2", content: "You're Registered!", styles: { textAlign: "center", color: "#0f172a" } },
-          { id: "w6", type: "paragraph", content: "Mark your calendar for Sunday at 8 PM EST.", styles: { textAlign: "center" } }
-        ]}]}
-      ],
-      thankyou: [
-        { id: "r3", columns: [{ id: "c3", widthPercent: 100, widgets: [
-          { id: "w7", type: "h3", content: "Webinar Replay", styles: { textAlign: "center" } },
-          { id: "w8", type: "video_embed", content: "https://www.youtube.com/embed/dQw4w9WgXcQ" },
-          { id: "w9", type: "button_animated", content: "Join The Coaching Program", styles: { backgroundColor: "#f59e0b", color: "#fff", textAlign: "center" } }
-        ]}]}
-      ]
-    }
-  },
-  {
-    id: "tpl_ecommerce",
-    name: "Physical Product E-com",
-    icon: "📦",
-    description: "Direct response physical product sales page with order bumps.",
-    data: {
-      landing: [
-        { id: "r1", columns: [
-          { id: "c1", widthPercent: 50, widgets: [{ id: "w1", type: "image", content: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80" }] },
-          { id: "c2", widthPercent: 50, widgets: [
-            { id: "w2", type: "h2", content: "Premium Noise Cancelling Headphones", styles: { paddingBottom: "10px" } },
-            { id: "w3", type: "product_rating", content: "4.9/5 (1,200 Reviews)" },
-            { id: "w4", type: "paragraph", content: "Experience studio-quality sound with 40-hour battery life.", styles: { paddingTop: "10px" } },
-            { id: "w5", type: "add_to_cart", content: "Add to Cart - $199", styles: { paddingTop: "20px" } }
-          ]}
-        ]}
-      ],
-      checkout: [
-        { id: "r2", columns: [{ id: "c3", widthPercent: 100, widgets: [
-          { id: "w6", type: "form_checkout", content: "Complete Order" },
-          { id: "w7", type: "order_bump", content: "Yes, add 2-year warranty for $19" }
-        ]}]}
-      ],
-      thankyou: [
-        { id: "r3", columns: [{ id: "c4", widthPercent: 100, widgets: [
-          { id: "w8", type: "h2", content: "Order Confirmed!", styles: { textAlign: "center" } },
-          { id: "w9", type: "paragraph", content: "Your order #10923 is being packed.", styles: { textAlign: "center" } }
-        ]}]}
-      ]
-    }
-  },
-  {
-    id: "tpl_agency",
-    name: "Agency Lead Gen",
-    icon: "🏢",
-    description: "Perfect for service providers looking to book discovery calls.",
-    data: {
-      landing: [
-        { id: "r1", columns: [{ id: "c1", widthPercent: 100, widgets: [
-          { id: "w1", type: "h1", content: "We Scale B2B Brands to 8 Figures", styles: { textAlign: "center" } },
-          { id: "w2", type: "trust_badges", content: "As seen on: Forbes | TechCrunch | WSJ", styles: { textAlign: "center", paddingBottom: "30px" } },
-          { id: "w3", type: "feature_grid", content: "SEO | Paid Ads | Web Design | Copywriting" },
-          { id: "w4", type: "button_primary", content: "Apply To Work With Us", styles: { textAlign: "center" } }
-        ]}]}
-      ],
-      checkout: [
-        { id: "r2", columns: [{ id: "c2", widthPercent: 100, widgets: [
-          { id: "w5", type: "h2", content: "Book Your Discovery Call", styles: { textAlign: "center" } },
-          { id: "w6", type: "form_contact", content: "Submit Request" }
-        ]}]}
-      ],
-      thankyou: [
-        { id: "r3", columns: [{ id: "c3", widthPercent: 100, widgets: [
-          { id: "w7", type: "h2", content: "Application Received.", styles: { textAlign: "center" } },
-          { id: "w8", type: "paragraph", content: "Please prepare your P&L sheet before our call.", styles: { textAlign: "center" } },
-          { id: "w9", type: "social_share", content: "Follow us on LinkedIn", styles: { textAlign: "center" } }
-        ]}]}
-      ]
-    }
-  }
-];
-
 export default function WebsiteBuilderCanvas() {
   const router = useRouter();
 
@@ -316,36 +192,26 @@ export default function WebsiteBuilderCanvas() {
   const [activeDeviceViewMode, setActiveDeviceViewMode] = useState("desktop"); 
   const [lastSystemUpdateTimeStamp, setLastSystemUpdateTimeStamp] = useState("Never updated");
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
+  const [isPrePublishModalOpen, setIsPrePublishModalOpen] = useState(false);
   const [generatedClientFunnelLink, setGeneratedClientFunnelLink] = useState("");
   const [isDatabasePushLoading, setIsDatabasePushLoading] = useState(false);
   
-  // MODAL STATES
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
-  const [isPrePublishModalOpen, setIsPrePublishModalOpen] = useState(false);
-  
-  // 🤖 AI GENERATION STATES (NEW UPGRADES)
   const [isAIGenerating, setIsAIGenerating] = useState(false);
   const [isAIFunnelModalOpen, setIsAIFunnelModalOpen] = useState(false);
   const [isBuildingFullFunnel, setIsBuildingFullFunnel] = useState(false);
-
-  // 🌙 THEME STATE
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // 🤖 ADVANCED AI FORM STATE
   const [aiForm, setAiForm] = useState({
     businessCategory: "", productName: "", targetLocation: "India", productCategories: "", rate: "", discount: "", finalPrice: "", description: ""
   });
 
-  // =========================================================================
-  // 🧠 GLOBAL MULTI-PAGE ENGINE WORKSPACE DATA TREE STORE
-  // =========================================================================
   const [funnelPagesDataStore, setFunnelPagesDataStore] = useState({
     landing: [], checkout: [], thankyou: []
   });
 
   const canvasRows = funnelPagesDataStore[activePageStep] || [];
   
-  // UI States for Sidebar & Inspector
   const [expandedCategory, setExpandedCategory] = useState("layout"); 
   const [activeInspectorTab, setActiveInspectorTab] = useState("content"); 
   const [selectedWidgetNode, setSelectedWidgetNode] = useState(null);
@@ -559,7 +425,7 @@ export default function WebsiteBuilderCanvas() {
   const triggerManualHotUpdateCommit = () => setLastSystemUpdateTimeStamp(new Date().toLocaleTimeString());
 
   // =========================================================================
-  // 🤖 WIDGET AI ENGINE HOOK (Text Rewriting)
+  // 🤖 WIDGET AI ENGINE HOOK
   // =========================================================================
   const handleMagicAI = async () => {
     if (!selectedWidgetNode || !selectedWidgetNode.widget.content) return;
@@ -600,9 +466,6 @@ export default function WebsiteBuilderCanvas() {
   }, [funnelPagesDataStore]); 
 
   // =========================================================================
-  // 📥 PUBLISH ENGINE (SHORT URL, TRIM FIX, BRANDING)
-  // =========================================================================
-    // =========================================================================
   // 📥 PUBLISH ENGINE (FIXED UUID & PREVIEW SYNC)
   // =========================================================================
   const handleCompileAndPublishFunnel = async (isPreviewMode = false) => {
@@ -610,7 +473,6 @@ export default function WebsiteBuilderCanvas() {
     try {
       if (!SUPABASE_PROJECT_URL || !SUPABASE_ANON_PUBLIC_KEY) throw new Error("Supabase Keys missing in Vercel Environment Variables.");
       
-      // FIX 1: Supabase require strict UUID format. Reverting to crypto.randomUUID()
       const uniqueClientUrlTokenId = crypto.randomUUID();
       const verifiedPublicClientLiveRouterLink = `${window.location.origin}/preview?id=${uniqueClientUrlTokenId}`;
       
@@ -627,7 +489,6 @@ export default function WebsiteBuilderCanvas() {
       
       if (!dbResponseStream.ok) throw new Error(`Database Error (${dbResponseStream.status}): ${await dbResponseStream.text()}`);
       
-      // FIX 2: Preview mode automatically opens in a new tab without showing the success modal
       if (isPreviewMode) {
         window.open(verifiedPublicClientLiveRouterLink, '_blank');
         setIsPrePublishModalOpen(false);
@@ -647,6 +508,17 @@ export default function WebsiteBuilderCanvas() {
   };
 
   // =========================================================================
+  // 📁 LOCAL FILE UPLOAD HANDLER
+  // =========================================================================
+  const handleLocalFileUpload = (e) => {
+    const file = e.target.files[0];
+    if(file) {
+      const fileUrl = URL.createObjectURL(file);
+      updateSelectedWidgetAttributes({ content: fileUrl });
+    }
+  };
+
+  // =========================================================================
   // 🖥️ UI RENDER
   // =========================================================================
   const categoriesDef = [
@@ -661,7 +533,8 @@ export default function WebsiteBuilderCanvas() {
   ];
 
   return (
-    <div className={`h-screen flex flex-col ${isDarkMode ? 'bg-slate-900 text-slate-100' : 'bg-[#f8fafc] text-slate-800'} font-sans overflow-hidden transition-colors duration-300`}>
+    // FIX 1: 'fixed inset-0 z-50' forces the builder to overlay any layout margins/toggles!
+    <div className={`fixed inset-0 z-50 flex flex-col ${isDarkMode ? 'bg-slate-900 text-slate-100' : 'bg-[#f8fafc] text-slate-800'} font-sans overflow-hidden transition-colors duration-300`}>
       
       {/* 🛸 PREMIUM FLUSH HEADER */}
       <header className={`h-14 ${isDarkMode ? 'bg-black border-b border-slate-800' : 'bg-[#0f172a]'} text-white px-4 flex items-center justify-between shrink-0 shadow-md z-40 transition-colors`}>
@@ -671,7 +544,6 @@ export default function WebsiteBuilderCanvas() {
             <span className="font-black text-sm tracking-widest uppercase hidden md:block">Website Builder</span>
           </div>
           
-          {/* DARK MODE TOGGLE */}
           <button onClick={() => setIsDarkMode(!isDarkMode)} className="flex items-center gap-1 bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded border border-slate-600 text-[10px] font-bold uppercase transition-all">
             {isDarkMode ? "☀️ Light" : "🌙 Dark"}
           </button>
@@ -698,21 +570,6 @@ export default function WebsiteBuilderCanvas() {
 
         <div className="flex items-center gap-3">
           <span className="text-[10px] text-slate-400 font-mono hidden lg:block">Synced: {lastSystemUpdateTimeStamp}</span>
-          
-          <button 
-            onClick={() => setIsAIFunnelModalOpen(true)}
-            className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wider shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-2 border border-indigo-400/30"
-          >
-            <span>🤖</span> Build with AI
-          </button>
-
-          <button 
-            onClick={() => setIsTemplateModalOpen(true)}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wider shadow transition-all flex items-center gap-2"
-          >
-            <span>✨</span> Templates
-          </button>
-
           <button 
             onClick={() => setIsPrePublishModalOpen(true)} disabled={isDatabasePushLoading}
             className={`bg-slate-700 hover:bg-slate-600 text-white px-5 py-1.5 rounded text-xs font-black uppercase tracking-wider shadow transition-all active:scale-95 ${isDatabasePushLoading ? "opacity-70 cursor-wait" : ""}`}
@@ -725,8 +582,8 @@ export default function WebsiteBuilderCanvas() {
       {/* 🏗 3-COLUMN WORKSPACE */}
       <div className="flex-1 flex overflow-hidden">
         
-        {/* ⬅️ LEFT: 180px HALF-WIDTH WIDGETS SIDEBAR */}
-        <aside className={`w-[180px] ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'} border-r flex flex-col shrink-0 shadow-sm z-30 select-none transition-colors`}>
+        {/* ⬅️ LEFT SIDEBAR (BUTTONS MOVED TO BOTTOM HERE) */}
+        <aside className={`w-[200px] ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'} border-r flex flex-col shrink-0 shadow-sm z-30 select-none transition-colors`}>
           <div className={`p-2 border-b ${isDarkMode ? 'border-slate-700 bg-slate-900' : 'border-slate-100 bg-slate-50'}`}>
             <button onClick={() => router.push("/dashboard")} className="w-full flex justify-center items-center gap-2 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] font-bold uppercase tracking-wider shadow transition-all">
               📊 Dashboard
@@ -769,9 +626,19 @@ export default function WebsiteBuilderCanvas() {
               );
             })}
           </div>
+
+          {/* FIX 1.2: AI AND TEMPLATE BUTTONS AT BOTTOM LEFT */}
+          <div className={`p-3 border-t flex flex-col gap-2 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+             <button onClick={() => setIsAIFunnelModalOpen(true)} className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white py-2.5 rounded text-xs font-bold uppercase tracking-wider shadow-md transition-all flex items-center justify-center gap-2">
+               🤖 Build with AI
+             </button>
+             <button onClick={() => setIsTemplateModalOpen(true)} className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 rounded text-xs font-bold uppercase tracking-wider shadow-md transition-all flex items-center justify-center gap-2">
+               ✨ Templates
+             </button>
+          </div>
         </aside>
 
-        {/* ⬜ CENTER: WIDE CANVAS */}
+        {/* ⬜ CENTER: CANVAS */}
         <main className={`flex-1 overflow-y-auto relative content-scrollbar flex justify-center p-6 bg-dot-matrix-mesh ${isDarkMode ? 'bg-[#0f172a]' : 'bg-[#f1f5f9]'}`}>
           
           <div className={`absolute top-4 left-1/2 transform -translate-x-1/2 px-2 py-1 rounded shadow border flex gap-1 z-20 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
@@ -842,17 +709,54 @@ export default function WebsiteBuilderCanvas() {
                                 )}
 
                                 <div style={globalStyles} className="w-full">
+                                  {/* FIX 3: REAL WIDGET RENDERING FOR MEDIA, PDF, CHARTS, ETC */}
                                   {(() => {
                                     const wType = widget.type;
+                                    
+                                    // Text Nodes
                                     if (["h1","h2","h3","h4","h5","h6","heading","sub_heading"].includes(wType)) return <h2 className="m-0 leading-tight">{widget.content}</h2>;
                                     if (wType === "paragraph") return <p className="m-0 leading-relaxed">{widget.content}</p>;
                                     if (wType === "blockquote") return <blockquote className="border-l-4 border-indigo-500 pl-4 italic m-0">{widget.content}</blockquote>;
-                                    if (wType === "razorpay_btn") return <button className="w-full bg-[#3395ff] text-white font-bold py-3 rounded text-xs uppercase shadow-sm">Pay {widget.pricing?.finalPrice ? `₹${widget.pricing.finalPrice}` : 'Now'} via Razorpay</button>;
+                                    if (wType === "bullet_list") return <ul className="list-disc pl-5 m-0 text-left">{widget.content.split('\n').map((item, i) => <li key={i}>{item}</li>)}</ul>;
+                                    if (wType === "check_list") return <ul className="pl-5 m-0 text-left">{widget.content.split('\n').map((item, i) => <li key={i}>✅ {item}</li>)}</ul>;
+                                    if (wType === "numbered_list") return <ol className="list-decimal pl-5 m-0 text-left">{widget.content.split('\n').map((item, i) => <li key={i}>{item}</li>)}</ol>;
+                                    
+                                    // Media & Real Files
                                     if (wType === "image") return <div className="flex justify-center w-full overflow-hidden"><img src={widget.content} className="max-w-full h-auto rounded shadow-sm object-contain" alt="Visual" /></div>;
-                                    if (wType.includes("button")) return <div className="w-full max-w-full overflow-hidden"><button className="font-bold border-none w-full shadow-sm" style={{...widget.styles, borderRadius: widget.styles?.borderRadius || '4px'}}>{widget.content}</button></div>;
+                                    if (wType === "pdf_viewer") return <iframe src={widget.content} className="w-full h-[500px] border rounded shadow-sm" />;
+                                    if (wType === "video_embed" || wType === "video") {
+                                      if(widget.content.includes("youtube") || widget.content.includes("vimeo")) {
+                                        return <iframe src={widget.content} className="w-full aspect-video rounded shadow-sm border-0" allowFullScreen />;
+                                      }
+                                      return <video src={widget.content} controls className="w-full aspect-video rounded shadow-sm" />;
+                                    }
+                                    if (wType === "audio_player") return <audio src={widget.content} controls className="w-full mt-2" />;
+                                    
+                                    // Charts Fake Rendering (Visual placeholder for Builder view)
+                                    if (wType.includes("chart")) return (
+                                      <div className="w-full h-40 bg-slate-50 border flex items-end justify-around p-4 rounded gap-2 shadow-inner">
+                                        <div className="w-full bg-indigo-300 h-[40%] rounded-t"></div>
+                                        <div className="w-full bg-indigo-500 h-[70%] rounded-t"></div>
+                                        <div className="w-full bg-indigo-700 h-[100%] rounded-t"></div>
+                                      </div>
+                                    );
+
+                                    // Forms & E-comm
+                                    if (wType === "razorpay_btn") return <button className="w-full bg-[#3395ff] text-white font-bold py-3 rounded text-xs uppercase shadow-sm">Pay {widget.pricing?.finalPrice ? `₹${widget.pricing.finalPrice}` : 'Now'} via Razorpay</button>;
+                                    if (wType.includes("button") || wType === "add_to_cart") return <div className="w-full max-w-full overflow-hidden"><button className="font-bold border-none w-full shadow-sm" style={{...widget.styles, borderRadius: widget.styles?.borderRadius || '4px'}}>{widget.content}</button></div>;
+                                    
+                                    if (wType.includes("form") || wType === "file_upload") return (
+                                      <div className="border p-6 rounded-lg bg-slate-50 w-full max-w-sm mx-auto flex flex-col gap-3 shadow-sm text-left">
+                                        <span className="font-bold text-sm text-slate-700 text-center mb-2">{widget.name}</span>
+                                        {widget.fields?.map((f, i) => <input key={i} type={f.type} placeholder={f.label} className="w-full border p-2.5 text-xs rounded bg-white" disabled/>) || <input type="text" placeholder="Email / Details" className="w-full border p-2.5 text-xs rounded bg-white" disabled/>}
+                                        <button className="bg-slate-800 text-white font-bold p-3 rounded text-xs mt-2 uppercase tracking-wide">Submit Details</button>
+                                      </div>
+                                    );
+
+                                    // Catch-all placeholder (FIXED: Editable generic text block)
                                     return (
-                                      <div className="w-full flex flex-col text-left">
-                                        <span className="text-[10px] font-black uppercase text-indigo-400 mb-1 opacity-50">{widget.name}</span>
+                                      <div className="w-full flex flex-col text-left border p-3 bg-slate-50/50 rounded shadow-sm">
+                                        <span className="text-[10px] font-black uppercase text-indigo-500 mb-1 opacity-70">{widget.name} Component</span>
                                         <div className="w-full leading-relaxed">{widget.content}</div>
                                       </div>
                                     );
@@ -896,6 +800,7 @@ export default function WebsiteBuilderCanvas() {
 
             <div className="flex-1 overflow-y-auto p-4 content-scrollbar space-y-5">
               
+              {/* CONTENT TAB */}
               {activeInspectorTab === "content" && (
                 <div className={`space-y-4 text-left ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                   <div className="space-y-1">
@@ -903,21 +808,30 @@ export default function WebsiteBuilderCanvas() {
                     <input type="url" placeholder="https://..." value={selectedWidgetNode.widget.redirectUrl || ""} onChange={(e) => updateSelectedWidgetAttributes({ redirectUrl: e.target.value })} className={`w-full text-xs p-2 border rounded focus:border-indigo-500 outline-none ${isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-slate-300'}`} />
                   </div>
                   
-                  {selectedWidgetNode.widget.type === "image" ? (
-                    <div className={`space-y-1 border p-2 rounded ${isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-slate-50'}`}>
-                      <label className="text-[10px] font-bold uppercase">Image URL</label>
-                      <input type="text" value={selectedWidgetNode.widget.content} onChange={(e) => updateSelectedWidgetAttributes({ content: e.target.value })} className={`w-full text-xs p-2 border rounded ${isDarkMode ? 'bg-slate-800 border-slate-600' : ''}`} />
-                    </div>
-                  ) : !["divider", "spacer", "layout"].some(t => selectedWidgetNode.widget.type.includes(t)) && (
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase">Primary Content / Value</label>
-                      <textarea rows={4} value={selectedWidgetNode.widget.content} onChange={(e) => updateSelectedWidgetAttributes({ content: e.target.value })} className={`w-full text-xs p-2 border rounded outline-none focus:border-indigo-500 ${isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : ''}`} />
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase">Primary Content / Value</label>
+                    <textarea rows={4} value={selectedWidgetNode.widget.content} onChange={(e) => updateSelectedWidgetAttributes({ content: e.target.value })} className={`w-full text-xs p-2 border rounded outline-none focus:border-indigo-500 ${isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : ''}`} />
+                    
+                    {!["divider", "spacer", "layout"].some(t => selectedWidgetNode.widget.type.includes(t)) && (
                       <button onClick={handleMagicAI} disabled={isAIGenerating} className="w-full mt-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-bold py-2 px-3 rounded flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 transition-all">
                         {isAIGenerating ? "🤖 AI is writing..." : "✨ Enhance with AI"}
                       </button>
+                    )}
+                  </div>
+
+                  {/* FIX 3.2: UNIVERSAL FILE UPLOAD FOR ALL MEDIA */}
+                  {["image", "pdf_viewer", "video_embed", "audio_player", "file_upload"].includes(selectedWidgetNode.widget.type) && (
+                    <div className="mt-4 p-4 border-2 border-dashed border-indigo-300 rounded-lg bg-indigo-50/50 hover:bg-indigo-50 text-center relative cursor-pointer transition-colors">
+                      <input type="file" onChange={handleLocalFileUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                      <div className="flex flex-col items-center gap-1.5">
+                         <span className="text-2xl">📁</span>
+                         <span className="text-[10px] font-bold text-indigo-700 uppercase tracking-wide">Upload Local File</span>
+                         <span className="text-[9px] text-indigo-400 font-medium">Replaces the URL above</span>
+                      </div>
                     </div>
                   )}
 
+                  {/* RAZORPAY PRICING CONFIGURATION */}
                   {selectedWidgetNode.widget.type === "razorpay_btn" && (
                     <div className={`space-y-2 mt-4 p-3 border rounded ${isDarkMode ? 'bg-slate-700 border-indigo-900' : 'bg-slate-50 border-indigo-100'}`}>
                       <label className={`text-[10px] font-bold uppercase ${isDarkMode ? 'text-indigo-400' : 'text-indigo-700'}`}>Checkout Pricing Config (₹)</label>
@@ -931,6 +845,7 @@ export default function WebsiteBuilderCanvas() {
                 </div>
               )}
 
+              {/* STYLE TAB */}
               {activeInspectorTab === "style" && (
                 <div className={`space-y-4 text-left ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                   <div className="grid grid-cols-2 gap-3">
@@ -943,10 +858,12 @@ export default function WebsiteBuilderCanvas() {
                       <input type="color" value={selectedWidgetNode.widget.styles?.backgroundColor || "#ffffff"} onChange={(e) => updateSelectedWidgetAttributes({}, { backgroundColor: e.target.value })} className="w-full h-8 cursor-pointer border rounded" />
                     </div>
                   </div>
+
                   <div className={`space-y-1 p-2 border rounded ${isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-slate-50'}`}>
                     <label className="text-[9px] font-bold uppercase flex justify-between"><span>Font Size</span> <span className="text-indigo-500">{parseInt(selectedWidgetNode.widget.styles?.fontSize || "14")}px</span></label>
                     <input type="range" min="10" max="72" value={parseInt(selectedWidgetNode.widget.styles?.fontSize || "14")} onChange={(e) => updateSelectedWidgetAttributes({}, { fontSize: `${e.target.value}px` })} className="w-full accent-indigo-500" />
                   </div>
+
                   <div className="space-y-1">
                     <label className="text-[9px] font-bold uppercase">Alignment</label>
                     <div className={`flex rounded p-1 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-100'}`}>
@@ -960,6 +877,7 @@ export default function WebsiteBuilderCanvas() {
                 </div>
               )}
 
+              {/* SPACING TAB */}
               {activeInspectorTab === "spacing" && (
                 <div className={`space-y-4 text-left ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                   <div className={`p-3 rounded border ${isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-slate-50 border-slate-200'}`}>
@@ -975,18 +893,26 @@ export default function WebsiteBuilderCanvas() {
                       </div>
                     </div>
                   </div>
+                  
+                  {selectedWidgetNode.widget.type === "spacer" && (
+                    <div className="space-y-1">
+                       <label className="text-[9px] font-bold uppercase">Spacer Height</label>
+                       <input type="range" min="10" max="200" onChange={(e) => updateSelectedWidgetAttributes({}, { verticalSpace: `${e.target.value}px` })} className="w-full accent-indigo-500" />
+                    </div>
+                  )}
                 </div>
               )}
+
             </div>
           </aside>
         )}
       </div>
 
       {/* =========================================================================
-          🌟 NEW: ADVANCED AI WEBSITE BUILDER MODAL UI
+          🌟 NEW: ADVANCED AI WEBSITE BUILDER MODAL UI (FULL UI RESTORED)
          ========================================================================= */}
       {isAIFunnelModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4 transition-all">
           <div className={`rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col animate-fadeIn border ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-indigo-200'}`}>
             <div className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white p-5 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -999,15 +925,15 @@ export default function WebsiteBuilderCanvas() {
               <button onClick={() => setIsAIFunnelModalOpen(false)} className="hover:text-indigo-200 font-black text-xl">✕</button>
             </div>
 
-            <div className={`p-6 flex flex-col gap-3 max-h-[80vh] overflow-y-auto content-scrollbar ${isDarkMode ? 'bg-slate-800 text-white' : 'bg-slate-50 text-slate-800'}`}>
+            <div className={`p-6 flex flex-col gap-4 max-h-[80vh] overflow-y-auto content-scrollbar ${isDarkMode ? 'bg-slate-800 text-white' : 'bg-slate-50 text-slate-800'}`}>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold uppercase opacity-70">Product Name</label>
-                  <input type="text" value={aiForm.productName} onChange={(e) => setAiForm({...aiForm, productName: e.target.value})} className={`w-full p-2 rounded border text-sm outline-none ${isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-white border-slate-300'}`} placeholder="e.g. Next.js Kit" />
+                  <input type="text" value={aiForm.productName} onChange={(e) => setAiForm({...aiForm, productName: e.target.value})} className={`w-full p-2.5 rounded border text-sm outline-none ${isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-white border-slate-300'}`} placeholder="e.g. Next.js Kit" />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold uppercase opacity-70">Target Location</label>
-                  <select value={aiForm.targetLocation} onChange={(e) => setAiForm({...aiForm, targetLocation: e.target.value})} className={`w-full p-2 rounded border text-sm outline-none ${isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-white border-slate-300'}`}>
+                  <select value={aiForm.targetLocation} onChange={(e) => setAiForm({...aiForm, targetLocation: e.target.value})} className={`w-full p-2.5 rounded border text-sm outline-none ${isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-white border-slate-300'}`}>
                     <option value="India">India</option>
                     <option value="Abroad">Abroad / International</option>
                   </select>
@@ -1017,11 +943,11 @@ export default function WebsiteBuilderCanvas() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold uppercase opacity-70">Business Category</label>
-                  <input type="text" value={aiForm.businessCategory} onChange={(e) => setAiForm({...aiForm, businessCategory: e.target.value})} className={`w-full p-2 rounded border text-sm outline-none ${isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-white border-slate-300'}`} placeholder="e.g. Software, Fitness" />
+                  <input type="text" value={aiForm.businessCategory} onChange={(e) => setAiForm({...aiForm, businessCategory: e.target.value})} className={`w-full p-2.5 rounded border text-sm outline-none ${isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-white border-slate-300'}`} placeholder="e.g. Software, Fitness" />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold uppercase opacity-70">Product Category</label>
-                  <input type="text" value={aiForm.productCategories} onChange={(e) => setAiForm({...aiForm, productCategories: e.target.value})} className={`w-full p-2 rounded border text-sm outline-none ${isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-white border-slate-300'}`} placeholder="e.g. SaaS, E-book" />
+                  <input type="text" value={aiForm.productCategories} onChange={(e) => setAiForm({...aiForm, productCategories: e.target.value})} className={`w-full p-2.5 rounded border text-sm outline-none ${isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-white border-slate-300'}`} placeholder="e.g. SaaS, E-book" />
                 </div>
               </div>
 
@@ -1042,10 +968,10 @@ export default function WebsiteBuilderCanvas() {
 
               <div className="space-y-1">
                 <label className="text-[10px] font-bold uppercase opacity-70">Additional Details</label>
-                <textarea rows="2" value={aiForm.description} onChange={(e) => setAiForm({...aiForm, description: e.target.value})} className={`w-full p-2 rounded border text-sm resize-none outline-none ${isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-white border-slate-300'}`} placeholder="Targeting busy founders..."></textarea>
+                <textarea rows="3" value={aiForm.description} onChange={(e) => setAiForm({...aiForm, description: e.target.value})} className={`w-full p-2.5 rounded border text-sm resize-none outline-none ${isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-white border-slate-300'}`} placeholder="Targeting busy founders..."></textarea>
               </div>
 
-              <button onClick={handleGenerateFullFunnelWithAI} disabled={isBuildingFullFunnel || !aiForm.productName.trim()} className="w-full mt-2 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 text-white font-black text-sm uppercase py-3 rounded transition-all flex justify-center items-center">
+              <button onClick={handleGenerateFullFunnelWithAI} disabled={isBuildingFullFunnel || !aiForm.productName.trim()} className="w-full mt-2 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 text-white font-black text-sm uppercase py-4 rounded-xl transition-all shadow-lg active:scale-95 flex justify-center items-center gap-2">
                 {isBuildingFullFunnel ? "Analyzing & Building..." : "✨ Generate My Website"}
               </button>
             </div>
@@ -1054,26 +980,36 @@ export default function WebsiteBuilderCanvas() {
       )}
 
       {/* =========================================================================
-          🌟 TEMPLATE GALLERY MODAL UI 
+          🌟 TEMPLATE GALLERY MODAL UI (FULL UI RESTORED)
          ========================================================================= */}
       {isTemplateModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
-          <div className="bg-white rounded shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col animate-fadeIn">
-            <div className="bg-slate-900 text-white p-4 flex items-center justify-between border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">✨</span>
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4 transition-all">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col animate-fadeIn">
+            <div className="bg-slate-900 text-white p-5 flex items-center justify-between border-b border-slate-800">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">✨</span>
                 <div>
                   <h3 className="text-sm font-black uppercase tracking-wider m-0">Template Gallery</h3>
+                  <p className="text-[10px] text-slate-400 font-mono m-0">Load pre-built structural blueprints.</p>
                 </div>
               </div>
-              <button onClick={() => setIsTemplateModalOpen(false)} className="hover:text-red-400 font-black text-lg">✕</button>
+              <button onClick={() => setIsTemplateModalOpen(false)} className="hover:text-red-400 font-black text-xl">✕</button>
             </div>
             <div className="p-6 bg-slate-50 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-h-[70vh] overflow-y-auto">
               {PREBUILT_TEMPLATES.map((template) => (
-                <div key={template.id} className="bg-white border border-slate-200 rounded-lg p-5 flex flex-col hover:shadow-xl hover:border-indigo-400 transition-all cursor-pointer group" onClick={() => handleLoadTemplate(template.id)}>
-                  <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">{template.icon}</div>
+                <div key={template.id} className="bg-white border border-slate-200 rounded-xl p-5 flex flex-col hover:shadow-xl hover:border-indigo-400 transition-all cursor-pointer group" onClick={() => handleLoadTemplate(template.id)}>
+                  <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">{template.icon}</div>
                   <h4 className="font-bold text-slate-800 text-sm mb-1">{template.name}</h4>
                   <p className="text-[11px] text-slate-500 flex-1 leading-relaxed">{template.description}</p>
+                  
+                  <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <div className="flex gap-1">
+                      {Object.keys(template.data).map((pageName, idx) => (
+                        <span key={idx} className="bg-slate-100 text-slate-500 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">{pageName}</span>
+                      ))}
+                    </div>
+                    <span className="text-[10px] font-black text-indigo-600 uppercase tracking-wider group-hover:text-indigo-800">Load ➔</span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -1085,11 +1021,11 @@ export default function WebsiteBuilderCanvas() {
           👁️ PREVIEW OR PUBLISH SELECTION MODAL
          ========================================================================= */}
       {isPrePublishModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4 transition-all">
           <div className={`rounded-xl shadow-2xl p-6 w-full max-w-sm flex flex-col gap-4 animate-fadeIn ${isDarkMode ? 'bg-slate-800' : 'bg-white'}`}>
             <h3 className={`text-lg font-black text-center uppercase tracking-wider ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Choose Action</h3>
             <div className="flex flex-col gap-3">
-                            <button
+              <button
                 onClick={() => handleCompileAndPublishFunnel(true)}
                 className="w-full py-3 rounded-lg font-bold bg-indigo-100 text-indigo-700 hover:bg-indigo-200 uppercase text-xs tracking-wide shadow-sm"
               >
@@ -1111,7 +1047,7 @@ export default function WebsiteBuilderCanvas() {
           🎨 LIVE PUBLISH SUCCESS MODAL
          ========================================================================= */}
       {isPublishModalOpen && generatedClientFunnelLink && (
-        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4 transition-all">
           <div className={`rounded-xl shadow-2xl border w-full max-w-lg overflow-hidden flex flex-col animate-fadeIn ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white'}`}>
             <div className="bg-gradient-to-r from-[#0f172a] to-slate-800 text-white p-5 flex items-center justify-between">
               <div className="flex items-center gap-3">
