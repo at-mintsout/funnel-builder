@@ -602,30 +602,45 @@ export default function WebsiteBuilderCanvas() {
   // =========================================================================
   // 📥 PUBLISH ENGINE (SHORT URL, TRIM FIX, BRANDING)
   // =========================================================================
-  const handleCompileAndPublishFunnel = async () => {
+    // =========================================================================
+  // 📥 PUBLISH ENGINE (FIXED UUID & PREVIEW SYNC)
+  // =========================================================================
+  const handleCompileAndPublishFunnel = async (isPreviewMode = false) => {
     setIsDatabasePushLoading(true);
     try {
       if (!SUPABASE_PROJECT_URL || !SUPABASE_ANON_PUBLIC_KEY) throw new Error("Supabase Keys missing in Vercel Environment Variables.");
       
-      // Generate 16-20 character short URL ID
-      const shortId = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
-      const uniqueClientUrlTokenId = `site_${shortId}`;
-      
+      // FIX 1: Supabase require strict UUID format. Reverting to crypto.randomUUID()
+      const uniqueClientUrlTokenId = crypto.randomUUID();
       const verifiedPublicClientLiveRouterLink = `${window.location.origin}/preview?id=${uniqueClientUrlTokenId}`;
       
       const dbResponseStream = await fetch(`${SUPABASE_PROJECT_URL}/rest/v1/${TARGET_TABLE_NAME}`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_PUBLIC_KEY, "Authorization": `Bearer ${SUPABASE_ANON_PUBLIC_KEY}`, "Prefer": "resolution=merge-duplicates" },
-        body: JSON.stringify({ id: uniqueClientUrlTokenId, name: `Website - ${new Date().toLocaleDateString()}`, canvas_state: funnelPagesDataStore, updated_at: new Date().toISOString() })
+        body: JSON.stringify({ 
+          id: uniqueClientUrlTokenId, 
+          name: isPreviewMode ? `Preview Draft - ${new Date().toLocaleTimeString()}` : `Website - ${new Date().toLocaleDateString()}`, 
+          canvas_state: funnelPagesDataStore, 
+          updated_at: new Date().toISOString() 
+        })
       });
+      
       if (!dbResponseStream.ok) throw new Error(`Database Error (${dbResponseStream.status}): ${await dbResponseStream.text()}`);
       
-      setGeneratedClientFunnelLink(verifiedPublicClientLiveRouterLink.trim());
-      setIsPublishModalOpen(true);
+      // FIX 2: Preview mode automatically opens in a new tab without showing the success modal
+      if (isPreviewMode) {
+        window.open(verifiedPublicClientLiveRouterLink, '_blank');
+        setIsPrePublishModalOpen(false);
+      } else {
+        setGeneratedClientFunnelLink(verifiedPublicClientLiveRouterLink.trim());
+        setIsPrePublishModalOpen(false);
+        setIsPublishModalOpen(true);
+      }
       triggerManualHotUpdateCommit(); 
    } catch (err) {
       alert("❌ Publish Error: " + err.message); 
       setIsPublishModalOpen(false); 
+      setIsPrePublishModalOpen(false);
     } finally {
       setIsDatabasePushLoading(false);
     }
@@ -1074,21 +1089,14 @@ export default function WebsiteBuilderCanvas() {
           <div className={`rounded-xl shadow-2xl p-6 w-full max-w-sm flex flex-col gap-4 animate-fadeIn ${isDarkMode ? 'bg-slate-800' : 'bg-white'}`}>
             <h3 className={`text-lg font-black text-center uppercase tracking-wider ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Choose Action</h3>
             <div className="flex flex-col gap-3">
-              <button
-                onClick={() => {
-                  localStorage.setItem('website_preview_draft', JSON.stringify(funnelPagesDataStore));
-                  window.open('/preview?mode=local', '_blank');
-                  setIsPrePublishModalOpen(false);
-                }}
+                            <button
+                onClick={() => handleCompileAndPublishFunnel(true)}
                 className="w-full py-3 rounded-lg font-bold bg-indigo-100 text-indigo-700 hover:bg-indigo-200 uppercase text-xs tracking-wide shadow-sm"
               >
                 👁️ Preview Website
               </button>
               <button
-                onClick={() => {
-                  setIsPrePublishModalOpen(false);
-                  handleCompileAndPublishFunnel();
-                }}
+                onClick={() => handleCompileAndPublishFunnel(false)}
                 className="w-full py-3 rounded-lg font-bold bg-emerald-600 text-white hover:bg-emerald-500 uppercase text-xs tracking-wide shadow-sm"
               >
                 🚀 Publish to Live
