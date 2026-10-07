@@ -53,7 +53,7 @@ const ELEMENTOR_WIDGET_CATALOG = [
   { type: "3d_model", name: "3D Viewer", category: "media", icon: "🧊", defaultContent: "3D Asset URL" },
   { type: "avatar", name: "User Avatar", category: "media", icon: "👤", defaultContent: "Initials: JD" },
   { type: "gif_player", name: "Giphy Embed", category: "media", icon: "🎬", defaultContent: "Funny Meme GIF" },
-  { type: "qr_code", name: "QR Code Generator", category: "media", icon: "📱", defaultContent: "https://mintsout.in" },
+  { type: "qr_code", name: "QR Code Generator", category: "media", icon: "📱", defaultContent: "https://website.com" },
   { type: "chart_bar", name: "Bar Chart", category: "media", icon: "📊", defaultContent: "Sales Data Growth" },
   { type: "chart_pie", name: "Pie Chart", category: "media", icon: "🍩", defaultContent: "Market Share Metrics" },
 
@@ -101,7 +101,7 @@ const ELEMENTOR_WIDGET_CATALOG = [
   { type: "feature_grid", name: "Benefit Grid", category: "marketing", icon: "🎛", defaultContent: "Fast|Secure|Cheap|Reliable" },
   { type: "faq_accordion", name: "FAQ Dropdowns", category: "marketing", icon: "❓", defaultContent: "Question 1|Question 2|Question 3" },
   { type: "timeline", name: "Process Timeline", category: "marketing", icon: "📈", defaultContent: "Step 1 -> Step 2 -> Step 3" },
-  { type: "comparison_table", name: "Us vs Them", category: "marketing", icon: "⚖️", defaultContent: "FunnelCraft vs Competitors" },
+  { type: "comparison_table", name: "Us vs Them", category: "marketing", icon: "⚖️", defaultContent: "Our Website vs Competitors" },
   { type: "guarantee_box", name: "Money-Back Guarantee", category: "marketing", icon: "🏆", defaultContent: "30-Day No Questions Asked Guarantee" },
   { type: "video_sales_letter", name: "VSL Wrapper", category: "marketing", icon: "🎬", defaultContent: "Watch this short video before it's taken down." },
   { type: "animated_headline", name: "Attention Headline", category: "marketing", icon: "🚨", defaultContent: "STOP: Read this now!" },
@@ -126,7 +126,7 @@ const ELEMENTOR_WIDGET_CATALOG = [
   { type: "crypto_pay", name: "Web3 Wallet Pay", category: "ecommerce", icon: "🪙", defaultContent: "Connect MetaMask (ETH/USDT)" },
   { type: "mini_cart", name: "Floating Mini Cart", category: "ecommerce", icon: "👜", defaultContent: "2 Items in Cart" },
   { type: "product_rating", name: "Aggregate Rating", category: "ecommerce", icon: "🌟", defaultContent: "4.8/5 based on 2,000 reviews" },
-  { type: "sku_display", name: "Product SKU", category: "ecommerce", icon: "🏷️", defaultContent: "SKU: FUN-1001" },
+  { type: "sku_display", name: "Product SKU", category: "ecommerce", icon: "🏷️", defaultContent: "SKU: WEB-1001" },
   { type: "inventory_status", name: "Stock Status", category: "ecommerce", icon: "📦", defaultContent: "In Stock (Only 4 left!)" },
   { type: "currency_switcher", name: "Currency Selector", category: "ecommerce", icon: "💱", defaultContent: "USD | EUR | INR | GBP" },
   { type: "shipping_calc", name: "Shipping Calculator", category: "ecommerce", icon: "🚚", defaultContent: "Enter zip code for shipping cost" },
@@ -141,7 +141,7 @@ const ELEMENTOR_WIDGET_CATALOG = [
   // --- 🌐 7. SOCIAL & COMMUNITY (15) ---
   { type: "social_share", name: "Share Buttons", category: "social", icon: "🔗", defaultContent: "Share on: Facebook | Twitter | LinkedIn" },
   { type: "fb_comments", name: "Facebook Comments", category: "social", icon: "📘", defaultContent: "Load FB Comments Plugin" },
-  { type: "twitter_feed", name: "X/Twitter Feed", category: "social", icon: "🐦", defaultContent: "Latest Tweets from @FunnelCraft" },
+  { type: "twitter_feed", name: "X/Twitter Feed", category: "social", icon: "🐦", defaultContent: "Latest Tweets from @OurWebsite" },
   { type: "insta_grid", name: "Instagram Grid", category: "social", icon: "📸", defaultContent: "Recent Instagram Posts" },
   { type: "discord_invite", name: "Discord Embed", category: "social", icon: "👾", defaultContent: "Join our Discord Community (500 online)" },
   { type: "telegram_chat", name: "Telegram Button", category: "social", icon: "✈️", defaultContent: "Chat with us on Telegram" },
@@ -179,7 +179,7 @@ const ELEMENTOR_WIDGET_CATALOG = [
 const PREBUILT_TEMPLATES = [
   {
     id: "tpl_digital_product",
-    name: "Digital Product Funnel",
+    name: "Digital Product Website",
     icon: "💻",
     description: "Sell e-books, courses, or digital templates. Includes VSL & Checkout.",
     data: {
@@ -206,10 +206,99 @@ const PREBUILT_TEMPLATES = [
         ]}]}
       ]
     }
+  },
+  {
+    id: "tpl_webinar",
+    name: "Webinar Registration",
+    icon: "🎥",
+    description: "Capture leads and register attendees for automated webinars.",
+    data: {
+      landing: [
+        { id: "r1", columns: [{ id: "c1", widthPercent: 100, widgets: [
+          { id: "w1", type: "urgency_text", content: "Live Training: 300 Seats Capacity", styles: { textAlign: "center", color: "#ef4444" } },
+          { id: "w2", type: "h1", content: "How to Build SaaS Without Coding", styles: { textAlign: "center", fontSize: "38px" } },
+          { id: "w3", type: "countdown_timer", content: "Starting in 15:00", styles: { textAlign: "center", paddingTop: "20px", paddingBottom: "20px" } },
+          { id: "w4", type: "form_optin", content: "Reserve My Seat Now", fields: [{ label: "Email Address", type: "email" }] }
+        ]}]}
+      ],
+      checkout: [
+        { id: "r2", columns: [{ id: "c2", widthPercent: 100, widgets: [
+          { id: "w5", type: "h2", content: "You're Registered!", styles: { textAlign: "center", color: "#0f172a" } },
+          { id: "w6", type: "paragraph", content: "Mark your calendar for Sunday at 8 PM EST.", styles: { textAlign: "center" } }
+        ]}]}
+      ],
+      thankyou: [
+        { id: "r3", columns: [{ id: "c3", widthPercent: 100, widgets: [
+          { id: "w7", type: "h3", content: "Webinar Replay", styles: { textAlign: "center" } },
+          { id: "w8", type: "video_embed", content: "https://www.youtube.com/embed/dQw4w9WgXcQ" },
+          { id: "w9", type: "button_animated", content: "Join The Coaching Program", styles: { backgroundColor: "#f59e0b", color: "#fff", textAlign: "center" } }
+        ]}]}
+      ]
+    }
+  },
+  {
+    id: "tpl_ecommerce",
+    name: "Physical Product E-com",
+    icon: "📦",
+    description: "Direct response physical product sales page with order bumps.",
+    data: {
+      landing: [
+        { id: "r1", columns: [
+          { id: "c1", widthPercent: 50, widgets: [{ id: "w1", type: "image", content: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80" }] },
+          { id: "c2", widthPercent: 50, widgets: [
+            { id: "w2", type: "h2", content: "Premium Noise Cancelling Headphones", styles: { paddingBottom: "10px" } },
+            { id: "w3", type: "product_rating", content: "4.9/5 (1,200 Reviews)" },
+            { id: "w4", type: "paragraph", content: "Experience studio-quality sound with 40-hour battery life.", styles: { paddingTop: "10px" } },
+            { id: "w5", type: "add_to_cart", content: "Add to Cart - $199", styles: { paddingTop: "20px" } }
+          ]}
+        ]}
+      ],
+      checkout: [
+        { id: "r2", columns: [{ id: "c3", widthPercent: 100, widgets: [
+          { id: "w6", type: "form_checkout", content: "Complete Order" },
+          { id: "w7", type: "order_bump", content: "Yes, add 2-year warranty for $19" }
+        ]}]}
+      ],
+      thankyou: [
+        { id: "r3", columns: [{ id: "c4", widthPercent: 100, widgets: [
+          { id: "w8", type: "h2", content: "Order Confirmed!", styles: { textAlign: "center" } },
+          { id: "w9", type: "paragraph", content: "Your order #10923 is being packed.", styles: { textAlign: "center" } }
+        ]}]}
+      ]
+    }
+  },
+  {
+    id: "tpl_agency",
+    name: "Agency Lead Gen",
+    icon: "🏢",
+    description: "Perfect for service providers looking to book discovery calls.",
+    data: {
+      landing: [
+        { id: "r1", columns: [{ id: "c1", widthPercent: 100, widgets: [
+          { id: "w1", type: "h1", content: "We Scale B2B Brands to 8 Figures", styles: { textAlign: "center" } },
+          { id: "w2", type: "trust_badges", content: "As seen on: Forbes | TechCrunch | WSJ", styles: { textAlign: "center", paddingBottom: "30px" } },
+          { id: "w3", type: "feature_grid", content: "SEO | Paid Ads | Web Design | Copywriting" },
+          { id: "w4", type: "button_primary", content: "Apply To Work With Us", styles: { textAlign: "center" } }
+        ]}]}
+      ],
+      checkout: [
+        { id: "r2", columns: [{ id: "c2", widthPercent: 100, widgets: [
+          { id: "w5", type: "h2", content: "Book Your Discovery Call", styles: { textAlign: "center" } },
+          { id: "w6", type: "form_contact", content: "Submit Request" }
+        ]}]}
+      ],
+      thankyou: [
+        { id: "r3", columns: [{ id: "c3", widthPercent: 100, widgets: [
+          { id: "w7", type: "h2", content: "Application Received.", styles: { textAlign: "center" } },
+          { id: "w8", type: "paragraph", content: "Please prepare your P&L sheet before our call.", styles: { textAlign: "center" } },
+          { id: "w9", type: "social_share", content: "Follow us on LinkedIn", styles: { textAlign: "center" } }
+        ]}]}
+      ]
+    }
   }
 ];
 
-export default function FunnelCraftBuilderCanvas() {
+export default function WebsiteBuilderCanvas() {
   const router = useRouter();
 
   // =========================================================================
@@ -232,6 +321,7 @@ export default function FunnelCraftBuilderCanvas() {
   
   // MODAL STATES
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  const [isPrePublishModalOpen, setIsPrePublishModalOpen] = useState(false);
   
   // 🤖 AI GENERATION STATES (NEW UPGRADES)
   const [isAIGenerating, setIsAIGenerating] = useState(false);
@@ -272,7 +362,7 @@ export default function FunnelCraftBuilderCanvas() {
   };
 
   // =========================================================================
-  // 🤖 FULL FUNNEL AI BUILDER ENGINE (WITH ADVANCED PROMPT)
+  // 🤖 FULL WEBSITE AI BUILDER ENGINE
   // =========================================================================
   const handleGenerateFullFunnelWithAI = async (e) => {
     e.preventDefault();
@@ -280,9 +370,8 @@ export default function FunnelCraftBuilderCanvas() {
     
     setIsBuildingFullFunnel(true);
     try {
-      // Compile the multi-field form into a single powerful prompt for the AI
       const compiledPrompt = `
-        Build a high-converting 3-page funnel (Landing, Checkout, Thank You) for:
+        Build a high-converting 3-page website (Landing, Checkout, Thank You) for:
         Product Name: ${aiForm.productName}
         Business Category: ${aiForm.businessCategory}
         Product Categories: ${aiForm.productCategories}
@@ -333,7 +422,7 @@ export default function FunnelCraftBuilderCanvas() {
   const handleLoadTemplate = (templateId) => {
     const template = PREBUILT_TEMPLATES.find(t => t.id === templateId);
     if (!template) return;
-    if(!confirm("Loading a template will overwrite your current funnel design. Continue?")) return;
+    if(!confirm("Loading a template will overwrite your current website design. Continue?")) return;
 
     setFunnelPageStepsTabs(Object.keys(template.data));
     setFunnelPagesDataStore(template.data);
@@ -502,7 +591,7 @@ export default function FunnelCraftBuilderCanvas() {
         await fetch(`${SUPABASE_PROJECT_URL}/rest/v1/${TARGET_TABLE_NAME}`, {
           method: "POST",
           headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_PUBLIC_KEY, "Authorization": `Bearer ${SUPABASE_ANON_PUBLIC_KEY}`, "Prefer": "resolution=merge-duplicates" },
-          body: JSON.stringify({ id: "draft_funnel_id_001", name: "My Auto-Saved Funnel", canvas_state: funnelPagesDataStore, updated_at: new Date().toISOString() })
+          body: JSON.stringify({ id: "draft_site_id_001", name: "My Auto-Saved Website", canvas_state: funnelPagesDataStore, updated_at: new Date().toISOString() })
         });
         triggerManualHotUpdateCommit(); 
       } catch (error) {}
@@ -511,22 +600,27 @@ export default function FunnelCraftBuilderCanvas() {
   }, [funnelPagesDataStore]); 
 
   // =========================================================================
-  // 📥 PUBLISH ENGINE (WITH VERCEL / UUID FIX)
+  // 📥 PUBLISH ENGINE (SHORT URL, TRIM FIX, BRANDING)
   // =========================================================================
   const handleCompileAndPublishFunnel = async () => {
     setIsDatabasePushLoading(true);
     try {
       if (!SUPABASE_PROJECT_URL || !SUPABASE_ANON_PUBLIC_KEY) throw new Error("Supabase Keys missing in Vercel Environment Variables.");
-      let uniqueClientUrlTokenId;
-      try { uniqueClientUrlTokenId = crypto.randomUUID(); } catch (e) { uniqueClientUrlTokenId = 'funnel_' + Date.now() + Math.random().toString(36).substring(7); }
+      
+      // Generate 16-20 character short URL ID
+      const shortId = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
+      const uniqueClientUrlTokenId = `site_${shortId}`;
+      
       const verifiedPublicClientLiveRouterLink = `${window.location.origin}/preview?id=${uniqueClientUrlTokenId}`;
+      
       const dbResponseStream = await fetch(`${SUPABASE_PROJECT_URL}/rest/v1/${TARGET_TABLE_NAME}`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_PUBLIC_KEY, "Authorization": `Bearer ${SUPABASE_ANON_PUBLIC_KEY}`, "Prefer": "resolution=merge-duplicates" },
-        body: JSON.stringify({ id: uniqueClientUrlTokenId, name: `Funnel - ${new Date().toLocaleDateString()}`, canvas_state: funnelPagesDataStore, updated_at: new Date().toISOString() })
+        body: JSON.stringify({ id: uniqueClientUrlTokenId, name: `Website - ${new Date().toLocaleDateString()}`, canvas_state: funnelPagesDataStore, updated_at: new Date().toISOString() })
       });
       if (!dbResponseStream.ok) throw new Error(`Database Error (${dbResponseStream.status}): ${await dbResponseStream.text()}`);
-      setGeneratedClientFunnelLink(verifiedPublicClientLiveRouterLink);
+      
+      setGeneratedClientFunnelLink(verifiedPublicClientLiveRouterLink.trim());
       setIsPublishModalOpen(true);
       triggerManualHotUpdateCommit(); 
    } catch (err) {
@@ -558,8 +652,8 @@ export default function FunnelCraftBuilderCanvas() {
       <header className={`h-14 ${isDarkMode ? 'bg-black border-b border-slate-800' : 'bg-[#0f172a]'} text-white px-4 flex items-center justify-between shrink-0 shadow-md z-40 transition-colors`}>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push("/dashboard")}>
-            <div className="h-7 w-7 bg-indigo-500 rounded flex items-center justify-center font-black text-xs shadow-lg">FC</div>
-            <span className="font-black text-sm tracking-widest uppercase hidden md:block">Builder Studio</span>
+            <div className="h-7 w-7 bg-indigo-500 rounded flex items-center justify-center font-black text-xs shadow-lg">WB</div>
+            <span className="font-black text-sm tracking-widest uppercase hidden md:block">Website Builder</span>
           </div>
           
           {/* DARK MODE TOGGLE */}
@@ -590,7 +684,6 @@ export default function FunnelCraftBuilderCanvas() {
         <div className="flex items-center gap-3">
           <span className="text-[10px] text-slate-400 font-mono hidden lg:block">Synced: {lastSystemUpdateTimeStamp}</span>
           
-          {/* 🌟 AUTO-BUILD AI FUNNEL BUTTON */}
           <button 
             onClick={() => setIsAIFunnelModalOpen(true)}
             className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wider shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-2 border border-indigo-400/30"
@@ -606,7 +699,7 @@ export default function FunnelCraftBuilderCanvas() {
           </button>
 
           <button 
-            onClick={handleCompileAndPublishFunnel} disabled={isDatabasePushLoading}
+            onClick={() => setIsPrePublishModalOpen(true)} disabled={isDatabasePushLoading}
             className={`bg-slate-700 hover:bg-slate-600 text-white px-5 py-1.5 rounded text-xs font-black uppercase tracking-wider shadow transition-all active:scale-95 ${isDatabasePushLoading ? "opacity-70 cursor-wait" : ""}`}
           >
             {isDatabasePushLoading ? "Syncing DB..." : "🚀 Publish"}
@@ -666,7 +759,6 @@ export default function FunnelCraftBuilderCanvas() {
         {/* ⬜ CENTER: WIDE CANVAS */}
         <main className={`flex-1 overflow-y-auto relative content-scrollbar flex justify-center p-6 bg-dot-matrix-mesh ${isDarkMode ? 'bg-[#0f172a]' : 'bg-[#f1f5f9]'}`}>
           
-          {/* Viewport Toggles */}
           <div className={`absolute top-4 left-1/2 transform -translate-x-1/2 px-2 py-1 rounded shadow border flex gap-1 z-20 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
             {[{ id: "desktop", icon: "💻" }, { id: "tablet", icon: "🎴" }, { id: "mobile", icon: "📱" }].map(dev => (
               <button key={dev.id} onClick={() => setActiveDeviceViewMode(dev.id)} className={`p-1 rounded transition-colors ${activeDeviceViewMode === dev.id ? "bg-indigo-100 text-indigo-700" : (isDarkMode ? "text-slate-400 hover:text-white" : "text-slate-400 hover:text-slate-700")}`}>{dev.icon}</button>
@@ -678,7 +770,7 @@ export default function FunnelCraftBuilderCanvas() {
             {canvasRows.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center text-center p-10">
                 <div className="text-4xl mb-4 text-indigo-300">✨</div>
-                <h2 className="text-xl font-bold text-slate-800 mb-2">Start Building Your Funnel</h2>
+                <h2 className="text-xl font-bold text-slate-800 mb-2">Start Building Your Website</h2>
                 <p className="text-sm text-slate-500 mb-6">Drag and drop any of the 150+ widgets from the left panel.</p>
                 <div className="flex gap-4">
                   <button onClick={() => addNewSectionRowLayout(1)} className="px-6 py-2 bg-indigo-600 text-white text-xs font-bold uppercase rounded shadow">Add Section Row</button>
@@ -735,25 +827,14 @@ export default function FunnelCraftBuilderCanvas() {
                                 )}
 
                                 <div style={globalStyles} className="w-full">
-                                  {/* SMART RENDERER FOR 150 ITEMS (FIXED) */}
                                   {(() => {
                                     const wType = widget.type;
-                                    
-                                    // Text Nodes
                                     if (["h1","h2","h3","h4","h5","h6","heading","sub_heading"].includes(wType)) return <h2 className="m-0 leading-tight">{widget.content}</h2>;
                                     if (wType === "paragraph") return <p className="m-0 leading-relaxed">{widget.content}</p>;
                                     if (wType === "blockquote") return <blockquote className="border-l-4 border-indigo-500 pl-4 italic m-0">{widget.content}</blockquote>;
-                                    
-                                    // E-Commerce & Checkout (NEW: Razorpay Final Price Display)
                                     if (wType === "razorpay_btn") return <button className="w-full bg-[#3395ff] text-white font-bold py-3 rounded text-xs uppercase shadow-sm">Pay {widget.pricing?.finalPrice ? `₹${widget.pricing.finalPrice}` : 'Now'} via Razorpay</button>;
-                                    
-                                    // Media
                                     if (wType === "image") return <div className="flex justify-center w-full overflow-hidden"><img src={widget.content} className="max-w-full h-auto rounded shadow-sm object-contain" alt="Visual" /></div>;
-                                    
-                                    // Buttons (FIXED: Prevent Bleeding with overflow-hidden max-w-full)
                                     if (wType.includes("button")) return <div className="w-full max-w-full overflow-hidden"><button className="font-bold border-none w-full shadow-sm" style={{...widget.styles, borderRadius: widget.styles?.borderRadius || '4px'}}>{widget.content}</button></div>;
-
-                                    // Catch-all placeholder (FIXED: Editable generic text block instead of gray box)
                                     return (
                                       <div className="w-full flex flex-col text-left">
                                         <span className="text-[10px] font-black uppercase text-indigo-400 mb-1 opacity-50">{widget.name}</span>
@@ -800,7 +881,6 @@ export default function FunnelCraftBuilderCanvas() {
 
             <div className="flex-1 overflow-y-auto p-4 content-scrollbar space-y-5">
               
-              {/* CONTENT TAB */}
               {activeInspectorTab === "content" && (
                 <div className={`space-y-4 text-left ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                   <div className="space-y-1">
@@ -817,14 +897,12 @@ export default function FunnelCraftBuilderCanvas() {
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold uppercase">Primary Content / Value</label>
                       <textarea rows={4} value={selectedWidgetNode.widget.content} onChange={(e) => updateSelectedWidgetAttributes({ content: e.target.value })} className={`w-full text-xs p-2 border rounded outline-none focus:border-indigo-500 ${isDarkMode ? 'bg-slate-700 border-slate-600 text-white' : ''}`} />
-                      
                       <button onClick={handleMagicAI} disabled={isAIGenerating} className="w-full mt-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-bold py-2 px-3 rounded flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 transition-all">
                         {isAIGenerating ? "🤖 AI is writing..." : "✨ Enhance with AI"}
                       </button>
                     </div>
                   )}
 
-                  {/* RAZORPAY PRICING CONFIGURATION (NEW) */}
                   {selectedWidgetNode.widget.type === "razorpay_btn" && (
                     <div className={`space-y-2 mt-4 p-3 border rounded ${isDarkMode ? 'bg-slate-700 border-indigo-900' : 'bg-slate-50 border-indigo-100'}`}>
                       <label className={`text-[10px] font-bold uppercase ${isDarkMode ? 'text-indigo-400' : 'text-indigo-700'}`}>Checkout Pricing Config (₹)</label>
@@ -838,7 +916,6 @@ export default function FunnelCraftBuilderCanvas() {
                 </div>
               )}
 
-              {/* STYLE TAB */}
               {activeInspectorTab === "style" && (
                 <div className={`space-y-4 text-left ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                   <div className="grid grid-cols-2 gap-3">
@@ -851,12 +928,10 @@ export default function FunnelCraftBuilderCanvas() {
                       <input type="color" value={selectedWidgetNode.widget.styles?.backgroundColor || "#ffffff"} onChange={(e) => updateSelectedWidgetAttributes({}, { backgroundColor: e.target.value })} className="w-full h-8 cursor-pointer border rounded" />
                     </div>
                   </div>
-
                   <div className={`space-y-1 p-2 border rounded ${isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-slate-50'}`}>
                     <label className="text-[9px] font-bold uppercase flex justify-between"><span>Font Size</span> <span className="text-indigo-500">{parseInt(selectedWidgetNode.widget.styles?.fontSize || "14")}px</span></label>
                     <input type="range" min="10" max="72" value={parseInt(selectedWidgetNode.widget.styles?.fontSize || "14")} onChange={(e) => updateSelectedWidgetAttributes({}, { fontSize: `${e.target.value}px` })} className="w-full accent-indigo-500" />
                   </div>
-
                   <div className="space-y-1">
                     <label className="text-[9px] font-bold uppercase">Alignment</label>
                     <div className={`flex rounded p-1 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-100'}`}>
@@ -870,7 +945,6 @@ export default function FunnelCraftBuilderCanvas() {
                 </div>
               )}
 
-              {/* SPACING TAB */}
               {activeInspectorTab === "spacing" && (
                 <div className={`space-y-4 text-left ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                   <div className={`p-3 rounded border ${isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-slate-50 border-slate-200'}`}>
@@ -888,24 +962,22 @@ export default function FunnelCraftBuilderCanvas() {
                   </div>
                 </div>
               )}
-
             </div>
           </aside>
         )}
       </div>
 
       {/* =========================================================================
-          🌟 NEW: ADVANCED AI FUNNEL BUILDER MODAL UI
+          🌟 NEW: ADVANCED AI WEBSITE BUILDER MODAL UI
          ========================================================================= */}
       {isAIFunnelModalOpen && (
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
           <div className={`rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col animate-fadeIn border ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-indigo-200'}`}>
-            
             <div className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white p-5 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span className="text-3xl">🤖</span>
                 <div>
-                  <h3 className="text-lg font-black uppercase tracking-wider m-0">Auto-Build Funnel</h3>
+                  <h3 className="text-lg font-black uppercase tracking-wider m-0">Auto-Build Website</h3>
                   <p className="text-xs text-indigo-100 font-medium m-0">Give us the details, AI does the rest.</p>
                 </div>
               </div>
@@ -913,7 +985,6 @@ export default function FunnelCraftBuilderCanvas() {
             </div>
 
             <div className={`p-6 flex flex-col gap-3 max-h-[80vh] overflow-y-auto content-scrollbar ${isDarkMode ? 'bg-slate-800 text-white' : 'bg-slate-50 text-slate-800'}`}>
-              
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold uppercase opacity-70">Product Name</label>
@@ -960,7 +1031,7 @@ export default function FunnelCraftBuilderCanvas() {
               </div>
 
               <button onClick={handleGenerateFullFunnelWithAI} disabled={isBuildingFullFunnel || !aiForm.productName.trim()} className="w-full mt-2 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 text-white font-black text-sm uppercase py-3 rounded transition-all flex justify-center items-center">
-                {isBuildingFullFunnel ? "Analyzing & Building..." : "✨ Generate My Funnel"}
+                {isBuildingFullFunnel ? "Analyzing & Building..." : "✨ Generate My Website"}
               </button>
             </div>
           </div>
@@ -968,7 +1039,7 @@ export default function FunnelCraftBuilderCanvas() {
       )}
 
       {/* =========================================================================
-          🌟 TEMPLATE GALLERY MODAL UI (TRUNCATED FOR BREVITY IN CODE BUT REMAINS INTACT)
+          🌟 TEMPLATE GALLERY MODAL UI 
          ========================================================================= */}
       {isTemplateModalOpen && (
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
@@ -994,50 +1065,99 @@ export default function FunnelCraftBuilderCanvas() {
           </div>
         </div>
       )}
+
       {/* =========================================================================
-          🎨 LIVE PUBLISH SUCCESS MODAL (ADDED BACK)
+          👁️ PREVIEW OR PUBLISH SELECTION MODAL
+         ========================================================================= */}
+      {isPrePublishModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
+          <div className={`rounded-xl shadow-2xl p-6 w-full max-w-sm flex flex-col gap-4 animate-fadeIn ${isDarkMode ? 'bg-slate-800' : 'bg-white'}`}>
+            <h3 className={`text-lg font-black text-center uppercase tracking-wider ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>Choose Action</h3>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => {
+                  localStorage.setItem('website_preview_draft', JSON.stringify(funnelPagesDataStore));
+                  window.open('/preview?mode=local', '_blank');
+                  setIsPrePublishModalOpen(false);
+                }}
+                className="w-full py-3 rounded-lg font-bold bg-indigo-100 text-indigo-700 hover:bg-indigo-200 uppercase text-xs tracking-wide shadow-sm"
+              >
+                👁️ Preview Website
+              </button>
+              <button
+                onClick={() => {
+                  setIsPrePublishModalOpen(false);
+                  handleCompileAndPublishFunnel();
+                }}
+                className="w-full py-3 rounded-lg font-bold bg-emerald-600 text-white hover:bg-emerald-500 uppercase text-xs tracking-wide shadow-sm"
+              >
+                🚀 Publish to Live
+              </button>
+            </div>
+            <button onClick={() => setIsPrePublishModalOpen(false)} className="text-[10px] uppercase font-bold text-slate-400 hover:text-red-400 text-center mt-2 transition-colors">Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          🎨 LIVE PUBLISH SUCCESS MODAL
          ========================================================================= */}
       {isPublishModalOpen && generatedClientFunnelLink && (
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all">
-          <div className={`rounded shadow-2xl border w-full max-w-xl overflow-hidden flex flex-col animate-fadeIn ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white'}`}>
-            
-            <div className="bg-gradient-to-r from-[#0f172a] to-slate-800 text-white p-4 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">🚀</span>
+          <div className={`rounded-xl shadow-2xl border w-full max-w-lg overflow-hidden flex flex-col animate-fadeIn ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white'}`}>
+            <div className="bg-gradient-to-r from-[#0f172a] to-slate-800 text-white p-5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🚀</span>
                 <div>
-                  <h3 className="text-xs font-black uppercase tracking-wider m-0">FunnelCraft Live Deployment</h3>
-                  <p className="text-[9px] text-slate-300 font-mono m-0">Payload deployed securely</p>
+                  <h3 className="text-sm font-black uppercase tracking-wider m-0">Website Live Deployment</h3>
+                  <p className="text-[10px] text-slate-300 font-mono m-0">URL successfully generated</p>
                 </div>
               </div>
-              <button onClick={() => setIsPublishModalOpen(false)} className="hover:text-red-400 font-black text-sm">✕</button>
+              <button onClick={() => setIsPublishModalOpen(false)} className="hover:text-red-400 font-black text-xl">✕</button>
             </div>
 
-            <div className={`p-5 space-y-4 text-left font-sans ${isDarkMode ? 'bg-slate-800' : 'bg-slate-50'}`}>
-              <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold p-3 rounded flex items-center gap-2">
+            <div className={`p-6 space-y-5 text-left font-sans ${isDarkMode ? 'bg-slate-800' : 'bg-slate-50'}`}>
+              <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold p-3 rounded flex items-center gap-2 shadow-sm">
                 <span>⚡</span>
-                <span>Success: Funnel saved to database!</span>
+                <span>Success: Website is now live!</span>
               </div>
 
-              <div className="space-y-1.5">
-                <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">🔗 Live Client Routing URL:</span>
-                <div className={`flex gap-2 items-center p-2 border rounded shadow-inner ${isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-white'}`}>
-                  <input type="text" readOnly value={generatedClientFunnelLink} className={`flex-1 text-[11px] font-mono font-bold bg-transparent outline-none select-all ${isDarkMode ? 'text-indigo-300' : 'text-[#1e3a8a]'}`} />
+              <div className="space-y-2">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">🔗 Your Live Website URL:</span>
+                <div className={`flex gap-2 items-center p-3 border rounded-lg shadow-inner ${isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-white'}`}>
+                  <input type="text" readOnly value={generatedClientFunnelLink.trim()} className={`flex-1 text-xs font-mono font-bold bg-transparent outline-none select-all ${isDarkMode ? 'text-indigo-300' : 'text-[#1e3a8a]'}`} />
+                </div>
+
+                <div className="flex gap-2 mt-4 pt-2">
                   <button 
-                    onClick={() => { navigator.clipboard.writeText(generatedClientFunnelLink); alert("📋 Live Link copied!"); }}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[9px] uppercase tracking-wider px-3 py-1.5 rounded transition-transform active:scale-95"
+                    onClick={() => { navigator.clipboard.writeText(generatedClientFunnelLink.trim()); alert("📋 Link copied!"); }}
+                    className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 font-black text-[10px] uppercase tracking-wider py-3 rounded-lg transition-transform active:scale-95"
                   >
-                    Copy Link
+                    Copy
+                  </button>
+                  <button 
+                    onClick={() => window.open(generatedClientFunnelLink.trim(), '_blank')}
+                    className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-lg transition-transform active:scale-95 shadow-md shadow-indigo-500/20"
+                  >
+                    Open
+                  </button>
+                  <button 
+                    onClick={() => {
+                      if (navigator.share) {
+                        navigator.share({ title: 'My Website', url: generatedClientFunnelLink.trim() });
+                      } else { alert("Share option not supported on this browser."); }
+                    }}
+                    className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-lg transition-transform active:scale-95 shadow-md shadow-emerald-500/20"
+                  >
+                    Share
                   </button>
                 </div>
               </div>
             </div>
-
-            <div className={`border-t p-3 flex justify-end ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-slate-100'}`}>
-              <button onClick={() => setIsPublishModalOpen(false)} className="bg-slate-300 hover:bg-slate-400 text-slate-800 text-[10px] font-bold uppercase tracking-wider px-4 py-1.5 rounded transition-colors">Close</button>
-            </div>
           </div>
         </div>
       )}
+
       {/* STYLES */}
       <style jsx global>{`
         .content-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
