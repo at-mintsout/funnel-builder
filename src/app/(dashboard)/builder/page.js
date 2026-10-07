@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation"; 
-import { PREBUILT_TEMPLATES } from "@/data/templates";
+import { PREBUILT_TEMPLATES } from "@/app/(dashboard)/builder/data/templates";
 
 // =========================================================================
 // 🌐 CONFIG MASTER DATA WIDGET REGISTRY SYSTEMS (150 PROFESSIONAL ELEMENTS)
