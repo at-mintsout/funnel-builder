@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation"; 
-import { PREBUILT_TEMPLATES } from "@/data/templates"; // Templates coming from your new file
+import { PREBUILT_TEMPLATES } from "@/Data/templates"; // Import path with Capital 'D' as discussed
+
 // =========================================================================
 // 🌐 CONFIG MASTER DATA WIDGET REGISTRY SYSTEMS (150 PROFESSIONAL ELEMENTS)
 // =========================================================================
@@ -199,7 +200,10 @@ export default function WebsiteBuilderCanvas() {
   const [isAIGenerating, setIsAIGenerating] = useState(false);
   const [isAIFunnelModalOpen, setIsAIFunnelModalOpen] = useState(false);
   const [isBuildingFullFunnel, setIsBuildingFullFunnel] = useState(false);
+  
+  // UI Appearance States
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // NEW: Sidebar toggle state
 
   const [aiForm, setAiForm] = useState({
     businessCategory: "", productName: "", targetLocation: "India", productCategories: "", rate: "", discount: "", finalPrice: "", description: ""
@@ -465,7 +469,7 @@ export default function WebsiteBuilderCanvas() {
   }, [funnelPagesDataStore]); 
 
   // =========================================================================
-  // 📥 PUBLISH ENGINE (FIXED UUID & PREVIEW SYNC)
+  // 📥 PUBLISH ENGINE
   // =========================================================================
   const handleCompileAndPublishFunnel = async (isPreviewMode = false) => {
     setIsDatabasePushLoading(true);
@@ -532,12 +536,20 @@ export default function WebsiteBuilderCanvas() {
   ];
 
   return (
-    // FIX 1: 'fixed inset-0 z-50' forces the builder to overlay any layout margins/toggles!
     <div className={`fixed inset-0 z-50 flex flex-col ${isDarkMode ? 'bg-slate-900 text-slate-100' : 'bg-[#f8fafc] text-slate-800'} font-sans overflow-hidden transition-colors duration-300`}>
       
       {/* 🛸 PREMIUM FLUSH HEADER */}
       <header className={`h-14 ${isDarkMode ? 'bg-black border-b border-slate-800' : 'bg-[#0f172a]'} text-white px-4 flex items-center justify-between shrink-0 shadow-md z-40 transition-colors`}>
         <div className="flex items-center gap-4">
+          
+          {/* MENU TOGGLE BUTTON (NEW) */}
+          <button 
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+            className="p-1.5 hover:bg-slate-700 rounded text-xl transition-colors flex items-center justify-center leading-none"
+          >
+            ☰
+          </button>
+
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push("/dashboard")}>
             <div className="h-7 w-7 bg-indigo-500 rounded flex items-center justify-center font-black text-xs shadow-lg">WB</div>
             <span className="font-black text-sm tracking-widest uppercase hidden md:block">Website Builder</span>
@@ -581,8 +593,8 @@ export default function WebsiteBuilderCanvas() {
       {/* 🏗 3-COLUMN WORKSPACE */}
       <div className="flex-1 flex overflow-hidden">
         
-        {/* ⬅️ LEFT SIDEBAR (BUTTONS MOVED TO BOTTOM HERE) */}
-        <aside className={`w-[200px] ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'} border-r flex flex-col shrink-0 shadow-sm z-30 select-none transition-colors`}>
+        {/* ⬅️ LEFT SIDEBAR (CONDITIONAL RENDER FOR MENU TOGGLE) */}
+        <aside className={`${isSidebarOpen ? 'flex' : 'hidden'} w-[200px] ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'} border-r flex-col shrink-0 shadow-sm z-30 select-none transition-all`}>
           <div className={`p-2 border-b ${isDarkMode ? 'border-slate-700 bg-slate-900' : 'border-slate-100 bg-slate-50'}`}>
             <button onClick={() => router.push("/dashboard")} className="w-full flex justify-center items-center gap-2 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] font-bold uppercase tracking-wider shadow transition-all">
               📊 Dashboard
@@ -626,7 +638,6 @@ export default function WebsiteBuilderCanvas() {
             })}
           </div>
 
-          {/* FIX 1.2: AI AND TEMPLATE BUTTONS AT BOTTOM LEFT */}
           <div className={`p-3 border-t flex flex-col gap-2 ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
              <button onClick={() => setIsAIFunnelModalOpen(true)} className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white py-2.5 rounded text-xs font-bold uppercase tracking-wider shadow-md transition-all flex items-center justify-center gap-2">
                🤖 Build with AI
@@ -708,7 +719,6 @@ export default function WebsiteBuilderCanvas() {
                                 )}
 
                                 <div style={globalStyles} className="w-full">
-                                  {/* FIX 3: REAL WIDGET RENDERING FOR MEDIA, PDF, CHARTS, ETC */}
                                   {(() => {
                                     const wType = widget.type;
                                     
@@ -752,7 +762,7 @@ export default function WebsiteBuilderCanvas() {
                                       </div>
                                     );
 
-                                    // Catch-all placeholder (FIXED: Editable generic text block)
+                                    // Catch-all placeholder
                                     return (
                                       <div className="w-full flex flex-col text-left border p-3 bg-slate-50/50 rounded shadow-sm">
                                         <span className="text-[10px] font-black uppercase text-indigo-500 mb-1 opacity-70">{widget.name} Component</span>
@@ -818,7 +828,6 @@ export default function WebsiteBuilderCanvas() {
                     )}
                   </div>
 
-                  {/* FIX 3.2: UNIVERSAL FILE UPLOAD FOR ALL MEDIA */}
                   {["image", "pdf_viewer", "video_embed", "audio_player", "file_upload"].includes(selectedWidgetNode.widget.type) && (
                     <div className="mt-4 p-4 border-2 border-dashed border-indigo-300 rounded-lg bg-indigo-50/50 hover:bg-indigo-50 text-center relative cursor-pointer transition-colors">
                       <input type="file" onChange={handleLocalFileUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
@@ -830,7 +839,6 @@ export default function WebsiteBuilderCanvas() {
                     </div>
                   )}
 
-                  {/* RAZORPAY PRICING CONFIGURATION */}
                   {selectedWidgetNode.widget.type === "razorpay_btn" && (
                     <div className={`space-y-2 mt-4 p-3 border rounded ${isDarkMode ? 'bg-slate-700 border-indigo-900' : 'bg-slate-50 border-indigo-100'}`}>
                       <label className={`text-[10px] font-bold uppercase ${isDarkMode ? 'text-indigo-400' : 'text-indigo-700'}`}>Checkout Pricing Config (₹)</label>
@@ -995,7 +1003,7 @@ export default function WebsiteBuilderCanvas() {
               <button onClick={() => setIsTemplateModalOpen(false)} className="hover:text-red-400 font-black text-xl">✕</button>
             </div>
             <div className="p-6 bg-slate-50 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-h-[70vh] overflow-y-auto">
-              {PREBUILT_TEMPLATES.map((template) => (
+              {PREBUILT_TEMPLATES?.map((template) => (
                 <div key={template.id} className="bg-white border border-slate-200 rounded-xl p-5 flex flex-col hover:shadow-xl hover:border-indigo-400 transition-all cursor-pointer group" onClick={() => handleLoadTemplate(template.id)}>
                   <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">{template.icon}</div>
                   <h4 className="font-bold text-slate-800 text-sm mb-1">{template.name}</h4>
