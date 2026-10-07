@@ -53,7 +53,7 @@ const ELEMENTOR_WIDGET_CATALOG = [
   { type: "3d_model", name: "3D Viewer", category: "media", icon: "🧊", defaultContent: "3D Asset URL" },
   { type: "avatar", name: "User Avatar", category: "media", icon: "👤", defaultContent: "Initials: JD" },
   { type: "gif_player", name: "Giphy Embed", category: "media", icon: "🎬", defaultContent: "Funny Meme GIF" },
-  { type: "qr_code", name: "QR Code Generator", category: "media", icon: "📱", defaultContent: "https://funnelcraft.io" },
+  { type: "qr_code", name: "QR Code Generator", category: "media", icon: "📱", defaultContent: "https://mintsout.in" },
   { type: "chart_bar", name: "Bar Chart", category: "media", icon: "📊", defaultContent: "Sales Data Growth" },
   { type: "chart_pie", name: "Pie Chart", category: "media", icon: "🍩", defaultContent: "Market Share Metrics" },
 
