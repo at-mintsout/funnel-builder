@@ -596,7 +596,35 @@ export default function WebsiteBuilderCanvas() {
           >
             {isDatabasePushLoading ? "Syncing DB..." : "🚀 Publish"}
           </button>
+</div>
+
+                    {/* TOP RIGHT BUTTONS */}
+        <div className="flex items-center gap-3">
+          
+          {/* NAYA LOGOUT BUTTON */}
+          <button 
+            onClick={handleLogout}
+            className="text-xs font-bold text-red-400 hover:text-red-300 px-3 py-1.5 border border-red-500/30 rounded hover:bg-red-900/30 transition-all mr-2"
+          >
+            🚪 Logout
+          </button>
+
+          {/* APKE PURANE BUTTONS */}
+          <button 
+            onClick={handleManualSave}
+            className="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-4 py-1.5 rounded text-xs font-black uppercase tracking-wider shadow transition-all active:scale-95"
+          >
+            💾 Update
+          </button>
+
+          <button 
+            onClick={() => setIsPrePublishModalOpen(true)} disabled={isDatabasePushLoading}
+            className={`bg-slate-700 hover:bg-slate-600 text-white px-5 py-1.5 rounded text-xs font-black uppercase tracking-wider shadow transition-all active:scale-95 ${isDatabasePushLoading ? "opacity-70 cursor-wait" : ""}`}
+          >
+            {isDatabasePushLoading ? "Syncing DB..." : "🚀 Publish"}
+          </button>
         </div>
+
       </header>
 
       {/* 🏗 3-COLUMN WORKSPACE */}
