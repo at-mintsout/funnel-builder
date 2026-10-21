@@ -288,6 +288,13 @@ export default function WebsiteBuilderCanvas() {
   // =========================================================================
   // 🌟 TEMPLATE INJECTION FUNCTION
   // =========================================================================
+  const handleLogout = async () => {
+    if (confirm("Are you sure you want to logout?")) {
+      await supabase.auth.signOut();
+      router.push("/login");
+    }
+  };
+
   const handleLoadTemplate = (templateId) => {
     const template = PREBUILT_TEMPLATES.find(t => t.id === templateId);
     if (!template) return;
