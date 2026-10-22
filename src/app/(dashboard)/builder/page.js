@@ -1640,19 +1640,29 @@ function FunnelBuilderCoreEngine() {
         )}
       </div>
 
-      {/* =====================================================================
+          {/* =====================================================================
           3. MODALS: PUBLISH, AI AUTO-BUILDER & PREBUILT TEMPLATES
       ===================================================================== */}
-            {isPrePublishModalOpen && (
+      {isPrePublishModalOpen && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 text-slate-800 shadow-2xl border border-slate-100 animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 text-slate-800 shadow-2xl border border-slate-100">
             
-            <div className="text-center">
-              <div className="mx-auto h-14 w-14 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-2xl font-black mb-3">
-                🚀
+            <div className="flex justify-between items-start">
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-2xl font-black">
+                  🚀
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-[#0B1536] uppercase tracking-tight">Publish & Share</h3>
+                  <p className="text-xs text-slate-500 font-medium">Manage your live cloud funnel</p>
+                </div>
               </div>
-              <h3 className="text-xl font-black text-[#0B1536] uppercase tracking-tight">Funnel Live & Published!</h3>
-              <p className="text-xs text-slate-500 mt-1 font-medium">Your marketing funnel is successfully deployed to the cloud.</p>
+              <button
+                onClick={() => setIsPrePublishModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center text-xs"
+              >
+                ✖
+              </button>
             </div>
 
             <div>
@@ -1666,56 +1676,156 @@ function FunnelBuilderCoreEngine() {
             </div>
 
             {funnelId && (
-              <div className="p-4 bg-indigo-50/60 rounded-2xl border border-indigo-100 space-y-2">
+              <div className="p-4 bg-indigo-50/60 rounded-2xl border border-indigo-100 space-y-3">
                 <span className="text-[10px] font-black text-indigo-800 uppercase tracking-widest block">Live Public URL:</span>
                 <div className="flex items-center gap-2 bg-white p-2 rounded-xl border border-indigo-200">
-                  <input 
-                    type="text" 
-                    readOnly 
-                    value={`${window.location.origin}/preview?id=${funnelId}`} 
+                  <input
+                    type="text"
+                    readOnly
+                    value={typeof window !== "undefined" ? `${window.location.origin}/preview?id=${funnelId}` : `/preview?id=${funnelId}`}
                     className="w-full bg-transparent text-xs text-slate-600 font-mono outline-none px-1"
                   />
                   <button
                     onClick={() => {
-                      navigator.clipboard.writeText(`${window.location.origin}/preview?id=${funnelId}`);
-                      alert("📋 Link copied to clipboard!");
+                      const url = `${window.location.origin}/preview?id=${funnelId}`;
+                      navigator.clipboard.writeText(url);
+                      alert("📋 Live link copied to clipboard!");
                     }}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider shrink-0 transition-all shadow-md"
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider shrink-0 shadow"
                   >
-                    Copy
+                    📋 Copy
+                  </button>
+                </div>
+
+                {/* Action Buttons: Preview, Share, Download */}
+                <div className="grid grid-cols-3 gap-2 pt-1">
+                  <a
+                    href={`/preview?id=${funnelId}&step=${activeStep}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="py-2 px-2 rounded-xl text-[10px] font-black uppercase tracking-wider bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-center flex items-center justify-center gap-1 shadow-sm"
+                  >
+                    👁️ View
+                  </a>
+                  <button
+                    onClick={() => {
+                      const url = `${window.location.origin}/preview?id=${funnelId}`;
+                      if (navigator.share) {
+                        navigator.share({ title: funnelName, url });
+                      } else {
+                        window.open(`https://wa.me/?text=${encodeURIComponent(funnelName + " - " + url)}`, "_blank");
+                      }
+                    }}
+                    className="py-2 px-2 rounded-xl text-[10px] font-black uppercase tracking-wider bg-emerald-500 hover:bg-emerald-600 text-white text-center flex items-center justify-center gap-1 shadow-sm"
+                  >
+                    📤 Share
+                  </button>
+                  <button
+                    onClick={() => {
+                      const blob = new Blob([JSON.stringify({ funnelName, pagesState }, null, 2)], { type: "application/json" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `${funnelName.toLowerCase().replace(/\s+/g, "-")}-backup.json`;
+                      a.click();
+                    }}
+                    className="py-2 px-2 rounded-xl text-[10px] font-black uppercase tracking-wider bg-slate-800 hover:bg-slate-700 text-white text-center flex items-center justify-center gap-1 shadow-sm"
+                  >
+                    📥 Download
                   </button>
                 </div>
               </div>
             )}
 
             <div className="grid grid-cols-2 gap-3 pt-2">
-              {funnelId && (
-                <a
-                  href={`/preview?id=${funnelId}&step=${activeStep}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-full py-3.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider bg-slate-100 hover:bg-slate-200 text-slate-700 text-center transition-all flex items-center justify-center gap-1.5"
-                >
-                  👁️ Preview
-                </a>
-              )}
               <button
                 onClick={() => setIsPrePublishModalOpen(false)}
-                className={`py-3.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider bg-[#0B1536] hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 transition-all ${!funnelId ? 'col-span-2' : ''}`}
+                className="py-3.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all"
               >
-                Done / Close ✖
+                Close
               </button>
-            </div>
-
-            {!funnelId && (
               <button
                 onClick={handlePublishToSupabase}
                 disabled={isDatabasePushLoading}
-                className="w-full py-3.5 rounded-xl text-xs font-black uppercase tracking-wider bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg transition-all"
+                className="py-3.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20 transition-all"
               >
-                {isDatabasePushLoading ? "Generating Link..." : "Generate Live Link ➔"}
+                {isDatabasePushLoading ? "Syncing..." : funnelId ? "💾 Save & Update" : "🚀 Publish Now"}
               </button>
-                      </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {isAiModalOpen && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 text-slate-800 shadow-2xl">
+            <h3 className="text-lg font-black text-[#0B1536]">🤖 Auto-Build Full Funnel With AI</h3>
+            <p className="text-xs text-slate-500">
+              Enter your product, niche, or offer name and AI will generate a complete 3-step Landing, Checkout, and Thank You funnel.
+            </p>
+            <input
+              type="text"
+              value={aiPrompt}
+              onChange={(e) => setAiPrompt(e.target.value)}
+              placeholder="e.g. Stock Market Mastery Course ₹499"
+              className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm"
+            />
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setIsAiModalOpen(false)} className="px-4 py-2 rounded-lg text-xs font-bold bg-slate-100">
+                Cancel
+              </button>
+              <button
+                onClick={handleAutoBuildFunnelWithAI}
+                className="px-5 py-2 rounded-lg text-xs font-black uppercase bg-indigo-600 text-white"
+              >
+                ✨ Generate Funnel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isTemplatesModalOpen && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 space-y-4 text-slate-800 shadow-2xl max-h-[80vh] flex flex-col">
+            <div className="flex justify-between items-center border-b pb-3">
+              <h3 className="text-lg font-black text-[#0B1536]">✨ Prebuilt High-Converting Templates</h3>
+              <button onClick={() => setIsTemplatesModalOpen(false)} className="text-slate-400 hover:text-slate-700 font-bold">✖</button>
+            </div>
+            <div className="flex-1 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-3 py-2">
+              {(Array.isArray(PREBUILT_TEMPLATES) && PREBUILT_TEMPLATES.length > 0
+                ? PREBUILT_TEMPLATES
+                : [
+                    { name: "SaaS Launch Funnel", desc: "Hero + Benefits + Contact Form + Razorpay Checkout" },
+                    { name: "Webinar Registration", desc: "Urgency Timer + Video VSL + Email Lead Capture" },
+                    { name: "E-Book / Digital Product", desc: "High-Converting Sales Page + Instant Checkout" },
+                    { name: "Coaching & Consultation", desc: "Authority Bio + Testimonials + Booking Form" },
+                  ]
+              ).map((tpl, idx) => (
+                <div key={idx} className="border border-slate-200 rounded-xl p-4 hover:border-indigo-500 flex flex-col justify-between bg-slate-50">
+                  <div>
+                    <h4 className="font-black text-sm text-[#0B1536]">{tpl.name || tpl.title || `Template #${idx + 1}`}</h4>
+                    <p className="text-xs text-slate-500 mt-1">{tpl.desc || tpl.description || "Ready-to-use conversion layout"}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (tpl.canvas_state) {
+                        setPagesState((prev) => ({ ...prev, ...tpl.canvas_state }));
+                      } else {
+                        setAiPrompt(tpl.name || "Digital Product");
+                        handleAutoBuildFunnelWithAI();
+                      }
+                      setIsTemplatesModalOpen(false);
+                    }}
+                    className="mt-4 w-full bg-[#0B1536] hover:bg-indigo-600 text-white py-2 rounded-lg text-[10px] font-black uppercase tracking-wider"
+                  >
+                    Load Template
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>
