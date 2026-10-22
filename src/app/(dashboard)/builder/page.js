@@ -1717,6 +1717,5 @@ function FunnelBuilderCoreEngine() {
               </button>
             )}
 
-          </div>
         </div>
       )}
