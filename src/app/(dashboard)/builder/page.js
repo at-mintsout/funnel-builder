@@ -1715,7 +1715,9 @@ function FunnelBuilderCoreEngine() {
               >
                 {isDatabasePushLoading ? "Generating Link..." : "Generate Live Link ➔"}
               </button>
-            )}
-
+                      </div>
         </div>
       )}
+    </div>
+  );
+}
