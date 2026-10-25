@@ -568,21 +568,23 @@ function FunnelBuilderCoreEngine() {
       })
     );
   };
-
   // =========================================================================
-  // 🤖 AI ENHANCER & AUTO-BUILDER
+  // 🤖 AI ENHANCER & AUTO-BUILDER (UPGRADED WITH GROQ API)
   // =========================================================================
   const handleEnhanceWithAI = async () => {
     if (!selectedWidget) return;
     setIsAiGenerating(true);
+    
     try {
       const res = await fetch("/api/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           prompt: `Rewrite and enhance this marketing copy to be ultra high-converting and persuasive. Return ONLY the enhanced text without quotes: "${selectedWidget.content}"`,
+          type: "enhance_text" // API ko batata hai ki sirf text rewrite karna hai
         }),
       });
+      
       if (res.ok) {
         const data = await res.json();
         const enhanced = data.result || data.text || data.content;
@@ -592,12 +594,14 @@ function FunnelBuilderCoreEngine() {
           return;
         }
       }
-      // Smart instant fallback if API route isn't configured
+      
+      // Smart instant fallback agar API limit reach ho jaye ya error aaye
       updateSelectedWidget((w) => ({
         ...w,
         content: `🔥 ${w.content} — Unlock 10x Faster Results Today (100% Risk-Free!)`,
       }));
-    } catch {
+    } catch (error) {
+      console.error("AI Enhance Error:", error);
       updateSelectedWidget((w) => ({
         ...w,
         content: `🚀 ${w.content} (Limited Time VIP Access)`,
@@ -607,75 +611,48 @@ function FunnelBuilderCoreEngine() {
     }
   };
 
-  const handleAutoBuildFunnelWithAI = () => {
-    const topic = aiPrompt.trim() || "Digital Marketing & SaaS Automation";
-    const ts = Date.now();
-    const generatedLanding = [
-      {
-        id: `row_${ts}_1`,
-        type: "layout_1",
-        columns: [
-          {
-            id: `col_${ts}_1`,
-            widthPercent: 100,
-            widgets: [
-              { ...createWidgetInstance(ELEMENTOR_WIDGET_CATALOG.find((w) => w.type === "urgency_text")), content: `🔥 Special Live Training on ${topic} — Limited Spots Available!` },
-              { ...createWidgetInstance(ELEMENTOR_WIDGET_CATALOG.find((w) => w.type === "h1")), content: `How To Master ${topic} & Scale Your Revenue In 30 Days`, styles: { color: "#0f172a", fontSize: "40px", fontWeight: "900", textAlign: "center", paddingTop: "12px", paddingBottom: "12px" } },
-              { ...createWidgetInstance(ELEMENTOR_WIDGET_CATALOG.find((w) => w.type === "paragraph")), content: `Stop guessing and start scaling. Use our proven step-by-step system for ${topic} without technical headaches.`, styles: { color: "#475569", fontSize: "18px", textAlign: "center", paddingBottom: "16px" } },
-              { ...createWidgetInstance(ELEMENTOR_WIDGET_CATALOG.find((w) => w.type === "form_contact")), name: `Claim Your ${topic} Blueprint`, content: "Get Instant Access ➔" },
-              { ...createWidgetInstance(ELEMENTOR_WIDGET_CATALOG.find((w) => w.type === "trust_badges")) },
-            ],
-          },
-        ],
-      },
-    ];
+  const handleAutoBuildFunnelWithAI = async () => {
+    if (!aiPrompt || !aiPrompt.trim()) {
+      alert("Please enter a funnel topic first! (e.g., 'Digital Marketing Course')");
+      return;
+    }
+    
+    setIsAiGenerating(true);
+    
+    try {
+      const response = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: aiPrompt.trim(),
+          type: "generate_funnel" // API ko batata hai ki pura JSON funnel layout chahiye
+        }),
+      });
 
-    const generatedCheckout = [
-      {
-        id: `row_${ts}_2`,
-        type: "layout_1",
-        columns: [
-          {
-            id: `col_${ts}_2`,
-            widthPercent: 100,
-            widgets: [
-              { ...createWidgetInstance(ELEMENTOR_WIDGET_CATALOG.find((w) => w.type === "h2")), content: `Complete Your Enrollment: ${topic} Pro`, styles: { color: "#0f172a", fontSize: "30px", fontWeight: "900", textAlign: "center" } },
-              { ...createWidgetInstance(ELEMENTOR_WIDGET_CATALOG.find((w) => w.type === "check_list")), content: "Instant Lifetime Access\nDone-For-You Templates Included\n30-Day Money-Back Guarantee" },
-              { ...createWidgetInstance(ELEMENTOR_WIDGET_CATALOG.find((w) => w.type === "razorpay_btn")), pricing: { rate: "1999", discount: "1500", finalPrice: "499" } },
-            ],
-          },
-        ],
-      },
-    ];
+      const data = await response.json();
 
-    const generatedThankYou = [
-      {
-        id: `row_${ts}_3`,
-        type: "layout_1",
-        columns: [
-          {
-            id: `col_${ts}_3`,
-            widthPercent: 100,
-            widgets: [
-              { ...createWidgetInstance(ELEMENTOR_WIDGET_CATALOG.find((w) => w.type === "confetti_trigger")) },
-              { ...createWidgetInstance(ELEMENTOR_WIDGET_CATALOG.find((w) => w.type === "h1")), content: "Welcome Aboard! Your Access Is Ready", styles: { color: "#10b981", fontSize: "36px", fontWeight: "900", textAlign: "center" } },
-              { ...createWidgetInstance(ELEMENTOR_WIDGET_CATALOG.find((w) => w.type === "invoice_download")) },
-            ],
-          },
-        ],
-      },
-    ];
-
-    setPagesState((prev) => ({
-      ...prev,
-      landing: generatedLanding,
-      checkout: generatedCheckout,
-      thankyou: generatedThankYou,
-    }));
-    setActiveStep("landing");
-    setIsAiModalOpen(false);
-    setAiPrompt("");
+      if (response.ok && data.result) {
+        // AI dwara generate kiya gaya structured JSON seedha pagesState me set karein
+        setPagesState({
+          landing: data.result.landing || [],
+          checkout: data.result.checkout || [],
+          thankyou: data.result.thankyou || [],
+        });
+        
+        setActiveStep("landing");
+        setIsAiModalOpen(false);
+        setAiPrompt("");
+      } else {
+        alert("AI Build Failed: " + (data.error || "Could not generate funnel data."));
+      }
+    } catch (error) {
+      console.error("Auto Build Error:", error);
+      alert("Something went wrong while connecting to the AI Builder.");
+    } finally {
+      setIsAiGenerating(false);
+    }
   };
+
 
   // =========================================================================
   // 🎨 MASTER 150-WIDGET INTERACTIVE CANVAS RENDERER
