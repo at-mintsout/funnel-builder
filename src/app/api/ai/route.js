@@ -77,7 +77,6 @@ export async function POST(req) {
     } else {
       cleanText = cleanText.replace(/```json/g, '').replace(/```/g, '').trim();
     }
-    
     return NextResponse.json({ result: cleanText });
 
   } catch (error) {
