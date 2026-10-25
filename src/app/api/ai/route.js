@@ -51,7 +51,7 @@ export async function POST(req) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "llama3-70b-8192", // ✅ Valid Groq Model
+        model: "openai/gpt-oss-120b", // ✅ Valid Groq Model
         messages: [
           { role: "system", content: systemInstruction },
           { role: "user", content: prompt }
