@@ -1900,6 +1900,9 @@ function FunnelBuilderCoreEngine() {
                 </div>
               ))}
             </div>
-          </div>
         </div>
-}
+      </div>
+    )}
+  </div>
+  );
+              }
