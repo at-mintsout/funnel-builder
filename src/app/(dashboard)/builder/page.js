@@ -568,23 +568,21 @@ function FunnelBuilderCoreEngine() {
       })
     );
   };
+
   // =========================================================================
-  // 🤖 AI ENHANCER & AUTO-BUILDER (UPGRADED WITH GROQ API)
+  // 🤖 AI ENHANCER & AUTO-BUILDER
   // =========================================================================
   const handleEnhanceWithAI = async () => {
     if (!selectedWidget) return;
     setIsAiGenerating(true);
-    
     try {
       const res = await fetch("/api/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           prompt: `Rewrite and enhance this marketing copy to be ultra high-converting and persuasive. Return ONLY the enhanced text without quotes: "${selectedWidget.content}"`,
-          type: "enhance_text" // API ko batata hai ki sirf text rewrite karna hai
         }),
       });
-      
       if (res.ok) {
         const data = await res.json();
         const enhanced = data.result || data.text || data.content;
@@ -594,14 +592,12 @@ function FunnelBuilderCoreEngine() {
           return;
         }
       }
-      
-      // Smart instant fallback agar API limit reach ho jaye ya error aaye
+      // Smart instant fallback if API route isn't configured
       updateSelectedWidget((w) => ({
         ...w,
         content: `🔥 ${w.content} — Unlock 10x Faster Results Today (100% Risk-Free!)`,
       }));
-    } catch (error) {
-      console.error("AI Enhance Error:", error);
+    } catch {
       updateSelectedWidget((w) => ({
         ...w,
         content: `🚀 ${w.content} (Limited Time VIP Access)`,
@@ -611,48 +607,75 @@ function FunnelBuilderCoreEngine() {
     }
   };
 
-  const handleAutoBuildFunnelWithAI = async () => {
-    if (!aiPrompt || !aiPrompt.trim()) {
-      alert("Please enter a funnel topic first! (e.g., 'Digital Marketing Course')");
-      return;
-    }
-    
-    setIsAiGenerating(true);
-    
-    try {
-      const response = await fetch("/api/ai", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt: aiPrompt.trim(),
-          type: "generate_funnel" // API ko batata hai ki pura JSON funnel layout chahiye
-        }),
-      });
+  const handleAutoBuildFunnelWithAI = () => {
+    const topic = aiPrompt.trim() || "Digital Marketing & SaaS Automation";
+    const ts = Date.now();
+    const generatedLanding = [
+      {
+        id: `row_${ts}_1`,
+        type: "layout_1",
+        columns: [
+          {
+            id: `col_${ts}_1`,
+            widthPercent: 100,
+            widgets: [
+              { ...createWidgetInstance(ELEMENTOR_WIDGET_CATALOG.find((w) => w.type === "urgency_text")), content: `🔥 Special Live Training on ${topic} — Limited Spots Available!` },
+              { ...createWidgetInstance(ELEMENTOR_WIDGET_CATALOG.find((w) => w.type === "h1")), content: `How To Master ${topic} & Scale Your Revenue In 30 Days`, styles: { color: "#0f172a", fontSize: "40px", fontWeight: "900", textAlign: "center", paddingTop: "12px", paddingBottom: "12px" } },
+              { ...createWidgetInstance(ELEMENTOR_WIDGET_CATALOG.find((w) => w.type === "paragraph")), content: `Stop guessing and start scaling. Use our proven step-by-step system for ${topic} without technical headaches.`, styles: { color: "#475569", fontSize: "18px", textAlign: "center", paddingBottom: "16px" } },
+              { ...createWidgetInstance(ELEMENTOR_WIDGET_CATALOG.find((w) => w.type === "form_contact")), name: `Claim Your ${topic} Blueprint`, content: "Get Instant Access ➔" },
+              { ...createWidgetInstance(ELEMENTOR_WIDGET_CATALOG.find((w) => w.type === "trust_badges")) },
+            ],
+          },
+        ],
+      },
+    ];
 
-      const data = await response.json();
+    const generatedCheckout = [
+      {
+        id: `row_${ts}_2`,
+        type: "layout_1",
+        columns: [
+          {
+            id: `col_${ts}_2`,
+            widthPercent: 100,
+            widgets: [
+              { ...createWidgetInstance(ELEMENTOR_WIDGET_CATALOG.find((w) => w.type === "h2")), content: `Complete Your Enrollment: ${topic} Pro`, styles: { color: "#0f172a", fontSize: "30px", fontWeight: "900", textAlign: "center" } },
+              { ...createWidgetInstance(ELEMENTOR_WIDGET_CATALOG.find((w) => w.type === "check_list")), content: "Instant Lifetime Access\nDone-For-You Templates Included\n30-Day Money-Back Guarantee" },
+              { ...createWidgetInstance(ELEMENTOR_WIDGET_CATALOG.find((w) => w.type === "razorpay_btn")), pricing: { rate: "1999", discount: "1500", finalPrice: "499" } },
+            ],
+          },
+        ],
+      },
+    ];
 
-      if (response.ok && data.result) {
-        // AI dwara generate kiya gaya structured JSON seedha pagesState me set karein
-        setPagesState({
-          landing: data.result.landing || [],
-          checkout: data.result.checkout || [],
-          thankyou: data.result.thankyou || [],
-        });
-        
-        setActiveStep("landing");
-        setIsAiModalOpen(false);
-        setAiPrompt("");
-      } else {
-        alert("AI Build Failed: " + (data.error || "Could not generate funnel data."));
-      }
-    } catch (error) {
-      console.error("Auto Build Error:", error);
-      alert("Something went wrong while connecting to the AI Builder.");
-    } finally {
-      setIsAiGenerating(false);
-    }
+    const generatedThankYou = [
+      {
+        id: `row_${ts}_3`,
+        type: "layout_1",
+        columns: [
+          {
+            id: `col_${ts}_3`,
+            widthPercent: 100,
+            widgets: [
+              { ...createWidgetInstance(ELEMENTOR_WIDGET_CATALOG.find((w) => w.type === "confetti_trigger")) },
+              { ...createWidgetInstance(ELEMENTOR_WIDGET_CATALOG.find((w) => w.type === "h1")), content: "Welcome Aboard! Your Access Is Ready", styles: { color: "#10b981", fontSize: "36px", fontWeight: "900", textAlign: "center" } },
+              { ...createWidgetInstance(ELEMENTOR_WIDGET_CATALOG.find((w) => w.type === "invoice_download")) },
+            ],
+          },
+        ],
+      },
+    ];
+
+    setPagesState((prev) => ({
+      ...prev,
+      landing: generatedLanding,
+      checkout: generatedCheckout,
+      thankyou: generatedThankYou,
+    }));
+    setActiveStep("landing");
+    setIsAiModalOpen(false);
+    setAiPrompt("");
   };
-
 
   // =========================================================================
   // 🎨 MASTER 150-WIDGET INTERACTIVE CANVAS RENDERER
@@ -1617,119 +1640,50 @@ function FunnelBuilderCoreEngine() {
         )}
       </div>
 
-          {/* =====================================================================
+      {/* =====================================================================
           3. MODALS: PUBLISH, AI AUTO-BUILDER & PREBUILT TEMPLATES
       ===================================================================== */}
       {isPrePublishModalOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 text-slate-800 shadow-2xl border border-slate-100">
-            
-            <div className="flex justify-between items-start">
-              <div className="flex items-center gap-3">
-                <div className="h-12 w-12 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-2xl font-black">
-                  🚀
-                </div>
-                <div>
-                  <h3 className="text-lg font-black text-[#0B1536] uppercase tracking-tight">Publish & Share</h3>
-                  <p className="text-xs text-slate-500 font-medium">Manage your live cloud funnel</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsPrePublishModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center text-xs"
-              >
-                ✖
-              </button>
-            </div>
-
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 text-slate-800 shadow-2xl">
+            <h3 className="text-lg font-black text-[#0B1536]">🚀 Publish Funnel to Live Web</h3>
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Funnel Project Name</label>
+              <label className="block text-[10px] font-black uppercase text-slate-500 mb-1">Funnel Name</label>
               <input
                 type="text"
                 value={funnelName}
                 onChange={(e) => setFunnelName(e.target.value)}
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold"
               />
             </div>
-
             {funnelId && (
-              <div className="p-4 bg-indigo-50/60 rounded-2xl border border-indigo-100 space-y-3">
-                <span className="text-[10px] font-black text-indigo-800 uppercase tracking-widest block">Live Public URL:</span>
-                <div className="flex items-center gap-2 bg-white p-2 rounded-xl border border-indigo-200">
-                  <input
-                    type="text"
-                    readOnly
-                    value={typeof window !== "undefined" ? `${window.location.origin}/preview?id=${funnelId}` : `/preview?id=${funnelId}`}
-                    className="w-full bg-transparent text-xs text-slate-600 font-mono outline-none px-1"
-                  />
-                  <button
-                    onClick={() => {
-                      const url = `${window.location.origin}/preview?id=${funnelId}`;
-                      navigator.clipboard.writeText(url);
-                      alert("📋 Live link copied to clipboard!");
-                    }}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider shrink-0 shadow"
-                  >
-                    📋 Copy
-                  </button>
-                </div>
-
-                {/* Action Buttons: Preview, Share, Download */}
-                <div className="grid grid-cols-3 gap-2 pt-1">
-                  <a
-                    href={`/preview?id=${funnelId}&step=${activeStep}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="py-2 px-2 rounded-xl text-[10px] font-black uppercase tracking-wider bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-center flex items-center justify-center gap-1 shadow-sm"
-                  >
-                    👁️ View
-                  </a>
-                  <button
-                    onClick={() => {
-                      const url = `${window.location.origin}/preview?id=${funnelId}`;
-                      if (navigator.share) {
-                        navigator.share({ title: funnelName, url });
-                      } else {
-                        window.open(`https://wa.me/?text=${encodeURIComponent(funnelName + " - " + url)}`, "_blank");
-                      }
-                    }}
-                    className="py-2 px-2 rounded-xl text-[10px] font-black uppercase tracking-wider bg-emerald-500 hover:bg-emerald-600 text-white text-center flex items-center justify-center gap-1 shadow-sm"
-                  >
-                    📤 Share
-                  </button>
-                  <button
-                    onClick={() => {
-                      const blob = new Blob([JSON.stringify({ funnelName, pagesState }, null, 2)], { type: "application/json" });
-                      const url = URL.createObjectURL(blob);
-                      const a = document.createElement("a");
-                      a.href = url;
-                      a.download = `${funnelName.toLowerCase().replace(/\s+/g, "-")}-backup.json`;
-                      a.click();
-                    }}
-                    className="py-2 px-2 rounded-xl text-[10px] font-black uppercase tracking-wider bg-slate-800 hover:bg-slate-700 text-white text-center flex items-center justify-center gap-1 shadow-sm"
-                  >
-                    📥 Download
-                  </button>
-                </div>
+              <div className="p-3 bg-slate-50 rounded-lg border text-xs break-all">
+                <span className="font-bold text-slate-500 block mb-1">Live Public URL:</span>
+                <a
+                  href={`/preview?id=${funnelId}&step=${activeStep}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-indigo-600 font-bold underline"
+                >
+                  {typeof window !== "undefined" ? `${window.location.origin}/preview?id=${funnelId}` : `/preview?id=${funnelId}`}
+                </a>
               </div>
             )}
-
-            <div className="grid grid-cols-2 gap-3 pt-2">
+            <div className="flex justify-end gap-2 pt-2">
               <button
                 onClick={() => setIsPrePublishModalOpen(false)}
-                className="py-3.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all"
+                className="px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 text-slate-600"
               >
-                Close
+                Cancel
               </button>
               <button
                 onClick={handlePublishToSupabase}
                 disabled={isDatabasePushLoading}
-                className="py-3.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20 transition-all"
+                className="px-5 py-2 rounded-lg text-xs font-black uppercase bg-indigo-600 text-white shadow-lg"
               >
-                {isDatabasePushLoading ? "Syncing..." : funnelId ? "💾 Save & Update" : "🚀 Publish Now"}
+                {isDatabasePushLoading ? "Publishing..." : "Confirm & Publish"}
               </button>
             </div>
-
           </div>
         </div>
       )}
